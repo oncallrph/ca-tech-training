@@ -1,0 +1,1946 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>California Technician Training Program Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Firebase JS SDK (v9 Compat Mode) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            800: '#0c4a6e',
+                            900: '#0f172a'
+                        },
+                        teacher: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Printable Certificate CSS Rules */
+        @media print {
+            @page {
+                size: letter portrait;
+                margin: 0.4in;
+            }
+
+            html, body {
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                height: auto !important;
+                min-height: 0 !important;
+                overflow: visible !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* Remove non-certificate page elements from document layout flow */
+            header, main, footer, 
+            #authModal, #signOffModal, #adminPortalModal, #vaultModal, #detailModal, #toastContainer, #confirmModal,
+            .no-print {
+                display: none !important;
+            }
+
+            /* Reset modal overlay container for standard paper flow */
+            #certificateModal {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                max-height: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                display: block !important;
+                overflow: visible !important;
+                box-shadow: none !important;
+                backdrop-filter: none !important;
+            }
+
+            /* Format full single-page certificate box */
+            #printableCertificate {
+                position: relative !important;
+                width: 100% !important;
+                margin: 0 auto !important;
+                padding: 2rem !important;
+                box-shadow: none !important;
+                border: 6px double #0f172a !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+        }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-800 antialiased flex flex-col min-h-screen">
+
+    <!-- Navigation Header -->
+    <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-brand-500 p-2.5 rounded-xl text-white shadow-lg shadow-brand-500/30">
+                    <i class="fa-solid fa-prescription-bottle-medical text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2 flex-wrap">
+                        California Technician Training Program
+                        <span class="text-xs bg-brand-500/20 text-brand-300 font-semibold px-2 py-0.5 rounded-full border border-brand-500/30">
+                            State Board Aligned
+                        </span>
+                        <!-- Firebase Cloud Status Badge -->
+                        <span id="firebaseStatusBadge" class="text-[10px] bg-slate-800 text-amber-400 font-mono px-2 py-0.5 rounded-full border border-slate-700 flex items-center gap-1">
+                            <i class="fa-solid fa-cloud text-amber-400"></i>
+                            <span id="firebaseStatusText">Firebase: techtraining-873e3</span>
+                        </span>
+                    </h1>
+                    <p class="text-xs text-slate-400">South Coast Mission Pharmacy • 30-Day Practical & Theoretical Curriculum</p>
+                </div>
+            </div>
+
+            <!-- Student / Teacher / Admin Profile Bar / Auth Controls -->
+            <div class="flex items-center space-x-2 sm:space-x-3 w-full md:w-auto justify-end flex-wrap gap-y-2">
+                <div id="userProfileBadge" class="hidden flex items-center space-x-3 bg-slate-800/80 px-3.5 py-1.5 rounded-xl border border-slate-700/60">
+                    <div class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center text-white font-bold text-xs" id="userAvatar">
+                        --
+                    </div>
+                    <div class="text-left">
+                        <div class="text-xs font-semibold text-slate-200" id="userNameDisplay">Student Name</div>
+                        <div class="text-[10px] text-emerald-400 font-medium flex items-center gap-1" id="userRoleBadge">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Semester Enrolled
+                        </div>
+                    </div>
+                    <button onclick="logoutStudent()" title="Sign Out" class="ml-2 text-slate-400 hover:text-red-400 transition text-xs p-1">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+
+                <button id="loginBtn" onclick="openAuthModal()" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-medium text-xs rounded-xl shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-user-check"></i>
+                    <span>Student Login / Register</span>
+                </button>
+
+                <button id="adminPortalBtn" onclick="openAdminPortalModal()" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span id="adminPortalBtnText">Admin Portal</span>
+                </button>
+
+                <button onclick="openVaultModal()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs rounded-xl border border-slate-700 transition flex items-center gap-2">
+                    <i class="fa-solid fa-award text-amber-400"></i>
+                    <span>Audit Vault</span>
+                </button>
+
+                <!-- Dedicated Logout Button for Shared Computers -->
+                <button id="logoutBtn" onclick="logoutStudent()" class="hidden px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Progress Overview Banner -->
+        <div class="bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 rounded-2xl p-5 text-white shadow-xl relative overflow-hidden border border-slate-800">
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="space-y-1 text-center md:text-left">
+                    <span class="text-xs uppercase tracking-wider font-semibold text-brand-300">Course Completion Tracker</span>
+                    <h2 class="text-xl font-extrabold tracking-tight">30-Day Pharmacy Technician Competency Curriculum</h2>
+                    <p class="text-xs text-slate-300 max-w-xl">
+                        Log daily training modules, record teaching & practical hours, and receive pharmacist/teacher sign-offs with verifiable audit certificates for California State Board of Pharmacy compliance.
+                    </p>
+                </div>
+
+                <!-- Stats Summary -->
+                <div class="flex items-center gap-4 bg-slate-800/60 p-4 rounded-xl border border-slate-700/50 backdrop-blur-sm min-w-[280px]">
+                    <div class="flex-1 text-center border-r border-slate-700/60 pr-3">
+                        <div class="text-2xl font-black text-brand-400" id="completedCount">0</div>
+                        <div class="text-[10px] text-slate-400 uppercase font-semibold">Completed</div>
+                    </div>
+                    <div class="flex-1 text-center border-r border-slate-700/60 pr-3">
+                        <div class="text-2xl font-black text-amber-400" id="hoursLogged">0.0</div>
+                        <div class="text-[10px] text-slate-400 uppercase font-semibold">Total Hours</div>
+                    </div>
+                    <div class="flex-1 text-center">
+                        <div class="text-2xl font-black text-emerald-400" id="progressPercent">0%</div>
+                        <div class="text-[10px] text-slate-400 uppercase font-semibold">Progress</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-800 h-2.5 rounded-full mt-5 overflow-hidden p-0.5 border border-slate-700">
+                <div id="progressBar" class="bg-gradient-to-r from-brand-500 to-emerald-400 h-full rounded-full transition-all duration-500 w-0"></div>
+            </div>
+        </div>
+
+        <!-- Filter Controls & Search -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-3">
+                
+                <!-- Search Input -->
+                <div class="relative w-full md:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search topic, day, or keyword..." 
+                        class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+                </div>
+
+                <!-- Week Filters -->
+                <div class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0" id="weekFilters">
+                    <button onclick="setFilter('all')" class="filter-btn active-filter px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-brand-500 text-white" data-week="all">All (30 Days)</button>
+                    <button onclick="setFilter('week1')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition" data-week="week1">Week 1 (Days 1-6)</button>
+                    <button onclick="setFilter('week2')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition" data-week="week2">Week 2 (Days 7-12)</button>
+                    <button onclick="setFilter('week3')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition" data-week="week3">Week 3 (Days 13-18)</button>
+                    <button onclick="setFilter('week4')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition" data-week="week4">Week 4 (Days 19-24)</button>
+                    <button onclick="setFilter('week5')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition" data-week="week5">Week 5 (Days 25-30)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="modulesGrid">
+            <!-- Cards populated dynamically by JS -->
+        </div>
+
+        <!-- No Results Fallback -->
+        <div id="noResults" class="hidden text-center py-12 bg-white rounded-2xl border border-slate-200 mt-4 shadow-sm">
+            <i class="fa-solid fa-magnifying-glass text-3xl text-slate-300 mb-3"></i>
+            <h3 class="text-base font-semibold text-slate-700">No matching training modules found</h3>
+            <p class="text-xs text-slate-500 mt-1">Try adjusting your search keywords or switching your week selection.</p>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-auto py-6">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 space-y-1">
+            <p class="font-semibold text-slate-700">California Pharmacy Technician Training Program Compliance Standard</p>
+            <p>© 2026 South Coast Mission Pharmacy. All training records archived for state board inspection.</p>
+        </div>
+    </footer>
+
+    <!-- Student Register / Sign-In / Reset Password / Admin & Teacher Login Modal -->
+    <div id="authModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-sm">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <div id="authIconBox" class="w-12 h-12 bg-brand-50 rounded-2xl text-brand-600 flex items-center justify-center mx-auto mb-3 text-xl font-bold">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900" id="authTitle">Student Semester Portal</h3>
+                <p class="text-xs text-slate-500 mt-1" id="authSubTitle">Register or sign in to manage progress and certificates throughout the semester.</p>
+            </div>
+
+            <!-- Auth Mode Navigation Tabs -->
+            <div id="authTabNav" class="flex bg-slate-100 p-1 rounded-xl mb-5 text-xs font-semibold overflow-x-auto gap-1">
+                <button id="tabSignIn" onclick="switchAuthTab('signin')" class="flex-1 py-2 px-2 rounded-lg text-brand-600 bg-white shadow-sm transition whitespace-nowrap text-center">Sign In</button>
+                <button id="tabRegister" onclick="switchAuthTab('register')" class="flex-1 py-2 px-2 rounded-lg text-slate-500 hover:text-slate-800 transition whitespace-nowrap text-center">Register</button>
+                <button id="tabForgot" onclick="switchAuthTab('forgot')" class="flex-1 py-2 px-2 rounded-lg text-slate-500 hover:text-slate-800 transition whitespace-nowrap text-center">Reset</button>
+                <button id="tabAdmin" onclick="switchAuthTab('admin')" class="flex-1 py-2 px-2 rounded-lg text-amber-700 hover:text-amber-900 transition whitespace-nowrap flex items-center justify-center gap-1 text-center">
+                    <i class="fa-solid fa-shield-halved"></i> Staff Access
+                </button>
+            </div>
+
+            <!-- Main Auth Form -->
+            <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                
+                <!-- Full Name Field -->
+                <div id="fieldFullNameContainer">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1" id="labelFullName">Student Full Name *</label>
+                    <input type="text" id="authFullName" placeholder="e.g., Jessica Martinez" 
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:bg-white focus:outline-none">
+                    <p class="text-[11px] text-slate-400 mt-1" id="fullNameHelp">Must match your official name for state board certificates.</p>
+                </div>
+
+                <!-- Admin & Teacher Role Sub-Selector (Visible in Admin/Staff Mode) -->
+                <div id="fieldStaffRoleContainer" class="hidden space-y-2">
+                    <label class="block text-xs font-semibold text-slate-800">Staff Role & Verification Type *</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label id="roleOptionTeacher" onclick="setStaffRole('teacher')" class="flex items-center gap-2 p-2.5 rounded-xl border border-teacher-500 bg-teacher-50 cursor-pointer transition">
+                            <input type="radio" name="staffRole" value="teacher" id="roleRadioTeacher" checked class="text-teacher-600 focus:ring-teacher-500">
+                            <div>
+                                <span class="block text-xs font-bold text-teacher-900"><i class="fa-solid fa-chalkboard-user mr-1 text-teacher-600"></i> Teacher</span>
+                                <span class="block text-[10px] text-teacher-700 font-mono">Issue Sign-Offs</span>
+                            </div>
+                        </label>
+                        <label id="roleOptionAdmin" onclick="setStaffRole('admin')" class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer transition">
+                            <input type="radio" name="staffRole" value="admin" id="roleRadioAdmin" class="text-amber-600 focus:ring-amber-500">
+                            <div>
+                                <span class="block text-xs font-bold text-slate-800"><i class="fa-solid fa-user-gear mr-1 text-amber-600"></i> Director (Admin)</span>
+                                <span class="block text-[10px] text-slate-500 font-mono">Admin Control</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Admin / Teacher PIN Code Field -->
+                <div id="fieldAdminPinContainer" class="hidden">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1" id="labelAdminPin">Staff PIN Code *</label>
+                    <input type="password" id="authAdminPin" placeholder="Enter PIN" 
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-teacher-300 rounded-xl text-xs focus:ring-2 focus:ring-teacher-500 focus:bg-white focus:outline-none font-mono tracking-widest text-base">
+                    <p class="text-[11px] text-teacher-700 mt-1" id="pinHelpText"><i class="fa-solid fa-key mr-1"></i> Enter authorized Teacher PIN for instructor sign-off access.</p>
+                </div>
+
+                <!-- Email Address Field -->
+                <div id="fieldEmailContainer" class="hidden">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Email Address *</label>
+                    <input type="email" id="authEmail" placeholder="e.g., jessica.martinez@example.com" 
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:bg-white focus:outline-none">
+                    <p class="text-[11px] text-slate-400 mt-1" id="emailHelp">Used for account verification and password recovery.</p>
+                </div>
+
+                <!-- Password Field -->
+                <div id="fieldPasswordContainer">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-semibold text-slate-700" id="labelPassword">Password *</label>
+                        <button type="button" id="forgotPassLink" onclick="switchAuthTab('forgot')" class="text-[11px] text-brand-600 hover:text-brand-800 font-medium transition">
+                            Forgot Password?
+                        </button>
+                    </div>
+                    <input type="password" id="authPassword" placeholder="••••••••" 
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:bg-white focus:outline-none">
+                </div>
+
+                <!-- New Password Field (Reset Mode) -->
+                <div id="fieldNewPasswordContainer" class="hidden">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">New Password *</label>
+                    <input type="password" id="authNewPassword" placeholder="••••••••" 
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:bg-white focus:outline-none">
+                </div>
+
+                <!-- Feedback Notifications -->
+                <div id="authSuccess" class="hidden text-xs bg-emerald-50 text-emerald-800 p-3 rounded-xl border border-emerald-200 flex items-start gap-2">
+                    <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
+                    <span id="authSuccessMsg">Success message</span>
+                </div>
+
+                <div id="authError" class="hidden text-xs bg-red-50 text-red-700 p-3 rounded-xl border border-red-200 flex items-start gap-2">
+                    <i class="fa-solid fa-circle-exclamation text-red-500 mt-0.5"></i>
+                    <span id="authErrorMsg">Error message</span>
+                </div>
+
+                <button type="submit" id="authSubmitBtn" class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold text-xs rounded-xl shadow-md transition">
+                    Sign In
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Pharmacist / Teacher End-of-Day Sign-Off Modal -->
+    <div id="signOffModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeSignOffModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-sm">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center space-x-3 border-b border-slate-100 pb-4 mb-4">
+                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center font-bold text-lg">
+                    <i class="fa-solid fa-file-signature"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">End-of-Day Module Sign-Off</h3>
+                    <p class="text-xs text-slate-500" id="signOffModuleTitle">Day Module Sign-Off</p>
+                </div>
+            </div>
+
+            <!-- Student Summary Badge -->
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 mb-4 flex items-center justify-between text-xs">
+                <div>
+                    <span class="text-slate-500 block text-[10px]">TRAINEE STUDENT</span>
+                    <strong class="text-slate-800 font-bold" id="signOffStudentName">Student Name</strong>
+                </div>
+                <div class="text-right">
+                    <span class="text-slate-500 block text-[10px]">TRAINING FACILITY</span>
+                    <strong class="text-slate-800 font-bold">South Coast Mission Pharmacy</strong>
+                </div>
+            </div>
+
+            <form id="signOffForm" onsubmit="handleSignOffSubmit(event)" class="space-y-4">
+                <input type="hidden" id="signOffDayId" value="">
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Supervising Pharmacist / Instructor Full Name *</label>
+                        <input type="text" id="rphName" required placeholder="e.g., Dr. Robert Vance, PharmD" 
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Instructor Initials *</label>
+                            <input type="text" id="rphInitials" maxlength="4" required placeholder="e.g., RV" 
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none uppercase">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">License / Credential # *</label>
+                            <input type="text" id="rphLicense" required placeholder="e.g., RPH-68492" 
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none uppercase">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Teaching Hours *</label>
+                            <input type="number" step="0.5" id="teachingHours" value="4.0" oninput="checkHoursVariance()" required 
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Practical Hours *</label>
+                            <input type="number" step="0.5" id="practicalHours" value="4.0" oninput="checkHoursVariance()" required 
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none font-semibold">
+                        </div>
+                    </div>
+
+                    <!-- Hours Variance Explanation Field -->
+                    <div id="varianceContainer" class="hidden bg-amber-50 p-3 rounded-xl border border-amber-200 space-y-1">
+                        <label class="block text-xs font-semibold text-amber-900">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1"></i> Hours Variance Explanation Required *
+                        </label>
+                        <p class="text-[11px] text-amber-700">Standard daily requirement is 4.0 Teaching & 4.0 Practical hours. Please state reason for variance.</p>
+                        <input type="text" id="hoursExplanation" placeholder="e.g., Extended clinical lab session / makeup hours" 
+                            class="w-full px-3 py-2 bg-white border border-amber-300 rounded-lg text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none mt-1">
+                    </div>
+
+                    <div class="flex items-start gap-2 pt-1">
+                        <input type="checkbox" id="signOffCertify" required class="mt-0.5 rounded border-slate-300 text-brand-600 focus:ring-brand-500">
+                        <label for="signOffCertify" class="text-[11px] text-slate-600 leading-snug">
+                            I certify under penalty of perjury under California law that the trainee completed the designated training hours and topics.
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-4 mt-4">
+                    <button type="button" onclick="closeSignOffModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-xl">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl shadow-md transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-stamp"></i>
+                        <span>Confirm & Sign Off</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Certificate Management Portal Modal (Strictly Restricted to Admins) -->
+    <div id="adminPortalModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeAdminPortalModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-sm">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center space-x-3 border-b border-slate-100 pb-4 mb-4">
+                <div id="adminPortalHeaderIcon" class="w-10 h-10 bg-amber-100 text-amber-800 rounded-xl flex items-center justify-center font-bold text-lg">
+                    <i class="fa-solid fa-user-gear"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900" id="adminPortalHeaderTitle">Administrator Certificate Portal</h3>
+                    <p class="text-xs text-slate-500" id="adminPortalHeaderSubtitle">Adjust completion dates, edit supervisor details, or modify logged hours</p>
+                </div>
+            </div>
+
+            <form id="adminCertForm" onsubmit="handleAdminCertSave(event)" class="space-y-4">
+                
+                <!-- Target Trainee & Module Selection -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-800 mb-1">Target Trainee Student *</label>
+                        <select id="adminStudentSelect" onchange="onAdminStudentOrDayChange()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none font-medium">
+                            <!-- Options populated via JS -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-800 mb-1">Day / Curriculum Module *</label>
+                        <select id="adminDaySelect" onchange="onAdminStudentOrDayChange()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none font-medium">
+                            <!-- Options populated via JS -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Live Status Banner -->
+                <div id="adminStatusBanner" class="p-3 rounded-xl text-xs font-medium flex items-center justify-between border bg-slate-100 border-slate-200 text-slate-700">
+                    <span id="adminStatusText"><i class="fa-solid fa-circle-info mr-1.5 text-slate-400"></i> Select a student and day module to edit.</span>
+                    <span id="adminStatusBadge" class="text-[10px] font-bold px-2 py-0.5 rounded uppercase">--</span>
+                </div>
+
+                <!-- Certificate Fields Section -->
+                <div class="space-y-3 pt-1">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-amber-900 mb-1">
+                                <i class="fa-solid fa-calendar-day mr-1 text-amber-600"></i> Certificate Completion Date *
+                            </label>
+                            <input type="date" id="adminCompletionDate" required class="w-full px-3.5 py-2.5 bg-amber-50/50 border border-amber-300 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            <p class="text-[11px] text-slate-400 mt-1">Directly overrides the completion timestamp displayed on audit certificates.</p>
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Supervising Pharmacist / Teacher Name *</label>
+                            <input type="text" id="adminRphName" required placeholder="e.g., Dr. Robert Vance, PharmD" 
+                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Instructor Initials *</label>
+                            <input type="text" id="adminRphInitials" maxlength="4" required placeholder="e.g., RV" 
+                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none uppercase">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">License / Credential # *</label>
+                            <input type="text" id="adminRphLicense" required placeholder="e.g., RPH-68492" 
+                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none uppercase">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Teaching Hours *</label>
+                            <input type="number" step="0.5" id="adminTeachingHours" value="4.0" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Practical Hours *</label>
+                            <input type="number" step="0.5" id="adminPracticalHours" value="4.0" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold">
+                        </div>
+
+                        <!-- Variance Flag Option -->
+                        <div class="sm:col-span-2 pt-1 border-t border-slate-100">
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="adminFlagVariance" onchange="toggleAdminVarianceNote()" class="rounded border-slate-300 text-amber-600 focus:ring-amber-500">
+                                <label for="adminFlagVariance" class="text-xs font-semibold text-slate-800 cursor-pointer">
+                                    Flag as Audit / Hours Variance (Display Explanation on Certificate)
+                                </label>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-0.5 pl-6">Leave unchecked to keep certificate formatted cleanly as an original record without variance flags.</p>
+                        </div>
+
+                        <div class="sm:col-span-2 hidden" id="adminExplanationContainer">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Audit Notes / Variance Justification</label>
+                            <input type="text" id="adminExplanation" placeholder="e.g., Extended clinical lab session / makeup hours" 
+                                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Action Controls -->
+                <div class="flex items-center justify-between border-t border-slate-100 pt-4 mt-2">
+                    <button type="button" id="adminDeleteBtn" onclick="handleAdminCertRevoke()" class="px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-semibold rounded-xl transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>Revoke Certificate</span>
+                    </button>
+
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="closeAdminPortalModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-xl">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl shadow-md transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span id="adminSubmitBtnText">Save & Apply Certificate Changes</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Verifiable Audit Certificate Modal -->
+    <div id="certificateModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-8 shadow-2xl border border-slate-200 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeCertificateModal()" class="no-print absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-sm">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Printable Certificate Body -->
+            <div id="printableCertificate" class="bg-white p-8 rounded-xl border-8 border-double border-slate-800 text-center relative space-y-6">
+                
+                <!-- Watermark Logo Header -->
+                <div class="flex justify-between items-center border-b-2 border-slate-800 pb-4">
+                    <div class="text-left">
+                        <h4 class="text-xs font-bold tracking-widest text-slate-800 uppercase">State of California</h4>
+                        <p class="text-[10px] text-slate-500 font-semibold uppercase">Pharmacy Technician Training Audit Record</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-brand-900 text-amber-400 flex items-center justify-center font-bold text-xl border-2 border-amber-400">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 block font-mono">Ref #: <strong id="certRefNum" class="text-slate-800">CTTP-2026-0000</strong></span>
+                        <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-block mt-1">
+                            VERIFIED COMPLETION
+                        </span>
+                    </div>
+                </div>
+
+                <div class="space-y-2 py-2">
+                    <p class="text-xs font-serif italic text-slate-600">This is an official state board compliance certificate verifying that</p>
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight underline decoration-amber-400 underline-offset-8" id="certStudentName">
+                        [Student Full Name]
+                    </h2>
+                    <p class="text-xs font-medium text-slate-600 pt-2">has successfully completed the practical & theoretical curriculum for</p>
+                    <h3 class="text-lg font-bold text-brand-800" id="certModuleTitle">[Day Module Title]</h3>
+                </div>
+
+                <!-- Hours Audit Table -->
+                <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 text-left text-xs space-y-2">
+                    <div class="font-bold text-slate-800 border-b border-slate-200 pb-1 flex justify-between">
+                        <span>CALIFORNIA BOARD OF PHARMACY HOURS LOG</span>
+                        <span id="certCompletionDate" class="text-slate-500 font-normal">Date: --</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center pt-1">
+                        <div class="bg-white p-2 rounded border border-slate-200">
+                            <span class="text-[10px] text-slate-400 block font-semibold uppercase">Teaching</span>
+                            <span class="text-sm font-bold text-slate-800" id="certTeachingHours">4.0 Hrs</span>
+                        </div>
+                        <div class="bg-white p-2 rounded border border-slate-200">
+                            <span class="text-[10px] text-slate-400 block font-semibold uppercase">Practical</span>
+                            <span class="text-sm font-bold text-slate-800" id="certPracticalHours">4.0 Hrs</span>
+                        </div>
+                        <div class="bg-brand-50 p-2 rounded border border-brand-200">
+                            <span class="text-[10px] text-brand-600 block font-semibold uppercase">Total Logged</span>
+                            <span class="text-sm font-bold text-brand-800" id="certTotalHours">8.0 Hrs</span>
+                        </div>
+                    </div>
+                    <div id="certVarianceNote" class="hidden text-[11px] text-slate-600 bg-amber-50 p-2 rounded border border-amber-200 italic mt-2">
+                        <strong>Variance Justification:</strong> <span id="certVarianceText">--</span>
+                    </div>
+                </div>
+
+                <!-- Signatures Grid -->
+                <div class="grid grid-cols-2 gap-8 pt-4 border-t border-slate-200 text-xs">
+                    <div class="text-left space-y-1">
+                        <p class="text-[10px] text-slate-400 font-semibold uppercase">Supervising Pharmacist / Teacher Sign-Off</p>
+                        <p class="font-bold text-slate-900 text-sm" id="certRphName">Dr. Pharmacist Name</p>
+                        <p class="text-[11px] text-slate-600">License/Credential #: <strong id="certRphLicense" class="font-mono">RPH-XXXXX</strong></p>
+                        <p class="text-[11px] text-slate-600">Initials Verification: <strong id="certRphInitials" class="font-mono bg-slate-100 px-1.5 py-0.5 rounded border">--</strong></p>
+                    </div>
+
+                    <div class="text-right space-y-1">
+                        <p class="text-[10px] text-slate-400 font-semibold uppercase">Training Facility</p>
+                        <p class="font-bold text-slate-900">South Coast Mission Pharmacy</p>
+                        <p class="text-[11px] text-slate-600">California Pharmacy License</p>
+                        <p class="text-[10px] text-slate-400 italic">Audit Log Encrypted & Archived</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="no-print flex justify-end gap-3 mt-6">
+                <button onclick="closeCertificateModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl">
+                    Close Window
+                </button>
+                <button onclick="window.print()" class="px-5 py-2 bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold rounded-xl shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i>
+                    <span>Print / Save PDF Certificate</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- State Board Audit Vault Modal -->
+    <div id="vaultModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-4xl w-full p-6 shadow-2xl border border-slate-100 relative max-h-[90vh] flex flex-col">
+            <button onclick="closeVaultModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-sm">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center space-x-3 border-b border-slate-100 pb-4 mb-4">
+                <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center font-bold text-lg">
+                    <i class="fa-solid fa-vault"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">State Board Audit Vault</h3>
+                    <p class="text-xs text-slate-500">Comprehensive training transcript & pharmacist/teacher sign-off audit log</p>
+                </div>
+            </div>
+
+            <div class="flex-grow overflow-y-auto space-y-4">
+                <!-- Vault Table -->
+                <div class="border border-slate-200 rounded-xl overflow-hidden">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase font-semibold text-[10px]">
+                            <tr>
+                                <th class="p-3">Day / Topic</th>
+                                <th class="p-3">Completion Date</th>
+                                <th class="p-3">Supervising RPh / Teacher</th>
+                                <th class="p-3 text-center">Hours (T / P)</th>
+                                <th class="p-3 text-center">Audit Status</th>
+                                <th class="p-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vaultTableBody" class="divide-y divide-slate-200 text-slate-800">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Vault Footer Export Controls -->
+            <div class="border-t border-slate-100 pt-4 mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <span class="text-xs text-slate-500" id="vaultRecordCount">0 audit logs found</span>
+                <div class="flex items-center gap-2">
+                    <button onclick="exportAuditJSON()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-code"></i>
+                        <span>Export JSON</span>
+                    </button>
+                    <button onclick="closeVaultModal()" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold rounded-xl shadow-sm">
+                        Done
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Module Detail Modal with Integrated Placeholder Links -->
+    <div id="detailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 relative max-h-[90vh] overflow-y-auto space-y-4">
+            <button onclick="closeDetailModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-sm">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div>
+                <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest bg-brand-50 px-2 py-0.5 rounded border border-brand-100" id="detailDayBadge">Day 1</span>
+                <h3 class="text-lg font-extrabold text-slate-900 mt-2" id="detailTitle">Module Title</h3>
+                <span class="text-xs text-slate-500 font-medium" id="detailCategory">Category</span>
+            </div>
+
+            <div class="space-y-3 border-t border-slate-100 pt-3">
+                <div>
+                    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1">Learning Outcomes</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed" id="detailDescription">Overview description...</p>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1">Daily Agenda & Practical Topics</h4>
+                    <ul class="text-xs text-slate-600 space-y-1.5 list-disc pl-4" id="detailAgenda">
+                        <!-- Populated dynamically -->
+                    </ul>
+                </div>
+
+                <!-- GitHub Pages & Local Curriculum Placeholder Links Section -->
+                <div class="border-t border-slate-100 pt-3">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-folder-open text-brand-500"></i> Curriculum Resources & Materials
+                        </h4>
+                        <span class="text-[10px] text-slate-400 font-medium">GitHub Pages Linked</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" id="detailResourcesContainer">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-100 pt-4 flex items-center justify-between">
+                <div id="detailModalActionBox">
+                    <!-- Action button dynamically injected -->
+                </div>
+                <button onclick="closeDetailModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal (Replaces browser confirm) -->
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 relative text-center space-y-4">
+            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto text-xl font-bold">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-900" id="confirmModalTitle">Action Confirmation</h3>
+            <p class="text-xs text-slate-600" id="confirmModalMessage">Are you sure you want to proceed with this action?</p>
+            <div class="flex items-center justify-center gap-3 pt-2">
+                <button id="confirmCancelBtn" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl">
+                    Cancel
+                </button>
+                <button id="confirmOkBtn" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-xl shadow-md">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+    <script>
+        /* ----------------------------------------------------
+           FIREBASE CLOUD INTEGRATION SETUP
+        ---------------------------------------------------- */
+        const firebaseConfig = {
+            apiKey: "AIzaSyAoOH1sZz9R5z_e1X2UeJe3QyF0ZVJBvNw",
+            authDomain: "techtraining-873e3.firebaseapp.com",
+            projectId: "techtraining-873e3",
+            storageBucket: "techtraining-873e3.firebasestorage.app",
+            messagingSenderId: "485056015379",
+            appId: "1:485056015379:web:a673a4b5696e77a67023e6",
+            measurementId: "G-DDC046R4PV"
+        };
+
+        let db = null;
+        let auth = null;
+        let isFirebaseActive = false;
+
+        try {
+            if (typeof firebase !== 'undefined' && firebaseConfig.apiKey !== "YOUR_FIREBASE_API_KEY") {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                auth = firebase.auth();
+                isFirebaseActive = true;
+                console.log("Firebase initialized for project: techtraining-873e3");
+            }
+        } catch (err) {
+            console.warn("Firebase config incomplete, running in LocalStorage mode:", err);
+        }
+
+        /* ----------------------------------------------------
+           30-DAY CALIFORNIA CURRICULUM DATASET
+        ---------------------------------------------------- */
+        const modules = [
+            // WEEK 1
+            { day: 1, week: 1, category: "Orientation & Law", title: "Introduction to Pharmacy Practice & State Board Regulations", description: "Foundational overview of pharmacy operations, technician duties under California Law, scope of practice, and state board rules.", agenda: ["California Pharmacy Law Overview", "Scope of Technician Responsibilities", "Pharmacy Ethics & Standards", "Facility Security & Operations"] },
+            { day: 2, week: 1, category: "Operations", title: "Prescription Sources, Intake & Patient Data Collection", description: "Proper receipt of written, electronic, and oral prescriptions, verifying required legal elements, and patient profile setup.", agenda: ["Required Prescription Legal Elements", "Patient Allergy & Insurance Intake", "Order Prioritization Protocols", "e-Prescribing Workflow Entry"] },
+            { day: 3, week: 1, category: "Pharmacology", title: "Drug Nomenclature, Interactions & Safety Standards", description: "Understanding generic vs. brand names, therapeutic categories, dangerous drug interactions, and high-alert medication lists.", agenda: ["Brand/Generic Equivalency Rules", "Common Therapeutic Classes", "Black Box Warnings Awareness", "Drug Interaction Screening Basics"] },
+            { day: 4, week: 1, category: "Dispensing", title: "Medication Selection, Counting & Measuring Procedures", description: "Accurate drug selection using National Drug Codes (NDC), tray & spatula counting, cross-contamination prevention, and liquid measurement.", agenda: ["NDC Code Matching Protocols", "Counting Tray Sanitation Standards", "Measuring Liquid Oral Solutions", "Double-Check Verification Steps"] },
+            { day: 5, week: 1, category: "Patient Care", title: "Effective Patient Communication & Professional Ethics", description: "Developing clear verbal communication skills, managing difficult customer interactions, and recognizing when pharmacist consultation is required.", agenda: ["Mandatory Pharmacist Counseling Triggers", "De-escalation Communication Techniques", "Cultural Competency in Patient Care", "Telephone Etiquette Protocols"] },
+            { day: 6, week: 1, category: "Compliance", title: "HIPAA Privacy Rules & Pharmacy Record Maintenance", description: "Strict patient privacy compliance, protected health information (PHI) disposal, prescription filing rules, and 3-year record retention.", agenda: ["HIPAA Standards & Shredding Rules", "State Prescription Record Retention", "Electronic Data Privacy Guardrails", "Patient Identification Protocols"] },
+
+            // WEEK 2
+            { day: 7, week: 2, category: "Safety", title: "Incident Reporting & Quality Assurance Audits", description: "Identifying near-miss events, medication error reporting procedures, continuous quality improvement (CQI) programs, and state board audits.", agenda: ["Quality Assurance (QA) Protocols", "Root Cause Incident Analysis", "Near-Miss Event Documentation", "Error Prevention Workflows"] },
+            { day: 8, week: 2, category: "Compounding", title: "Foundations of Extemporaneous Drug Compounding", description: "Introduction to USP <795> standards for non-sterile compounding, equipment calibration, weighing technique, and compounding logs.", agenda: ["USP <795> Quality Standards", "Analytical Balance Calibration", "Compounding Log Recordkeeping", "Measuring Powders & Liquids"] },
+            { day: 9, week: 2, category: "Compounding", title: "Non-Sterile Compounding Techniques", description: "Hands-on preparation of topical creams, ointments, oral suspensions, capsules, and geometric dilution methodology.", agenda: ["Geometric Dilution Techniques", "Levigation & Trituration Practicum", "Ointment Base Compatibility", "Expiration (BUD) Assignment Rules"] },
+            { day: 10, week: 2, category: "Compounding", title: "Sterile Compounding & Cleanroom Aseptic Technique", description: "Introduction to USP <797> cleanroom environments, laminar airflow workbenches, garbing procedures, and aseptic syringe draws.", agenda: ["USP <797> Aseptic Standards", "Cleanroom Garbing & Hand Hygiene", "Laminar Flow Hood Operation", "Ampule & Vial Syringe Transfer"] },
+            { day: 11, week: 2, category: "Dispensing", title: "Prescription Packaging, Auxiliary Labels & Unit Dose", description: "Selection of light-resistant amber vials, child-resistant caps, applying appropriate warning auxiliary labels, and unit-dose packaging.", agenda: ["Amber Bottle & Vial Sizing Rules", "Poison Prevention Packaging Act", "Mandatory Auxiliary Warning Labels", "Unit-Dose Blister Packaging"] },
+            { day: 12, week: 2, category: "Inventory", title: "Medication Storage, Cold Chain & Climate Control", description: "Refrigerated and frozen drug storage protocols, temperature log monitoring, cold chain integrity during transport, and room temperature limits.", agenda: ["Refrigeration (2°C - 8°C) Logs", "Cold Chain Transport Packaging", "Room Temperature Control Rules", "Quarantine of Expired Items"] },
+
+            // WEEK 3
+            { day: 13, week: 3, category: "Operations", title: "Electronic Health Records & e-Prescribing Processing", description: "Navigating pharmacy computer systems, processing digital e-prescriptions, resolving data entry rejections, and sig code translation.", agenda: ["Medical Sig Code Interpretation", "EHR System Data Entry Practice", "Electronic Order Queue Triage", "Physician Clarification Requests"] },
+            { day: 14, week: 3, category: "Law & Safety", title: "Controlled Substances Regulations & Security Protocols", description: "Federal Schedule II-V controlled drug rules, DEA registration, C-II prescription validity, CURES database reporting, and vault security.", agenda: ["Schedule II - V Drug Classifications", "DEA Perpetual Inventory Logs", "CURES Reporting Requirements", "Controlled Substance Theft Protocols"] },
+            { day: 15, week: 3, category: "Inventory", title: "Inventory Control, Reordering & Recalls Management", description: "Wholesale ordering systems, par level management, inventory rotation (FIFO), Class I-III drug recalls, and hazardous disposal.", agenda: ["First-In, First-Out (FIFO) Rotation", "Wholesale Ordering Portals", "Class I, II & III Drug Recall Action", "Hazardous Waste Management"] },
+            { day: 16, week: 3, category: "Pharmacology", title: "Drug Classifications & Therapeutic Categories", description: "In-depth study of major cardiovascular, respiratory, gastrointestinal, anti-infective, and endocrine therapeutic agents.", agenda: ["Top 100 Maintenance Drugs Study", "Mechanism of Action Overview", "Common Side Effects Recognition", "Special Storage Requirements"] },
+            { day: 17, week: 3, category: "Patient Care", title: "Over-the-Counter (OTC) Products & Medical Supplies", description: "Assisting patients in locating OTC medications, medical durable equipment (DME), diabetic testing meters, and surgical supplies.", agenda: ["OTC Classifications & Layout", "Diabetic Supply Selection", "Blood Pressure Monitor Overview", "Referring OTC Questions to RPh"] },
+            { day: 18, week: 3, category: "Safety", title: "Drug Allergies, Hypersensitivity & Adverse Reactions", description: "Differentiating between side effects and true allergic reactions (anaphylaxis), updating EHR allergy fields, and cross-sensitivity risks.", agenda: ["Penicillin Cross-Sensitivity", "Anaphylaxis Symptoms & Escalation", "Updating Patient Allergy Profiles", "MedWatch Adverse Event Logs"] },
+
+            // WEEK 4
+            { day: 19, week: 4, category: "Patient Care", title: "Medication Adherence, Refills & Auto-Fill Management", description: "Strategies for improving long-term patient medication adherence, managing sync-refill programs, and processing refill authorization requests.", agenda: ["Medication Synchronization Programs", "Refill Authorization Requests", "Adherence Barrier Identification", "Automated Reminder Notifications"] },
+            { day: 20, week: 4, category: "Safety", title: "Root Cause Analysis & Medication Error Prevention", description: "Analyzing real-world pharmacy error case studies, sound-alike look-alike drugs (TALLman lettering), and barcode scanning verification.", agenda: ["Look-Alike Sound-Alike (LASA) Drugs", "TALLman Lettering Application", "Barcode Verification Scanning", "Error Reduction Checklists"] },
+            { day: 21, week: 4, category: "Compliance", title: "California Pharmacy Law & Board Inspections Prep", description: "Reviewing California Pharmacy Board inspection checklists, self-assessment forms, staff ratios, and supervisor duties.", agenda: ["Pharmacist-to-Technician Ratios", "Board Inspection Checklists", "Mandatory Name Tags & Credentials", "Self-Assessment Documentation"] },
+            { day: 22, week: 4, category: "Technology", title: "Pharmacy Automation, Robotics & Barcode Scanning", description: "Operating automated counting robotics, pill dispensing cells, optical scanners, and automated inventory carousel systems.", agenda: ["Automated Dispensing Cells", "Robotic Dispenser Maintenance", "Barcode Reader Calibration", "System Override Safeguards"] },
+            { day: 23, week: 4, category: "Operations", title: "Pharmacy Workflow Optimization & Team Roles", description: "Structuring intake, data entry, fill station, checking station, and pick-up counter workflows for maximum safety and efficiency.", agenda: ["Five Station Workflow Model", "Bottle Neck Identification", "Task Delegation Protocols", "Peak Hour Queue Management"] },
+            { day: 24, week: 4, category: "Safety", title: "Emergency Preparedness & Crisis Medication Protocols", description: "Disaster management, power outage drug preservation, emergency prescription fill overrides, and community relief response.", agenda: ["Refrigerated Drug Backup Generator", "Disaster Emergency Overrides", "Critical Medication Stocking", "Emergency Response Safety"] },
+
+            // WEEK 5
+            { day: 25, week: 5, category: "Pharmacology", title: "Specialty Pharmaceuticals & Biologics Handling", description: "Handling high-cost specialty drugs, biological products, biosimilars, refrigerated syringes, and REMS program compliance.", agenda: ["REMS Safety Requirement Logs", "Cold Chain Biologic Handling", "Specialty Pharmacy Distribution", "Biosimilar Substitution Rules"] },
+            { day: 26, week: 5, category: "Clinical", title: "Immunization Support & Clinical Screening Assistance", description: "Supporting pharmacist-led vaccine clinics, vaccine storage & handling, emergency anaphylaxis kit readiness, and record entry.", agenda: ["Vaccine Temperature Logs", "Immunization Record Data Entry", "Clinic Supply Preparation", "Safety Needlestick Protocols"] },
+            { day: 27, week: 5, category: "Operations", title: "Third-Party Billing, PBM Claims & Audit Compliance", description: "Understanding pharmacy benefit managers (PBMs), prior authorization requests, co-pay tiers, and desk audit preparation.", agenda: ["PBM Adjudication Rejections", "Prior Authorization Workflows", "Coordination of Benefits (COB)", "Pharmacy Audit Defense Steps"] },
+            { day: 28, week: 5, category: "Compounding", title: "Complex Sterile Packaging & Hazardous Drug Handling", description: "Introduction to USP <800> standards for handling hazardous medications, chemotherapy containment hoods, and personal protective equipment.", agenda: ["USP <800> Hazardous Drug Standards", "Chemo Hood Negative Pressure", "Personal Protective Equipment (PPE)", "Spill Kit Cleanup Protocols"] },
+            { day: 29, week: 5, category: "Assessment", title: "Comprehensive Pharmacy Technician Skills Evaluation", description: "Practical hands-on examination covering prescription data entry, counting accuracy, sterile garbing speed, and law scenario resolution.", agenda: ["Timed Prescription Fill Exam", "Sterile Garbing Practical Exam", "Law & Compliance Quiz", "Pharmacist Mock Audit Check"] },
+            { day: 30, week: 5, category: "Capstone", title: "Program Completion, Practical Assessment & Final Sign-Off", description: "Final review of student's 30-day transcript, verification of logged practical and teaching hours, and issuance of state board certificate.", agenda: ["30-Day Hours Transcript Review", "State Board Compliance Sign-Off", "Final Pharmacist Evaluation", "Graduation & Certificate Issuance"] }
+        ];
+
+        /* ----------------------------------------------------
+           APPLICATION STATE & ROLE MANAGEMENT
+        ---------------------------------------------------- */
+        let currentUser = JSON.parse(localStorage.getItem('cttp_current_user')) || null;
+        let isAdminLoggedIn = JSON.parse(localStorage.getItem('cttp_is_admin')) || false;
+        let isTeacherLoggedIn = JSON.parse(localStorage.getItem('cttp_is_teacher')) || false;
+        let activeFilter = 'all';
+        let searchQuery = '';
+        let authMode = 'signin'; // 'signin', 'register', 'forgot', or 'admin'
+        let selectedStaffRole = 'teacher'; // 'teacher' or 'admin'
+
+        const DEFAULT_ADMIN_PIN = "4515";
+        const DEFAULT_TEACHER_PIN = "9999";
+
+        function getUsersDatabase() {
+            return JSON.parse(localStorage.getItem('cttp_users_db')) || {};
+        }
+
+        function saveUsersDatabase(users) {
+            localStorage.setItem('cttp_users_db', JSON.stringify(users));
+        }
+
+        /* Custom Notification Toast Helper */
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto flex items-center justify-between p-3.5 rounded-xl shadow-lg border text-xs font-semibold transition-all duration-300 transform translate-y-2 opacity-0 ${
+                type === 'success' ? 'bg-emerald-900 text-emerald-100 border-emerald-700' :
+                type === 'error' ? 'bg-red-900 text-red-100 border-red-700' :
+                'bg-slate-900 text-white border-slate-700'
+            }`;
+
+            const icon = type === 'success' ? 'fa-circle-check text-emerald-400' :
+                         type === 'error' ? 'fa-circle-exclamation text-red-400' :
+                         'fa-circle-info text-brand-400';
+
+            toast.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid ${icon} text-sm"></i>
+                    <span>${message}</span>
+                </div>
+                <button onclick="this.parentElement.remove()" class="ml-3 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.classList.add('opacity-0', 'translate-y-2');
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 3500);
+        }
+
+        /* Custom Confirm Modal Replacement */
+        function showConfirmModal(title, message, onConfirm) {
+            const modal = document.getElementById('confirmModal');
+            document.getElementById('confirmModalTitle').innerText = title;
+            document.getElementById('confirmModalMessage').innerText = message;
+
+            const okBtn = document.getElementById('confirmOkBtn');
+            const cancelBtn = document.getElementById('confirmCancelBtn');
+
+            const cleanup = () => {
+                modal.classList.add('hidden');
+                okBtn.onclick = null;
+                cancelBtn.onclick = null;
+            };
+
+            okBtn.onclick = () => {
+                cleanup();
+                onConfirm();
+            };
+
+            cancelBtn.onclick = () => {
+                cleanup();
+            };
+
+            modal.classList.remove('hidden');
+        }
+
+        function hideAuthAlerts() {
+            const successEl = document.getElementById('authSuccess');
+            const errorEl = document.getElementById('authError');
+            if (successEl) successEl.classList.add('hidden');
+            if (errorEl) errorEl.classList.add('hidden');
+        }
+
+        function showAuthError(msg) {
+            const errorEl = document.getElementById('authError');
+            const msgEl = document.getElementById('authErrorMsg');
+            if (errorEl && msgEl) {
+                msgEl.innerText = msg;
+                errorEl.classList.remove('hidden');
+            }
+        }
+
+        function showAuthSuccess(msg) {
+            const successEl = document.getElementById('authSuccess');
+            const msgEl = document.getElementById('authSuccessMsg');
+            if (successEl && msgEl) {
+                msgEl.innerText = msg;
+                successEl.classList.remove('hidden');
+            }
+        }
+
+        window.onload = function() {
+            updateUserUI();
+            renderGrid();
+            updateStats();
+            
+            // Update Firebase Connection Status Badge UI
+            const statusText = document.getElementById('firebaseStatusText');
+            if (statusText) {
+                if (isFirebaseActive) {
+                    statusText.innerHTML = `<span class="text-emerald-400 font-bold">Cloud Synced</span> (techtraining-873e3)`;
+                } else {
+                    statusText.innerHTML = `Project: <strong class="text-slate-200">techtraining-873e3</strong> (Local Mode)`;
+                }
+            }
+        };
+
+        /* ----------------------------------------------------
+           AUTH & USER SYSTEM WITH UNEXPOSED SECURE STAFF PINS
+        ---------------------------------------------------- */
+        function openAuthModal() {
+            document.getElementById('authModal').classList.remove('hidden');
+            switchAuthTab('signin');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+            hideAuthAlerts();
+        }
+
+        function setStaffRole(role) {
+            selectedStaffRole = role;
+            const teacherRadio = document.getElementById('roleRadioTeacher');
+            const adminRadio = document.getElementById('roleRadioAdmin');
+            const teacherBox = document.getElementById('roleOptionTeacher');
+            const adminBox = document.getElementById('roleOptionAdmin');
+            const pinHelp = document.getElementById('pinHelpText');
+            const pinInput = document.getElementById('authAdminPin');
+
+            if (role === 'teacher') {
+                if (teacherRadio) teacherRadio.checked = true;
+                teacherBox.className = "flex items-center gap-2 p-2.5 rounded-xl border border-teacher-500 bg-teacher-50 cursor-pointer transition";
+                adminBox.className = "flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer transition";
+                pinHelp.innerHTML = `<i class="fa-solid fa-key mr-1"></i> Enter authorized Teacher PIN for instructor sign-off access.`;
+                pinInput.placeholder = "Enter Teacher PIN";
+                pinInput.className = "w-full px-3.5 py-2.5 bg-slate-50 border border-teacher-300 rounded-xl text-xs focus:ring-2 focus:ring-teacher-500 focus:bg-white focus:outline-none font-mono tracking-widest text-base";
+            } else {
+                if (adminRadio) adminRadio.checked = true;
+                adminBox.className = "flex items-center gap-2 p-2.5 rounded-xl border border-amber-500 bg-amber-50 cursor-pointer transition";
+                teacherBox.className = "flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer transition";
+                pinHelp.innerHTML = `<i class="fa-solid fa-shield-halved mr-1"></i> Enter authorized Director PIN for program director access.`;
+                pinInput.placeholder = "Enter Admin PIN";
+                pinInput.className = "w-full px-3.5 py-2.5 bg-slate-50 border border-amber-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 focus:bg-white focus:outline-none font-mono tracking-widest text-base";
+            }
+        }
+
+        function switchAuthTab(mode) {
+            authMode = mode;
+            hideAuthAlerts();
+
+            const tabSignIn = document.getElementById('tabSignIn');
+            const tabRegister = document.getElementById('tabRegister');
+            const tabForgot = document.getElementById('tabForgot');
+            const tabAdmin = document.getElementById('tabAdmin');
+            
+            const fieldFullName = document.getElementById('fieldFullNameContainer');
+            const fieldEmail = document.getElementById('fieldEmailContainer');
+            const fieldPassword = document.getElementById('fieldPasswordContainer');
+            const fieldNewPassword = document.getElementById('fieldNewPasswordContainer');
+            const fieldAdminPin = document.getElementById('fieldAdminPinContainer');
+            const fieldStaffRole = document.getElementById('fieldStaffRoleContainer');
+            
+            const title = document.getElementById('authTitle');
+            const subTitle = document.getElementById('authSubTitle');
+            const btn = document.getElementById('authSubmitBtn');
+            const forgotLink = document.getElementById('forgotPassLink');
+            const iconBox = document.getElementById('authIconBox');
+
+            const activeTabClass = "flex-1 py-2 px-2 rounded-lg text-brand-600 bg-white shadow-sm transition whitespace-nowrap text-center font-bold";
+            const inactiveTabClass = "flex-1 py-2 px-2 rounded-lg text-slate-500 hover:text-slate-800 transition whitespace-nowrap text-center font-semibold";
+            const activeAdminTabClass = "flex-1 py-2 px-2 rounded-lg text-amber-900 bg-amber-100 font-bold shadow-sm transition whitespace-nowrap text-center";
+
+            tabSignIn.className = mode === 'signin' ? activeTabClass : inactiveTabClass;
+            tabRegister.className = mode === 'register' ? activeTabClass : inactiveTabClass;
+            tabForgot.className = mode === 'forgot' ? activeTabClass : inactiveTabClass;
+            tabAdmin.className = mode === 'admin' ? activeAdminTabClass : "flex-1 py-2 px-2 rounded-lg text-amber-700 hover:text-amber-900 transition whitespace-nowrap flex items-center justify-center gap-1 text-center font-semibold";
+
+            // Reset field visibilities
+            fieldFullName.classList.add('hidden');
+            fieldEmail.classList.remove('hidden');
+            fieldPassword.classList.remove('hidden');
+            fieldNewPassword.classList.add('hidden');
+            fieldAdminPin.classList.add('hidden');
+            fieldStaffRole.classList.add('hidden');
+            if (forgotLink) forgotLink.classList.remove('hidden');
+
+            if (mode === 'signin') {
+                title.innerText = "Student Semester Sign In";
+                subTitle.innerText = "Enter your student credentials to log training progress.";
+                btn.innerText = "Sign In to Portal";
+                btn.className = "w-full py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold text-xs rounded-xl shadow-md transition";
+                iconBox.className = "w-12 h-12 bg-brand-50 rounded-2xl text-brand-600 flex items-center justify-center mx-auto mb-3 text-xl font-bold";
+            } else if (mode === 'register') {
+                fieldFullName.classList.remove('hidden');
+                if (forgotLink) forgotLink.classList.add('hidden');
+                title.innerText = "Student Registration";
+                subTitle.innerText = "Create a new trainee profile for California State Board logging.";
+                btn.innerText = "Complete Registration";
+                btn.className = "w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs rounded-xl shadow-md transition";
+                iconBox.className = "w-12 h-12 bg-brand-50 rounded-2xl text-brand-600 flex items-center justify-center mx-auto mb-3 text-xl font-bold";
+            } else if (mode === 'forgot') {
+                fieldPassword.classList.add('hidden');
+                fieldNewPassword.classList.remove('hidden');
+                if (forgotLink) forgotLink.classList.add('hidden');
+                title.innerText = "Reset Account Password";
+                subTitle.innerText = "Enter your email address and new password to recover access.";
+                btn.innerText = "Reset Password";
+                btn.className = "w-full py-3 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs rounded-xl shadow-md transition";
+                iconBox.className = "w-12 h-12 bg-slate-100 rounded-2xl text-slate-700 flex items-center justify-center mx-auto mb-3 text-xl font-bold";
+            } else if (mode === 'admin') {
+                fieldEmail.classList.add('hidden');
+                fieldPassword.classList.add('hidden');
+                fieldAdminPin.classList.remove('hidden');
+                fieldStaffRole.classList.remove('hidden');
+                if (forgotLink) forgotLink.classList.add('hidden');
+                title.innerText = "Instructor & Staff Portal Access";
+                subTitle.innerText = "Authenticate using your authorized Staff or Director PIN.";
+                btn.innerText = "Authenticate Staff Access";
+                btn.className = "w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl shadow-md transition";
+                iconBox.className = "w-12 h-12 bg-amber-100 rounded-2xl text-amber-800 flex items-center justify-center mx-auto mb-3 text-xl font-bold";
+            }
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            hideAuthAlerts();
+
+            const fullName = document.getElementById('authFullName').value.trim();
+            const email = document.getElementById('authEmail').value.trim().toLowerCase();
+            const password = document.getElementById('authPassword').value;
+            const newPassword = document.getElementById('authNewPassword').value;
+            const adminPin = document.getElementById('authAdminPin').value.trim();
+
+            const usersDb = getUsersDatabase();
+
+            if (authMode === 'admin') {
+                if (selectedStaffRole === 'teacher') {
+                    if (adminPin === DEFAULT_TEACHER_PIN) {
+                        isTeacherLoggedIn = true;
+                        isAdminLoggedIn = false;
+                        localStorage.setItem('cttp_is_teacher', 'true');
+                        localStorage.setItem('cttp_is_admin', 'false');
+                        showToast("Teacher Access Authenticated (Issue Sign-Offs)", "success");
+                        closeAuthModal();
+                        updateUserUI();
+                        renderGrid();
+                    } else {
+                        showAuthError("Invalid Teacher PIN. Please check your credentials.");
+                    }
+                } else {
+                    if (adminPin === DEFAULT_ADMIN_PIN) {
+                        isAdminLoggedIn = true;
+                        isTeacherLoggedIn = true;
+                        localStorage.setItem('cttp_is_admin', 'true');
+                        localStorage.setItem('cttp_is_teacher', 'true');
+                        showToast("Administrator Access Authenticated (Certificate Editing Enabled)", "success");
+                        closeAuthModal();
+                        updateUserUI();
+                        renderGrid();
+                    } else {
+                        showAuthError("Invalid Director/Admin PIN. Please check your credentials.");
+                    }
+                }
+                return;
+            }
+
+            if (authMode === 'register') {
+                if (!fullName || !email || !password) {
+                    showAuthError("Please complete all required registration fields.");
+                    return;
+                }
+                if (usersDb[email]) {
+                    showAuthError("An account with this email address already exists. Please sign in.");
+                    return;
+                }
+
+                usersDb[email] = { fullName, email, password, records: {} };
+                saveUsersDatabase(usersDb);
+
+                currentUser = { fullName, email };
+                localStorage.setItem('cttp_current_user', JSON.stringify(currentUser));
+                showToast(`Welcome, ${fullName}! Student account registered successfully.`, "success");
+                closeAuthModal();
+                updateUserUI();
+                renderGrid();
+                updateStats();
+                return;
+            }
+
+            if (authMode === 'signin') {
+                if (!email || !password) {
+                    showAuthError("Please enter your email address and password.");
+                    return;
+                }
+                if (!usersDb[email] || usersDb[email].password !== password) {
+                    showAuthError("Invalid student credentials. Please verify your email and password.");
+                    return;
+                }
+
+                currentUser = { fullName: usersDb[email].fullName, email };
+                localStorage.setItem('cttp_current_user', JSON.stringify(currentUser));
+                showToast(`Signed in as ${usersDb[email].fullName}`, "success");
+                closeAuthModal();
+                updateUserUI();
+                renderGrid();
+                updateStats();
+                return;
+            }
+
+            if (authMode === 'forgot') {
+                if (!email || !newPassword) {
+                    showAuthError("Please provide your email address and a new password.");
+                    return;
+                }
+                if (!usersDb[email]) {
+                    showAuthError("No student account found with this email address.");
+                    return;
+                }
+
+                usersDb[email].password = newPassword;
+                saveUsersDatabase(usersDb);
+                showAuthSuccess("Password successfully updated. You may now sign in.");
+                setTimeout(() => switchAuthTab('signin'), 1500);
+            }
+        }
+
+        function logoutStudent() {
+            showConfirmModal(
+                "Sign Out / Logout Confirmation",
+                "Are you sure you want to log out of all active student and staff sessions on this computer?",
+                () => {
+                    currentUser = null;
+                    isAdminLoggedIn = false;
+                    isTeacherLoggedIn = false;
+                    localStorage.removeItem('cttp_current_user');
+                    localStorage.removeItem('cttp_is_admin');
+                    localStorage.removeItem('cttp_is_teacher');
+                    showToast("Logged out successfully.", "info");
+                    updateUserUI();
+                    renderGrid();
+                    updateStats();
+                }
+            );
+        }
+
+        function updateUserUI() {
+            const userBadge = document.getElementById('userProfileBadge');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const userNameDisplay = document.getElementById('userNameDisplay');
+            const userAvatar = document.getElementById('userAvatar');
+            const userRoleBadge = document.getElementById('userRoleBadge');
+            const adminPortalBtnText = document.getElementById('adminPortalBtnText');
+
+            if (isAdminLoggedIn) {
+                adminPortalBtnText.innerText = "Admin Portal (Active)";
+            } else if (isTeacherLoggedIn) {
+                adminPortalBtnText.innerText = "Teacher Mode";
+            } else {
+                adminPortalBtnText.innerText = "Admin Portal";
+            }
+
+            const hasActiveSession = currentUser || isAdminLoggedIn || isTeacherLoggedIn;
+
+            if (hasActiveSession) {
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
+            } else {
+                if (logoutBtn) logoutBtn.classList.add('hidden');
+            }
+
+            if (currentUser) {
+                userBadge.classList.remove('hidden');
+                loginBtn.classList.add('hidden');
+                userNameDisplay.innerText = currentUser.fullName;
+                
+                // Get initials
+                const parts = currentUser.fullName.split(' ');
+                const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].slice(0, 2).toUpperCase();
+                userAvatar.innerText = initials;
+
+                if (isAdminLoggedIn) {
+                    userRoleBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Program Director (Admin)`;
+                } else if (isTeacherLoggedIn) {
+                    userRoleBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span> Instructor / Teacher`;
+                } else {
+                    userRoleBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Semester Enrolled`;
+                }
+            } else {
+                userBadge.classList.add('hidden');
+                loginBtn.classList.remove('hidden');
+            }
+        }
+
+        /* ----------------------------------------------------
+           GRID RENDERING & SEARCH FILTERING
+        ---------------------------------------------------- */
+        function setFilter(week) {
+            activeFilter = week;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.getAttribute('data-week') === week) {
+                    btn.className = "filter-btn active-filter px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-brand-500 text-white shadow-xs";
+                } else {
+                    btn.className = "filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition";
+                }
+            });
+            renderGrid();
+        }
+
+        function handleSearch(val) {
+            searchQuery = val.toLowerCase().trim();
+            renderGrid();
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('modulesGrid');
+            const noResults = document.getElementById('noResults');
+
+            const usersDb = getUsersDatabase();
+            const userRecords = (currentUser && usersDb[currentUser.email] && usersDb[currentUser.email].records) ? usersDb[currentUser.email].records : {};
+
+            let filtered = modules.filter(m => {
+                // Week filter
+                let passWeek = true;
+                if (activeFilter === 'week1') passWeek = m.week === 1;
+                else if (activeFilter === 'week2') passWeek = m.week === 2;
+                else if (activeFilter === 'week3') passWeek = m.week === 3;
+                else if (activeFilter === 'week4') passWeek = m.week === 4;
+                else if (activeFilter === 'week5') passWeek = m.week === 5;
+
+                // Search query filter
+                let passSearch = true;
+                if (searchQuery) {
+                    passSearch = m.title.toLowerCase().includes(searchQuery) ||
+                                 m.description.toLowerCase().includes(searchQuery) ||
+                                 m.category.toLowerCase().includes(searchQuery) ||
+                                 `day ${m.day}`.includes(searchQuery);
+                }
+
+                return passWeek && passSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            noResults.classList.add('hidden');
+
+            grid.innerHTML = filtered.map(m => {
+                const rec = userRecords[m.day];
+                const isDone = !!rec;
+
+                return `
+                    <div class="bg-white rounded-2xl border ${isDone ? 'border-emerald-200 bg-emerald-50/10' : 'border-slate-200'} p-5 hover:shadow-md transition flex flex-col justify-between group">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-3">
+                                <span class="text-[10px] font-bold text-brand-600 bg-brand-50 border border-brand-100 px-2 py-0.5 rounded">
+                                    Day ${m.day} • Week ${m.week}
+                                </span>
+                                <span class="text-[10px] font-medium text-slate-400">${m.category}</span>
+                            </div>
+                            
+                            <h3 class="font-bold text-slate-900 text-sm mb-2 group-hover:text-brand-600 transition leading-snug">${m.title}</h3>
+                            <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-4">${m.description}</p>
+                        </div>
+
+                        <div class="space-y-2 border-t border-slate-100 pt-3">
+                            ${isDone ? `
+                                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 text-xs text-emerald-900 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+                                        <div>
+                                            <span class="block font-bold text-[11px]">Signed Off: ${rec.rphName}</span>
+                                            <span class="block text-[10px] text-emerald-700 font-mono">${rec.completionDate} • ${rec.totalHours || (parseFloat(rec.teachingHours) + parseFloat(rec.practicalHours))} Hrs</span>
+                                        </div>
+                                    </div>
+                                    <button onclick="viewCertificate(${m.day})" title="View Certificate" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-[10px] shadow-xs">
+                                        Audit Certificate
+                                    </button>
+                                </div>
+                            ` : ''}
+
+                            <div class="flex items-center gap-2">
+                                <button onclick="openDetailModal(${m.day})" class="flex-1 py-2 px-3 bg-slate-50 hover:bg-brand-50 text-slate-700 hover:text-brand-700 border border-slate-200 hover:border-brand-200 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 transition">
+                                    <i class="fa-solid fa-folder-open text-brand-500"></i>
+                                    <span>Details & Links</span>
+                                </button>
+
+                                ${(isTeacherLoggedIn || isAdminLoggedIn) && !isDone ? `
+                                    <button onclick="openSignOffModal(${m.day})" class="py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 shrink-0">
+                                        <i class="fa-solid fa-file-signature"></i>
+                                        <span>Sign Off</span>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            const usersDb = getUsersDatabase();
+            const userRecords = (currentUser && usersDb[currentUser.email] && usersDb[currentUser.email].records) ? usersDb[currentUser.email].records : {};
+
+            const completed = Object.keys(userRecords).length;
+            let totalHours = 0;
+
+            Object.values(userRecords).forEach(r => {
+                totalHours += parseFloat(r.teachingHours || 4.0) + parseFloat(r.practicalHours || 4.0);
+            });
+
+            const percent = Math.round((completed / 30) * 100);
+
+            document.getElementById('completedCount').innerText = completed;
+            document.getElementById('hoursLogged').innerText = totalHours.toFixed(1);
+            document.getElementById('progressPercent').innerText = `${percent}%`;
+            document.getElementById('progressBar').style.width = `${percent}%`;
+        }
+
+        /* ----------------------------------------------------
+           DETAILS POPUP & PLACEHOLDER LINKS GENERATION LOGIC
+        ---------------------------------------------------- */
+        function openDetailModal(dayNum) {
+            const mod = modules.find(m => m.day === dayNum);
+            if (!mod) return;
+
+            document.getElementById('detailDayBadge').innerText = `Day ${mod.day} • Week ${mod.week}`;
+            document.getElementById('detailTitle').innerText = mod.title;
+            document.getElementById('detailCategory').innerText = mod.category;
+            document.getElementById('detailDescription').innerText = mod.description;
+
+            // Agenda items
+            const agendaUl = document.getElementById('detailAgenda');
+            agendaUl.innerHTML = mod.agenda.map(a => `<li>${a}</li>`).join('');
+
+            // Format Day Number for GitHub Pages / relative links (e.g., Day 1 -> day-01)
+            const paddedDay = mod.day < 10 ? '0' + mod.day : mod.day;
+            
+            // GitHub Pages & Local Compatible Placeholder Links
+            const studentMaterialUrl = `./materials/day-${paddedDay}-reading.html`;
+            const teacherPlanUrl = `./lesson-plans/day-${paddedDay}-plan.html`;
+
+            const resourcesContainer = document.getElementById('detailResourcesContainer');
+            let linksHtml = '';
+
+            // 1. Student Reading Material Link
+            linksHtml += `
+                <a href="${studentMaterialUrl}" target="_blank" title="Open Student Reading Guide" class="flex items-center gap-3 p-3 rounded-xl border border-brand-200 bg-brand-50/60 hover:bg-brand-100/80 text-brand-700 transition group relative">
+                    <div class="w-9 h-9 rounded-lg bg-brand-500 text-white flex items-center justify-center text-sm shrink-0 shadow-xs group-hover:scale-105 transition">
+                        <i class="fa-solid fa-book-open"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <span class="block text-xs font-bold text-brand-900 group-hover:text-brand-600 transition truncate">Student Reading</span>
+                        <span class="block text-[10px] text-brand-600 font-mono truncate">day-${paddedDay}-reading.html</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-brand-400 absolute top-2.5 right-2.5"></i>
+                </a>
+            `;
+
+            // 2. Teacher Lesson Plan Link
+            if (isTeacherLoggedIn || isAdminLoggedIn) {
+                linksHtml += `
+                    <a href="${teacherPlanUrl}" target="_blank" title="Open Teacher Lesson Plan" class="flex items-center gap-3 p-3 rounded-xl border border-teacher-200 bg-teacher-50/60 hover:bg-teacher-100/80 text-teacher-700 transition group relative">
+                        <div class="w-9 h-9 rounded-lg bg-teacher-600 text-white flex items-center justify-center text-sm shrink-0 shadow-xs group-hover:scale-105 transition">
+                            <i class="fa-solid fa-chalkboard-user"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <div class="flex items-center gap-1">
+                                <span class="block text-xs font-bold text-teacher-900 group-hover:text-teacher-600 transition truncate">Teacher Plan</span>
+                                <span class="text-[9px] bg-teacher-200 text-teacher-900 px-1 rounded font-bold">Staff</span>
+                            </div>
+                            <span class="block text-[10px] text-teacher-600 font-mono truncate">day-${paddedDay}-plan.html</span>
+                        </div>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-teacher-400 absolute top-2.5 right-2.5"></i>
+                    </a>
+                `;
+            } else {
+                // Public / Student View Placeholder for Teacher Plan
+                linksHtml += `
+                    <a href="${teacherPlanUrl}" target="_blank" title="Open Teacher Lesson Plan" class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 transition group relative">
+                        <div class="w-9 h-9 rounded-lg bg-slate-200 text-slate-500 flex items-center justify-center text-sm shrink-0 shadow-xs group-hover:scale-105 transition">
+                            <i class="fa-solid fa-chalkboard-user"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <span class="block text-xs font-bold text-slate-800 group-hover:text-brand-600 transition truncate">Teacher Plan</span>
+                            <span class="block text-[10px] text-slate-500 font-mono truncate">day-${paddedDay}-plan.html</span>
+                        </div>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400 absolute top-2.5 right-2.5"></i>
+                    </a>
+                `;
+            }
+
+            resourcesContainer.innerHTML = linksHtml;
+
+            // Action box inside detail modal
+            const actionBox = document.getElementById('detailModalActionBox');
+            const usersDb = getUsersDatabase();
+            const userRecords = (currentUser && usersDb[currentUser.email] && usersDb[currentUser.email].records) ? usersDb[currentUser.email].records : {};
+            const isDone = !!userRecords[mod.day];
+
+            if (isDone) {
+                actionBox.innerHTML = `
+                    <button onclick="closeDetailModal(); viewCertificate(${mod.day});" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2">
+                        <i class="fa-solid fa-award"></i> View Audit Certificate
+                    </button>
+                `;
+            } else if (isTeacherLoggedIn || isAdminLoggedIn) {
+                actionBox.innerHTML = `
+                    <button onclick="closeDetailModal(); openSignOffModal(${mod.day});" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2">
+                        <i class="fa-solid fa-file-signature"></i> Sign Off Day Module
+                    </button>
+                `;
+            } else {
+                actionBox.innerHTML = `<span class="text-xs text-slate-400 italic">Sign-off requires Teacher or Admin login</span>`;
+            }
+
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+
+        /* ----------------------------------------------------
+           END-OF-DAY SIGN-OFF WORKFLOWS
+        ---------------------------------------------------- */
+        function openSignOffModal(dayNum) {
+            if (!currentUser) {
+                showToast("Please select or sign in a student account before signing off.", "error");
+                openAuthModal();
+                return;
+            }
+
+            const mod = modules.find(m => m.day === dayNum);
+            if (!mod) return;
+
+            document.getElementById('signOffDayId').value = dayNum;
+            document.getElementById('signOffModuleTitle').innerText = `Day ${mod.day}: ${mod.title}`;
+            document.getElementById('signOffStudentName').innerText = currentUser.fullName;
+
+            document.getElementById('teachingHours').value = "4.0";
+            document.getElementById('practicalHours').value = "4.0";
+            document.getElementById('varianceContainer').classList.add('hidden');
+            document.getElementById('hoursExplanation').value = "";
+            document.getElementById('signOffCertify').checked = false;
+
+            document.getElementById('signOffModal').classList.remove('hidden');
+        }
+
+        function closeSignOffModal() {
+            document.getElementById('signOffModal').classList.add('hidden');
+        }
+
+        function checkHoursVariance() {
+            const teaching = parseFloat(document.getElementById('teachingHours').value) || 0;
+            const practical = parseFloat(document.getElementById('practicalHours').value) || 0;
+            const varianceContainer = document.getElementById('varianceContainer');
+
+            if (teaching !== 4.0 || practical !== 4.0) {
+                varianceContainer.classList.remove('hidden');
+            } else {
+                varianceContainer.classList.add('hidden');
+            }
+        }
+
+        function handleSignOffSubmit(e) {
+            e.preventDefault();
+
+            const dayId = parseInt(document.getElementById('signOffDayId').value);
+            const rphName = document.getElementById('rphName').value.trim();
+            const rphInitials = document.getElementById('rphInitials').value.trim().toUpperCase();
+            const rphLicense = document.getElementById('rphLicense').value.trim().toUpperCase();
+            const teachingHours = parseFloat(document.getElementById('teachingHours').value) || 4.0;
+            const practicalHours = parseFloat(document.getElementById('practicalHours').value) || 4.0;
+            const explanation = document.getElementById('hoursExplanation').value.trim();
+
+            if (teachingHours !== 4.0 || practicalHours !== 4.0) {
+                if (!explanation) {
+                    showToast("Please provide an explanation for the hours variance.", "error");
+                    return;
+                }
+            }
+
+            const usersDb = getUsersDatabase();
+            if (!currentUser || !usersDb[currentUser.email]) {
+                showToast("Active student session required.", "error");
+                return;
+            }
+
+            const todayStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            const totalHours = teachingHours + practicalHours;
+
+            const newRecord = {
+                day: dayId,
+                rphName,
+                rphInitials,
+                rphLicense,
+                teachingHours,
+                practicalHours,
+                totalHours,
+                explanation: (teachingHours !== 4.0 || practicalHours !== 4.0) ? explanation : '',
+                completionDate: todayStr,
+                timestamp: Date.now()
+            };
+
+            usersDb[currentUser.email].records[dayId] = newRecord;
+            saveUsersDatabase(usersDb);
+
+            // Cloud sync if Firebase active
+            if (isFirebaseActive && db) {
+                db.collection('student_records').doc(currentUser.email).set({
+                    email: currentUser.email,
+                    records: usersDb[currentUser.email].records,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true }).catch(err => console.error("Firebase sync error:", err));
+            }
+
+            showToast(`Day ${dayId} signed off successfully! Certificate issued.`, "success");
+            closeSignOffModal();
+            renderGrid();
+            updateStats();
+        }
+
+        /* ----------------------------------------------------
+           ADMIN-ONLY CERTIFICATE PORTAL LOGIC
+        ---------------------------------------------------- */
+        function openAdminPortalModal() {
+            // ONLY ALLOW ADMINS TO ACCESS ADMIN PORTAL TO EDIT CERTIFICATES
+            if (!isAdminLoggedIn) {
+                showToast("Access Restricted: Contact Nick for Admin Access.", "error");
+                if (!isTeacherLoggedIn) {
+                    openAuthModal();
+                    switchAuthTab('admin');
+                }
+                return;
+            }
+
+            populateAdminDropdowns();
+            document.getElementById('adminPortalModal').classList.remove('hidden');
+            onAdminStudentOrDayChange();
+        }
+
+        function closeAdminPortalModal() {
+            document.getElementById('adminPortalModal').classList.add('hidden');
+        }
+
+        function populateAdminDropdowns() {
+            const usersDb = getUsersDatabase();
+            const studentSelect = document.getElementById('adminStudentSelect');
+            const daySelect = document.getElementById('adminDaySelect');
+
+            const users = Object.values(usersDb);
+            if (users.length === 0) {
+                studentSelect.innerHTML = `<option value="">No registered students found</option>`;
+            } else {
+                studentSelect.innerHTML = users.map(u => `<option value="${u.email}">${u.fullName} (${u.email})</option>`).join('');
+                if (currentUser && usersDb[currentUser.email]) {
+                    studentSelect.value = currentUser.email;
+                }
+            }
+
+            daySelect.innerHTML = modules.map(m => `<option value="${m.day}">Day ${m.day}: ${m.title}</option>`).join('');
+        }
+
+        function onAdminStudentOrDayChange() {
+            const studentEmail = document.getElementById('adminStudentSelect').value;
+            const dayId = parseInt(document.getElementById('adminDaySelect').value);
+
+            const usersDb = getUsersDatabase();
+            const student = usersDb[studentEmail];
+            const record = (student && student.records) ? student.records[dayId] : null;
+
+            const statusText = document.getElementById('adminStatusText');
+            const statusBadge = document.getElementById('adminStatusBadge');
+            const deleteBtn = document.getElementById('adminDeleteBtn');
+
+            if (record) {
+                statusText.innerHTML = `<i class="fa-solid fa-circle-check mr-1.5 text-emerald-500"></i> Issued Certificate Record Found for ${student.fullName}.`;
+                statusBadge.innerText = "ISSUED";
+                statusBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded uppercase bg-emerald-100 text-emerald-800 border border-emerald-300";
+                
+                document.getElementById('adminCompletionDate').value = record.completionDate || "";
+                document.getElementById('adminRphName').value = record.rphName || "";
+                document.getElementById('adminRphInitials').value = record.rphInitials || "";
+                document.getElementById('adminRphLicense').value = record.rphLicense || "";
+                document.getElementById('adminTeachingHours').value = record.teachingHours || "4.0";
+                document.getElementById('adminPracticalHours').value = record.practicalHours || "4.0";
+                
+                const hasVariance = !!record.explanation;
+                document.getElementById('adminFlagVariance').checked = hasVariance;
+                document.getElementById('adminExplanation').value = record.explanation || "";
+                
+                if (hasVariance) {
+                    document.getElementById('adminExplanationContainer').classList.remove('hidden');
+                } else {
+                    document.getElementById('adminExplanationContainer').classList.add('hidden');
+                }
+
+                if (deleteBtn) deleteBtn.classList.remove('hidden');
+            } else {
+                statusText.innerHTML = `<i class="fa-solid fa-circle-info mr-1.5 text-amber-500"></i> No certificate recorded for Day ${dayId} yet. Filling form will issue a new certificate.`;
+                statusBadge.innerText = "UNISSUED";
+                statusBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded uppercase bg-amber-100 text-amber-800 border border-amber-300";
+
+                const todayStr = new Date().toISOString().split('T')[0];
+                document.getElementById('adminCompletionDate').value = todayStr;
+                document.getElementById('adminRphName').value = "Dr. Robert Vance, PharmD";
+                document.getElementById('adminRphInitials').value = "RV";
+                document.getElementById('adminRphLicense').value = "RPH-68492";
+                document.getElementById('adminTeachingHours').value = "4.0";
+                document.getElementById('adminPracticalHours').value = "4.0";
+                document.getElementById('adminFlagVariance').checked = false;
+                document.getElementById('adminExplanation').value = "";
+                document.getElementById('adminExplanationContainer').classList.add('hidden');
+
+                if (deleteBtn) deleteBtn.classList.add('hidden');
+            }
+        }
+
+        function toggleAdminVarianceNote() {
+            const isChecked = document.getElementById('adminFlagVariance').checked;
+            const container = document.getElementById('adminExplanationContainer');
+            if (isChecked) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function handleAdminCertSave(e) {
+            e.preventDefault();
+
+            // Enforce admin permission check
+            if (!isAdminLoggedIn) {
+                showToast("Unauthorized: Only Administrators can save certificate edits.", "error");
+                return;
+            }
+
+            const studentEmail = document.getElementById('adminStudentSelect').value;
+            const dayId = parseInt(document.getElementById('adminDaySelect').value);
+
+            const usersDb = getUsersDatabase();
+            if (!usersDb[studentEmail]) {
+                showToast("Target student account not found.", "error");
+                return;
+            }
+
+            const rawDate = document.getElementById('adminCompletionDate').value;
+            let formattedDate = rawDate;
+            if (rawDate && rawDate.includes('-')) {
+                const parts = rawDate.split('-');
+                formattedDate = new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            }
+
+            const rphName = document.getElementById('adminRphName').value.trim();
+            const rphInitials = document.getElementById('adminRphInitials').value.trim().toUpperCase();
+            const rphLicense = document.getElementById('adminRphLicense').value.trim().toUpperCase();
+            const teachingHours = parseFloat(document.getElementById('adminTeachingHours').value) || 4.0;
+            const practicalHours = parseFloat(document.getElementById('adminPracticalHours').value) || 4.0;
+            const isVariance = document.getElementById('adminFlagVariance').checked;
+            const explanation = isVariance ? document.getElementById('adminExplanation').value.trim() : '';
+
+            const updatedRecord = {
+                day: dayId,
+                rphName,
+                rphInitials,
+                rphLicense,
+                teachingHours,
+                practicalHours,
+                totalHours: teachingHours + practicalHours,
+                explanation,
+                completionDate: formattedDate || rawDate,
+                timestamp: Date.now()
+            };
+
+            usersDb[studentEmail].records[dayId] = updatedRecord;
+            saveUsersDatabase(usersDb);
+
+            if (isFirebaseActive && db) {
+                db.collection('student_records').doc(studentEmail).set({
+                    email: studentEmail,
+                    records: usersDb[studentEmail].records,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true }).catch(err => console.error("Firebase sync error:", err));
+            }
+
+            showToast(`Admin Certificate update applied for Day ${dayId}.`, "success");
+            closeAdminPortalModal();
+            renderGrid();
+            updateStats();
+        }
+
+        function handleAdminCertRevoke() {
+            if (!isAdminLoggedIn) {
+                showToast("Unauthorized: Only Administrators can revoke certificates.", "error");
+                return;
+            }
+
+            const studentEmail = document.getElementById('adminStudentSelect').value;
+            const dayId = parseInt(document.getElementById('adminDaySelect').value);
+
+            showConfirmModal(
+                "Revoke Certificate Confirmation",
+                `Are you sure you want to permanently revoke the Day ${dayId} certificate for student ${studentEmail}?`,
+                () => {
+                    const usersDb = getUsersDatabase();
+                    if (usersDb[studentEmail] && usersDb[studentEmail].records[dayId]) {
+                        delete usersDb[studentEmail].records[dayId];
+                        saveUsersDatabase(usersDb);
+
+                        if (isFirebaseActive && db) {
+                            db.collection('student_records').doc(studentEmail).set({
+                                email: studentEmail,
+                                records: usersDb[studentEmail].records,
+                                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                            }, { merge: true });
+                        }
+
+                        showToast(`Certificate for Day ${dayId} successfully revoked.`, "info");
+                        closeAdminPortalModal();
+                        renderGrid();
+                        updateStats();
+                    }
+                }
+            );
+        }
+
+        /* ----------------------------------------------------
+           CERTIFICATE DISPLAY & AUDIT VAULT
+        ---------------------------------------------------- */
+        function viewCertificate(dayNum) {
+            const usersDb = getUsersDatabase();
+            const records = (currentUser && usersDb[currentUser.email]) ? usersDb[currentUser.email].records : {};
+            const rec = records[dayNum];
+            const mod = modules.find(m => m.day === dayNum);
+
+            if (!rec || !mod) {
+                showToast("No active certificate found for this module.", "error");
+                return;
+            }
+
+            document.getElementById('certStudentName').innerText = currentUser.fullName;
+            document.getElementById('certModuleTitle').innerText = `Day ${mod.day}: ${mod.title}`;
+            document.getElementById('certRefNum').innerText = `CTTP-2026-${String(mod.day).padStart(4, '0')}`;
+            document.getElementById('certCompletionDate').innerText = `Date: ${rec.completionDate}`;
+
+            const teach = parseFloat(rec.teachingHours || 4.0);
+            const prac = parseFloat(rec.practicalHours || 4.0);
+            const tot = rec.totalHours || (teach + prac);
+
+            document.getElementById('certTeachingHours').innerText = `${teach.toFixed(1)} Hrs`;
+            document.getElementById('certPracticalHours').innerText = `${prac.toFixed(1)} Hrs`;
+            document.getElementById('certTotalHours').innerText = `${tot.toFixed(1)} Hrs`;
+
+            document.getElementById('certRphName').innerText = rec.rphName;
+            document.getElementById('certRphLicense').innerText = rec.rphLicense;
+            document.getElementById('certRphInitials').innerText = rec.rphInitials;
+
+            const varNote = document.getElementById('certVarianceNote');
+            if (rec.explanation) {
+                varNote.classList.remove('hidden');
+                document.getElementById('certVarianceText').innerText = rec.explanation;
+            } else {
+                varNote.classList.add('hidden');
+            }
+
+            document.getElementById('certificateModal').classList.remove('hidden');
+        }
+
+        function closeCertificateModal() {
+            document.getElementById('certificateModal').classList.add('hidden');
+        }
+
+        function openVaultModal() {
+            renderVaultTable();
+            document.getElementById('vaultModal').classList.remove('hidden');
+        }
+
+        function closeVaultModal() {
+            document.getElementById('vaultModal').classList.add('hidden');
+        }
+
+        function renderVaultTable() {
+            const tbody = document.getElementById('vaultTableBody');
+            const countEl = document.getElementById('vaultRecordCount');
+
+            const usersDb = getUsersDatabase();
+            const records = (currentUser && usersDb[currentUser.email]) ? usersDb[currentUser.email].records : {};
+            const recordKeys = Object.keys(records);
+
+            countEl.innerText = `${recordKeys.length} signed-off audit logs found`;
+
+            if (recordKeys.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-6 text-center text-slate-400 italic">
+                            No training module sign-offs recorded for the current student.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = recordKeys.map(k => {
+                const r = records[k];
+                const mod = modules.find(m => m.day === parseInt(k));
+                const teach = parseFloat(r.teachingHours || 4.0);
+                const prac = parseFloat(r.practicalHours || 4.0);
+
+                return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 font-bold text-slate-900">
+                            Day ${r.day}: ${mod ? mod.title : 'Module'}
+                        </td>
+                        <td class="p-3 text-slate-600 font-mono">${r.completionDate}</td>
+                        <td class="p-3 font-semibold text-slate-800">${r.rphName} (${r.rphInitials})</td>
+                        <td class="p-3 text-center font-mono font-bold">${teach.toFixed(1)} / ${prac.toFixed(1)}</td>
+                        <td class="p-3 text-center">
+                            <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full">
+                                VERIFIED
+                            </span>
+                        </td>
+                        <td class="p-3 text-right">
+                            <button onclick="closeVaultModal(); viewCertificate(${r.day});" class="px-2.5 py-1 bg-brand-500 hover:bg-brand-600 text-white text-[11px] font-bold rounded-lg transition shadow-xs">
+                                View Cert
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function exportAuditJSON() {
+            const usersDb = getUsersDatabase();
+            const records = (currentUser && usersDb[currentUser.email]) ? usersDb[currentUser.email].records : {};
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(records, null, 2));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `CTTP_Audit_Transcript_${currentUser ? currentUser.fullName.replace(/\s+/g, '_') : 'Student'}.json`);
+            document.body.appendChild(dlAnchorElem);
+            dlAnchorElem.click();
+            dlAnchorElem.remove();
+        }
+    </script>
+</body>
+</html>
