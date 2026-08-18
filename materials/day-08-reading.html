@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 8: Comprehensive Drug Compounding Curriculum - Pharmacy Tech Training</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- KaTeX for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        pharmacy: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+        }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-800 antialiased flex flex-col bg-slate-50 custom-scrollbar">
+
+    <!-- Top Header / App Bar -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Branding -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg bg-pharmacy-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                        <i class="fa-solid font-bold fa-mortar-pestle"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-lg tracking-wide leading-tight">SOUTH COAST MISSION PHARMACY</div>
+                        <div class="text-xs text-pharmacy-200 font-medium">California Technician Training Program • Day 8</div>
+                    </div>
+                </div>
+
+                <!-- Timer & Session Stats -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <!-- Session Duration Tracker -->
+                    <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                        <i class="fa-regular fa-clock text-pharmacy-400"></i>
+                        <span class="text-xs text-slate-300">Time Spent:</span>
+                        <span id="sessionTimer" class="font-mono text-sm font-semibold text-emerald-400">00:00:00</span>
+                    </div>
+
+                    <!-- Target Time Indicator -->
+                    <div class="text-xs text-slate-400 flex items-center space-x-1">
+                        <i class="fa-solid fa-hourglass-half text-amber-400"></i>
+                        <span>Target: 120 Minutes</span>
+                    </div>
+
+                    <!-- Quick Action Notes Modal Trigger -->
+                    <button onclick="toggleNotesModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-1 transition">
+                        <i class="fa-solid fa-note-sticky text-yellow-400"></i>
+                        <span>Study Notes</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Module Progress Bar -->
+        <div class="w-full bg-slate-800 h-2 relative">
+            <div id="overallProgressBar" class="bg-gradient-to-r from-pharmacy-500 to-emerald-400 h-2 transition-all duration-500" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <!-- Main Application Container -->
+    <div class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col lg:flex-row gap-6">
+
+        <!-- Sidebar Navigation -->
+        <aside class="w-full lg:w-80 shrink-0 space-y-4 no-print">
+            <!-- Student Profile Card -->
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold border border-slate-200">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Trainee Session</div>
+                        <input type="text" id="studentNameInput" value="Pharmacy Student" onchange="updateStudentName()" class="font-semibold text-slate-800 text-sm bg-transparent border-b border-dashed border-slate-300 focus:outline-none focus:border-pharmacy-500 w-full" title="Click to edit name">
+                    </div>
+                </div>
+                <div class="space-y-2 text-xs text-slate-600">
+                    <div class="flex justify-between">
+                        <span>Curriculum Progress:</span>
+                        <span id="modulesCompletedCount" class="font-semibold text-slate-800">0 / 6 Modules</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Current Assessment Score:</span>
+                        <span id="overallScoreDisplay" class="font-semibold text-pharmacy-600">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="bg-white rounded-xl shadow-sm border border-slate-200 p-2 space-y-1">
+                <div class="px-3 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Day 8 Curriculum</div>
+
+                <button onclick="switchTab('overview')" id="nav-overview" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition bg-pharmacy-50 text-pharmacy-800">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-compass w-5 text-center text-pharmacy-600"></i>
+                        <span>Course Overview</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+                </button>
+
+                <button onclick="switchTab('mod1')" id="nav-mod1" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-book-bookmark w-5 text-center text-slate-400"></i>
+                        <span>1. USP Standards (&lt;795&gt;, &lt;797&gt;, &lt;800&gt;)</span>
+                    </div>
+                    <span id="status-mod1" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod2')" id="nav-mod2" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-flask w-5 text-center text-slate-400"></i>
+                        <span>2. Equipment & Techniques</span>
+                    </div>
+                    <span id="status-mod2" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">25m</span>
+                </button>
+
+                <button onclick="switchTab('mod3')" id="nav-mod3" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-user-shield w-5 text-center text-slate-400"></i>
+                        <span>3. Garbing & Cleanroom Protocols</span>
+                    </div>
+                    <span id="status-mod3" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod4')" id="nav-mod4" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-shield-halved w-5 text-center text-slate-400"></i>
+                        <span>4. Aseptic Technique & BUDs</span>
+                    </div>
+                    <span id="status-mod4" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod5')" id="nav-mod5" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-calculator w-5 text-center text-slate-400"></i>
+                        <span>5. Compounding Math Lab</span>
+                    </div>
+                    <span id="status-mod5" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod6')" id="nav-mod6" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-clipboard-check w-5 text-center text-slate-400"></i>
+                        <span>6. Exam & Case Studies</span>
+                    </div>
+                    <span id="status-mod6" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">15m</span>
+                </button>
+
+                <div class="pt-2 border-t border-slate-100">
+                    <button onclick="switchTab('certificate')" id="nav-certificate" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                        <div class="flex items-center space-x-3">
+                            <i class="fa-solid fa-award w-5 text-center text-amber-500"></i>
+                            <span>Certificate of Completion</span>
+                        </div>
+                        <i class="fa-solid fa-lock text-xs text-slate-300" id="certLockIcon"></i>
+                    </button>
+                </div>
+            </nav>
+
+            <!-- Quick Reference Drawer Box -->
+            <div class="bg-slate-900 text-slate-200 rounded-xl p-4 shadow-sm text-xs space-y-2">
+                <div class="font-bold text-pharmacy-400 uppercase tracking-wider flex items-center justify-between">
+                    <span><i class="fa-solid fa-lightbulb mr-1"></i> Key Takeaways</span>
+                    <span class="text-[10px] text-slate-400">Reference</span>
+                </div>
+                <ul class="space-y-1.5 text-slate-300 list-disc list-inside">
+                    <li><strong class="text-teal-300">USP &lt;795&gt;:</strong> Non-Sterile (Simple, Moderate, Complex)</li>
+                    <li><strong class="text-teal-300">USP &lt;797&gt;:</strong> Sterile (ISO 5 PEC, ISO 7 Buffer, ISO 8 Ante)</li>
+                    <li><strong class="text-teal-300">USP &lt;800&gt;:</strong> Hazardous Drugs (Negative pressure, C-PEC)</li>
+                    <li><strong class="text-teal-300">First Air:</strong> Direct, unfiltered HEPA air reaching critical sites</li>
+                    <li><strong class="text-teal-300">Garbing:</strong> Dirty-to-clean sequence (Shoe covers first, gloves last)</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto custom-scrollbar">
+
+            <!-- TAB: OVERVIEW -->
+            <div id="tab-overview" class="tab-content space-y-6">
+                <div>
+                    <div class="inline-flex items-center space-x-2 bg-pharmacy-100 text-pharmacy-800 text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <span>California Technician Training Program</span>
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Day 8: Comprehensive Pharmaceutical Compounding</h1>
+                    <p class="mt-2 text-slate-600 text-sm leading-relaxed">
+                        Welcome to Day 8 of the California Pharmacy Technician Training Program. Pharmaceutical compounding is both a science and an art. It represents the professional preparation, mixing, assembling, packaging, and labeling of customized medications when commercially manufactured drug products do not meet a specific patient's needs.
+                    </p>
+                </div>
+
+                <!-- Detailed Syllabus Breakdown -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-pharmacy-600"></i>
+                        <span>2-Hour Curriculum Time Allocation & Modular Objectives</span>
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-pharmacy-700">Module 1 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">USP Regulatory Framework</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">In-depth breakdown of USP Chapters &lt;795&gt;, &lt;797&gt;, and &lt;800&gt;, California Board of Pharmacy regulations, and quality assurance principles.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-pharmacy-700">Module 2 (25 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Equipment & Techniques</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Torsion balances, sensitivity requirements, volumetric measurement, mortars & pestles, trituration, levigation, and geometric dilution.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-pharmacy-700">Module 3 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Garbing & Cleanroom Prep</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">ISO cleanroom classifications, ante-room vs buffer room pressure differentials, 30-second aseptic hand hygiene, and strict garbing order.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-pharmacy-700">Module 4 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Aseptic Hood Operations & BUDs</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Laminar airflow workbench principles, First Air physics, 6-inch rule, cleaning protocols, and USP non-sterile/sterile Beyond-Use Date matrices.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-pharmacy-700">Module 5 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Compounding Math Lab</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Alligation alternate calculations, percent concentration conversions ($%w/v, %v/v, %w/w$), MWQ, and displacement volume problem solving.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-pharmacy-700">Module 6 (15 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Assessment & Case Studies</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">10-question evaluation check, real-world compounding scenarios, and certificate issuance logic upon scoring &ge; 80%.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Objectives -->
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Core Learning Competencies</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="flex items-start space-x-3 p-3 bg-emerald-50/60 border border-emerald-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Regulatory Mastery:</strong> Articulate the legal boundaries, safety requirements, and operational differences between non-sterile (USP &lt;795&gt;), sterile (USP &lt;797&gt;), and hazardous (USP &lt;800&gt;) compounding.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-emerald-50/60 border border-emerald-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Equipment & Technique Precision:</strong> Select proper mortars, pestles, spatulas, and volumetric devices based on material compatibility and perform flawless geometric dilution.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-emerald-50/60 border border-emerald-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Cleanroom Excellence:</strong> Execute dirty-to-clean garbing sequences without cross-contamination, maintaining ISO Class 5 air quality and proper pressure differentials.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-emerald-50/60 border border-emerald-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Mathematical Accuracy:</strong> Calculate exact active ingredient quantities, alligation ratios, dilution concentrations, and Beyond-Use Dates (BUDs) without clinical error.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end">
+                    <button onclick="switchTab('mod1')" class="bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition">
+                        <span>Begin Module 1: USP Regulations</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 1 -->
+            <div id="tab-mod1" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-pharmacy-600 uppercase tracking-wider">Module 1 of 6 • Estimated Reading Time: 20 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-book-open mr-1"></i> Legislative & Regulatory Framework</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">USP Standards (&lt;795&gt;, &lt;797&gt;, &lt;800&gt;) & California Regulations</h2>
+                </div>
+
+                <!-- Deep-Dive Text Content -->
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        In pharmaceutical practice, **compounding** is legally distinguished from manufacturing. While manufacturing involves the large-scale production of drug products regulated directly by the FDA under Current Good Manufacturing Practices (cGMP), compounding is a patient-specific healthcare service regulated primarily by state boards of pharmacy (such as the **California State Board of Pharmacy**) alongside federal oversight under Section 503A of the Federal Food, Drug, and Cosmetic Act.
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">1.1 The United States Pharmacopeia (USP) Standards</h3>
+                    <p>
+                        The United States Pharmacopeia is an independent, non-profit organization that establishes legally enforceable standards for medication identity, strength, quality, and purity. Chapters numbered below <strong>&lt;1000&gt;</strong> are strictly enforceable by law and regulatory inspectors.
+                    </p>
+
+                    <!-- USP Chapters Detailed Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-4">
+                        <!-- USP 795 -->
+                        <div class="bg-blue-50/80 border border-blue-200 rounded-xl p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="bg-blue-600 text-white font-mono text-xs font-bold px-2.5 py-1 rounded-md">USP &lt;795&gt;</span>
+                                <i class="fa-solid fa-mortar-pestle text-blue-500 text-lg"></i>
+                            </div>
+                            <h4 class="font-bold text-blue-900 text-xs">Non-Sterile Compounding</h4>
+                            <p class="text-[11px] text-slate-600">
+                                Applies to non-sterile formulations including oral liquids, ointments, creams, suppositories, capsules, and troches. Defines three complexity levels:
+                            </p>
+                            <ul class="text-[10px] text-slate-700 list-disc list-inside space-y-1 font-medium">
+                                <li><strong>Simple:</strong> Following USP monograph or official recipe (e.g., Captopril oral solution).</li>
+                                <li><strong>Moderate:</strong> Requires special calculations or unit mixing (e.g., Morphine suppository).</li>
+                                <li><strong>Complex:</strong> Requires complex processes or modified-release (e.g., Extended-release transdermal gel).</li>
+                            </ul>
+                        </div>
+
+                        <!-- USP 797 -->
+                        <div class="bg-teal-50/80 border border-teal-200 rounded-xl p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="bg-teal-600 text-white font-mono text-xs font-bold px-2.5 py-1 rounded-md">USP &lt;797&gt;</span>
+                                <i class="fa-solid fa-syringe text-teal-500 text-lg"></i>
+                            </div>
+                            <h4 class="font-bold text-teal-900 text-xs">Sterile Compounding</h4>
+                            <p class="text-[11px] text-slate-600">
+                                Governs preparations delivered into the bloodstream, eyes, or spinal fluid (IV bags, TPNs, eye drops, epidurals).
+                            </p>
+                            <ul class="text-[10px] text-slate-700 list-disc list-inside space-y-1 font-medium">
+                                <li><strong>Category 1 CSPs:</strong> Prepared in a Segregated Compounding Area (SCA) with shorter BUDs.</li>
+                                <li><strong>Category 2 CSPs:</strong> Prepared in an ISO Class 7 cleanroom suite with longer BUDs.</li>
+                                <li><strong>Category 3 CSPs:</strong> High-risk preparations requiring additional stability, sterility, and pyrogen testing.</li>
+                            </ul>
+                        </div>
+
+                        <!-- USP 800 -->
+                        <div class="bg-amber-50/80 border border-amber-200 rounded-xl p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="bg-amber-600 text-white font-mono text-xs font-bold px-2.5 py-1 rounded-md">USP &lt;800&gt;</span>
+                                <i class="fa-solid fa-biohazard text-amber-500 text-lg"></i>
+                            </div>
+                            <h4 class="font-bold text-amber-900 text-xs">Hazardous Drug Handling</h4>
+                            <p class="text-[11px] text-slate-600">
+                                Protects personnel, patients, and the environment when receiving, storing, compounding, and administering Hazardous Drugs (HDs).
+                            </p>
+                            <ul class="text-[10px] text-slate-700 list-disc list-inside space-y-1 font-medium">
+                                <li><strong>NIOSH List:</strong> Group 1 (Antineoplastics), Group 2 (Non-antineoplastics), Group 3 (Reproductive toxins).</li>
+                                <li><strong>Negative Pressure:</strong> C-PEC hoods kept in negative-pressure room (-0.01 to -0.03 inches w.g.).</li>
+                                <li><strong>CSTDs:</strong> Closed-system drug transfer devices mandatory for administration.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">1.2 Quality Assurance, Documentation & Master Formulation Records</h3>
+                    <p>
+                        Every compounded medication must be traceable, reproducible, and verifiable. In California, every compounding pharmacy must maintain two critical documents for every batch:
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs my-2">
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="font-bold text-slate-800 flex items-center"><i class="fa-solid fa-file-signature text-pharmacy-600 mr-2"></i> Master Formulation Record (The Recipe)</div>
+                            <p class="text-slate-600 text-[11px] mt-1">The official, static document containing step-by-step instructions, ingredients, exact quantities, equipment needed, storage conditions, container types, and Beyond-Use Date rationale.</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="font-bold text-slate-800 flex items-center"><i class="fa-solid fa-clipboard-list text-pharmacy-600 mr-2"></i> Compounding Record (The Log)</div>
+                            <p class="text-slate-600 text-[11px] mt-1">The dynamic, batch-specific log recording actual manufacturer lot numbers, expiration dates, measured weights, technician signature, pharmacist review, and actual yield.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Activity: Extended USP Matcher -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold text-slate-800 flex items-center space-x-2 uppercase tracking-wider">
+                            <i class="fa-solid fa-gamepad text-pharmacy-600"></i>
+                            <span>Interactive Practice: Assign the Correct Regulatory Chapter</span>
+                        </h3>
+                        <span class="text-[11px] text-slate-500">6 Scenarios</span>
+                    </div>
+                    <p class="text-xs text-slate-600">Click the correct USP badge for each scenario below:</p>
+
+                    <div id="uspQuizContainer" class="space-y-3 text-xs">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('overview')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Back to Overview</span>
+                    </button>
+                    <button onclick="completeModule(1); switchTab('mod2')" class="bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Module 2</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 2 -->
+            <div id="tab-mod2" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-pharmacy-600 uppercase tracking-wider">Module 2 of 6 • Estimated Reading Time: 25 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-flask mr-1"></i> Laboratory Equipment & Compounding Techniques</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Equipment Mechanics, Dosage Forms & Core Techniques</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        Precision in pharmaceutical compounding relies heavily on understanding the mechanical limitations of equipment, chemical compatibility of materials, and proper physical manipulation techniques.
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">2.1 Measurement Balances & Minimum Weighable Quantity (MWQ)</h3>
+                    <p>
+                        Compounding pharmacies utilize two primary types of balances:
+                    </p>
+                    <ul class="list-disc list-inside space-y-1 pl-2">
+                        <li><strong>Class III (Class A) Torsion Balance:</strong> Uses a mechanical beam and internal spring. Has a <em>Sensitivity Requirement (SR)</em> of $6\,\text{mg}$. This means adding $6\,\text{mg}$ causes the indicator pointer to shift by 1 index division.</li>
+                        <li><strong>Electronic Digital Analytical Balance:</strong> Uses electromagnetic force restoration. Highly accurate up to $0.1\,\text{mg}$ or $1\,\text{mg}$.</li>
+                    </ul>
+
+                    <!-- MWQ Formula Highlight Box -->
+                    <div class="p-4 bg-slate-900 text-slate-100 rounded-xl space-y-2 font-mono text-xs shadow-md">
+                        <div class="text-pharmacy-400 font-bold uppercase tracking-wider text-[11px]">Minimum Weighable Quantity (MWQ) Standard Formula</div>
+                        <p class="text-slate-300 font-sans text-[11px]">
+                            To ensure that measurement error never exceeds the USP standard maximum allowable error of $5\%$ ($0.05$), the Minimum Weighable Quantity ($MWQ$) on a mechanical Class III balance is calculated as:
+                        </p>
+                        <div class="text-emerald-400 font-bold text-sm text-center py-2 bg-slate-800 rounded border border-slate-700">
+                            $$MWQ = \frac{\text{Sensitivity Requirement (SR)}}{\text{Maximum Allowable Error \%}} = \frac{6\,\text{mg}}{0.05} = 120\,\text{mg}$$
+                        </div>
+                        <p class="text-slate-400 text-[10px] font-sans">
+                            <em>Key Clinical Takeaway:</em> Never weigh an amount smaller than $120\,\text{mg}$ directly on a Class III torsion balance with $SR = 6\,\text{mg}$ unless using an aliquot method.
+                        </p>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">2.2 Mortars, Pestles & Volumetric Glassware Selection</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1">
+                            <div class="font-bold text-slate-800 text-xs flex items-center">
+                                <i class="fa-solid fa-mortar-pestle text-pharmacy-600 mr-2"></i> Glass Mortar & Pestle
+                            </div>
+                            <p class="text-[11px] text-slate-600">
+                                Smooth, non-porous glass surface. Ideal for preparing liquids, suspensions, oily compounds, and materials that stain easily (e.g., Iodine, Methylene Blue). Does not triturate powders effectively because it lacks surface friction.
+                            </p>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1">
+                            <div class="font-bold text-slate-800 text-xs flex items-center">
+                                <i class="fa-solid fa-bowl-rice text-pharmacy-600 mr-2"></i> Wedgewood & Porcelain Mortar
+                            </div>
+                            <p class="text-[11px] text-slate-600">
+                                Unglazed or rough ceramic interior. Provides high surface friction necessary for <strong>trituration</strong> (grinding coarse powders into fine particles). Porcelain is slightly smoother than Wedgewood and easier to sanitize.
+                            </p>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1">
+                            <div class="font-bold text-slate-800 text-xs flex items-center">
+                                <i class="fa-solid fa-vial text-pharmacy-600 mr-2"></i> Graduated Cylinders
+                            </div>
+                            <p class="text-[11px] text-slate-600">
+                                Tall, uniform cylindrical shape providing high volumetric precision. Always read liquid volume at eye level at the <strong>bottom of the meniscus</strong>. Choose a cylinder where liquid volume fills more than $20\%$ of total capacity.
+                            </p>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1">
+                            <div class="font-bold text-slate-800 text-xs flex items-center">
+                                <i class="fa-solid fa-wine-glass text-pharmacy-600 mr-2"></i> Conical Graduates
+                            </div>
+                            <p class="text-[11px] text-slate-600">
+                                Wide mouth and tapering sides. Less precise than cylindrical graduates, but allows easy insertion of stirring rods for dissolving viscous liquids or thick suspensions.
+                            </p>
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">2.3 Five Fundamental Non-Sterile Compounding Techniques</h3>
+                    <div class="space-y-2 text-xs">
+                        <div class="p-3 bg-slate-50 border-l-4 border-pharmacy-500 rounded-r-lg">
+                            <strong class="text-slate-800">1. Geometric Dilution:</strong> A critical technique used when blending a small amount of potent active ingredient with a large amount of inactive diluent powder. Equal parts of diluent are added incrementally to the active powder and mixed thoroughly at each step to ensure uniform drug distribution throughout the mixture.
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-pharmacy-500 rounded-r-lg">
+                            <strong class="text-slate-800">2. Trituration:</strong> The continuous rubbing or grinding of a solid substance in a mortar with a pestle to reduce particle size to a fine powder without chemical change.
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-pharmacy-500 rounded-r-lg">
+                            <strong class="text-slate-800">3. Levigation:</strong> The process of reducing particle size of a solid powder by triturating it with a small amount of insoluble liquid vehicle (a <em>levigating agent</em> such as mineral oil for hydrophobic bases or glycerin for hydrophilic bases) to form a smooth paste before incorporation into an ointment base.
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-pharmacy-500 rounded-r-lg">
+                            <strong class="text-slate-800">4. Spatulation:</strong> Blending powders or creams together on an ointment slab using a flexible spatula. No particle size reduction occurs during spatulation.
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-pharmacy-500 rounded-r-lg">
+                            <strong class="text-slate-800">5. Pulverization by Intervention:</strong> Dissolving a gummy or hard crystalline solid (e.g., Camphor, Menthol) in a volatile solvent (such as Alcohol or Ether) and triturating until the solvent evaporates, leaving behind finely pulverized particles.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Activity: Dosage Forms & Technique Sorter -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-2">
+                        <i class="fa-solid fa-list-check text-pharmacy-600"></i>
+                        <span>Interactive Exercise: Technique & Dosage Form Classification</span>
+                    </h3>
+                    <p class="text-xs text-slate-600">Click each item below to verify its primary compounding category:</p>
+
+                    <div id="dosageSorterContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- JS Generated -->
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod1')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Previous Module</span>
+                    </button>
+                    <button onclick="completeModule(2); switchTab('mod3')" class="bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Module 3</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 3 -->
+            <div id="tab-mod3" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-pharmacy-600 uppercase tracking-wider">Module 3 of 6 • Estimated Reading Time: 20 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-user-shield mr-1"></i> Cleanroom Architecture & Garbing</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Cleanroom Protocols, Air Quality & Garbing Sequence</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        Human operators are the primary source of particle shedding and microbial contamination in cleanroom environments. USP &lt;797&gt; establishes strict engineering controls and personal protective equipment (PPE) guidelines to prevent contamination during sterile compounding.
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">3.1 Cleanroom Architecture & ISO Air Classifications</h3>
+                    <p>
+                        Cleanroom environments are categorized by international standard ISO 14644-1 based on maximum allowable particulate concentration per cubic meter of air:
+                    </p>
+
+                    <div class="overflow-x-auto my-3">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-800 text-white font-semibold">
+                                    <th class="p-2 border border-slate-700">ISO Class</th>
+                                    <th class="p-2 border border-slate-700">Cleanroom Area Type</th>
+                                    <th class="p-2 border border-slate-700">Max Particles ($\ge 0.5\,\mu\text{m} / \text{m}^3$)</th>
+                                    <th class="p-2 border border-slate-700">Air Changes Per Hour (ACPH)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 bg-slate-50 text-[11px]">
+                                <tr>
+                                    <td class="p-2 border font-bold text-pharmacy-700">ISO Class 5</td>
+                                    <td class="p-2 border">Primary Engineering Control (PEC Hood)</td>
+                                    <td class="p-2 border font-mono">3,520</td>
+                                    <td class="p-2 border font-mono">Continuous HEPA flow</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 border font-bold text-slate-800">ISO Class 7</td>
+                                    <td class="p-2 border">Buffer Area (Cleanroom Suite)</td>
+                                    <td class="p-2 border font-mono">352,000</td>
+                                    <td class="p-2 border font-mono">&ge; 30 ACPH</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 border font-bold text-slate-800">ISO Class 8</td>
+                                    <td class="p-2 border">Ante-Room (Gowning & Washing Area)</td>
+                                    <td class="p-2 border font-mono">3,520,000</td>
+                                    <td class="p-2 border font-mono">&ge; 20 ACPH</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs my-2">
+                        <div class="p-3 bg-teal-50 border border-teal-200 rounded-lg">
+                            <strong class="text-teal-900 font-bold block mb-1">Positive Pressure Differential (Non-Hazardous):</strong>
+                            Air flows outward from the buffer area (ISO 7) into the ante-room (ISO 8) to prevent dirty room air from entering the sterile compounding space (&ge; +0.02 inches water gauge).
+                        </div>
+                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                            <strong class="text-amber-900 font-bold block mb-1">Negative Pressure Differential (Hazardous USP &lt;800&gt;):</strong>
+                            Air flows inward into the hazardous compounding buffer room to contain hazardous vapors and powders (-0.01 to -0.03 inches water gauge).
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">3.2 Hand Hygiene & Aseptic Scrub Standard Operating Procedure</h3>
+                    <ol class="list-decimal list-inside space-y-1.5 pl-2 text-[11px]">
+                        <li>Remove all outer garments, cosmetics, jewelry, rings, watches, and ear piercings.</li>
+                        <li>Nails must be short and clean; artificial nails or polish are strictly prohibited.</li>
+                        <li>Wet hands and forearms up to the elbows under warm water.</li>
+                        <li>Clean fingernails under running water using a disposable nail cleaner pick.</li>
+                        <li>Apply antiseptic soap (e.g., Chlorhexidine or Povidone-Iodine) and scrub hands and forearms vigorously for <strong>at least 30 seconds</strong>.</li>
+                        <li>Rinse thoroughly under running warm water from fingertips towards elbows.</li>
+                        <li>Dry hands completely using lint-free disposable towels or warm air dryer.</li>
+                    </ol>
+                </div>
+
+                <!-- Interactive Garbing Order Simulator -->
+                <div class="bg-slate-900 text-white rounded-xl p-5 space-y-4 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold text-pharmacy-300 uppercase tracking-wider flex items-center space-x-2">
+                            <i class="fa-solid fa-list-ol"></i>
+                            <span>USP &lt;797&gt; Garbing Sequence Rationale Simulator</span>
+                        </h3>
+                        <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">Dirty-to-Clean Progression</span>
+                    </div>
+
+                    <div id="garbingGameArea" class="space-y-2">
+                        <!-- JS Interactive Garbing Steps -->
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod2')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Previous Module</span>
+                    </button>
+                    <button onclick="completeModule(3); switchTab('mod4')" class="bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Module 4</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 4 -->
+            <div id="tab-mod4" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-pharmacy-600 uppercase tracking-wider">Module 4 of 6 • Estimated Reading Time: 20 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-wind mr-1"></i> Aseptic Operations & Stability</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Aseptic Techniques, Laminar Airflow & BUD Matrix</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        A **Primary Engineering Control (PEC)** is a device or room that provides an ISO Class 5 environment for compounding. These include Laminar Airflow Workbenches (LAFW), Class II Biological Safety Cabinets (BSC), and Compounding Aseptic Isolators (CAI).
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">4.1 Laminar Airflow Mechanics & First Air Principles</h3>
+                    <p>
+                        Air in a laminar flow workbench passes through a pre-filter to remove large dust particles, then is forced through a **HEPA (High-Efficiency Particulate Air) Filter** at a constant velocity of $90\,\text{feet per minute} \pm 20\%$. HEPA filters remove $99.97\%$ of airborne particles $0.3\,\mu\text{m}$ or larger.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-3">
+                        <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg space-y-1">
+                            <strong class="text-blue-900 font-bold text-xs block"><i class="fa-solid fa-arrow-right mr-1"></i> Horizontal Laminar Flow Workbench (LAFW):</strong>
+                            <p class="text-[11px] text-slate-600">Air flows from the back filter horizontally forward towards the operator. Used <em>only</em> for non-hazardous sterile preparations. Never place hands between the HEPA filter (back) and the critical site.</p>
+                        </div>
+                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg space-y-1">
+                            <strong class="text-amber-900 font-bold text-xs block"><i class="fa-solid fa-arrow-down mr-1"></i> Vertical Biological Safety Cabinet (BSC):</strong>
+                            <p class="text-[11px] text-slate-600">Air flows from the top HEPA filter downward toward the work surface and is pulled into front air grilles. Mandatory for hazardous drugs (USP &lt;800&gt;) to protect the operator.</p>
+                        </div>
+                    </div>
+
+                    <!-- Critical Rules List -->
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                        <div class="font-bold text-slate-800 text-xs uppercase tracking-wider">Crucial Hood Manipulation Operating Rules</div>
+                        <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-700">
+                            <li><strong>The 6-Inch Rule:</strong> All compounding manipulations must take place at least <strong>6 inches inside</strong> the outer front edge of the hood.</li>
+                            <li><strong>First Air Integrity:</strong> Never block the uninterrupted HEPA-filtered air stream ("First Air") reaching critical sites (needle hubs, ampule necks, vial stoppers).</li>
+                            <li><strong>Sanitization Protocol:</strong> Disinfect the hood surface with <strong>70% Sterile Isopropyl Alcohol (IPA)</strong> top-to-bottom, back-to-front in overlapping parallel strokes. Allow alcohol to air dry completely.</li>
+                            <li><strong>Blower Startup:</strong> If turned off, the hood must operate continuously for <strong>at least 30 minutes</strong> before compounding begins.</li>
+                        </ul>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">4.2 Beyond-Use Date (BUD) Determination Standards</h3>
+                    <p>
+                        A Beyond-Use Date (BUD) is the date or time after which a compounded preparation cannot be used, administered, or stored. It is calculated from the date/time of compounding.
+                    </p>
+
+                    <!-- BUD Tables -->
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-slate-800 text-xs">USP &lt;795&gt; Non-Sterile BUD Guidelines (Absence of Specific Stability Data)</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-pharmacy-800 text-white font-semibold text-[11px]">
+                                        <th class="p-2 border">Formulation Type</th>
+                                        <th class="p-2 border">Maximum Beyond-Use Date (BUD)</th>
+                                        <th class="p-2 border">Storage Condition Requirements</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200 bg-white text-[11px]">
+                                    <tr>
+                                        <td class="p-2 border font-bold text-slate-800">Nonaqueous Formulations</td>
+                                        <td class="p-2 border font-mono text-pharmacy-700 font-bold">6 Months (180 Days)</td>
+                                        <td class="p-2 border">Controlled Room Temperature or as stated in API expiration.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 border font-bold text-slate-800">Water-Containing Oral Liquids</td>
+                                        <td class="p-2 border font-mono text-pharmacy-700 font-bold">14 Days</td>
+                                        <td class="p-2 border">Must be stored under refrigeration ($2^\circ\text{C}$ to $8^\circ\text{C}$).</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 border font-bold text-slate-800">Water-Containing Topical Formulations</td>
+                                        <td class="p-2 border font-mono text-pharmacy-700 font-bold">30 Days</td>
+                                        <td class="p-2 border">Controlled Room Temperature ($20^\circ\text{C}$ to $25^\circ\text{C}$).</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod3')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Previous Module</span>
+                    </button>
+                    <button onclick="completeModule(4); switchTab('mod5')" class="bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Module 5</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 5 -->
+            <div id="tab-mod5" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-pharmacy-600 uppercase tracking-wider">Module 5 of 6 • Estimated Reading Time: 20 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-calculator mr-1"></i> Interactive Calculations Laboratory</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Compounding Mathematics & Formula Calculations</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        Calculation errors in pharmacy compounding can lead to severe adverse drug events. Technicians must master concentration conversions, dilution principles ($C_1 V_1 = C_2 V_2$), and the Alligation Alternate method.
+                    </p>
+
+                    <!-- Alligation Detailed Explanation -->
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                        <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center">
+                            <i class="fa-solid fa-border-all text-pharmacy-600 mr-2"></i> The Alligation Alternate Method Step-by-Step
+                        </h3>
+                        <p class="text-[11px] text-slate-600">
+                            The Alligation Alternate method is used when mixing two different strengths of stock solutions or ointments (a Higher % and a Lower %) to achieve a desired intermediate concentration (% Target).
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center bg-white p-3 rounded-lg border border-slate-200">
+                            <div class="font-mono text-[11px] space-y-1 text-slate-800">
+                                <div>[Higher %] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [Target % - Lower %] = Parts Higher</div>
+                                <div class="text-pharmacy-600 font-bold">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [Target %]</div>
+                                <div>[Lower %] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [Higher % - Target %] = Parts Lower</div>
+                                <div class="border-t border-slate-300 pt-1 text-emerald-700 font-bold">Sum of Parts = Total Parts</div>
+                            </div>
+                            <div class="text-[11px] text-slate-600 space-y-1">
+                                <div>$$\text{Volume of Stock needed} = \left(\frac{\text{Parts of Stock}}{\text{Total Parts}}\right) \times \text{Total Target Volume}$$</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Math Practice Problems -->
+                <div class="space-y-4 pt-2">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Practical Problem Solving Lab</h3>
+
+                    <!-- Math Problem 1 -->
+                    <div class="border border-slate-200 rounded-xl p-4 space-y-3 bg-white shadow-2xs">
+                        <div class="flex justify-between items-start">
+                            <span class="font-bold text-slate-800 text-xs">Problem 1: Alligation Method Calculation</span>
+                            <span class="text-[10px] bg-pharmacy-100 text-pharmacy-800 px-2 py-0.5 rounded font-semibold">Alligation Practice</span>
+                        </div>
+                        <p class="text-xs text-slate-600">
+                            A prescription calls for <strong>200 mL of 20% Hydrocortisone solution</strong>. You have stock supplies of <strong>50% Hydrocortisone solution</strong> and <strong>10% Hydrocortisone solution</strong>. How many mL of the <strong>50% solution</strong> are required?
+                        </p>
+
+                        <div class="flex items-center space-x-3 text-xs">
+                            <input type="number" id="mathInput1" placeholder="Enter mL of 50%" class="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-pharmacy-500 w-48 font-mono">
+                            <button onclick="checkMathProblem1()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2 rounded-lg transition text-xs">Check Answer</button>
+                        </div>
+                        <div id="mathFeedback1" class="text-xs hidden"></div>
+                    </div>
+
+                    <!-- Math Problem 2 -->
+                    <div class="border border-slate-200 rounded-xl p-4 space-y-3 bg-white shadow-2xs">
+                        <div class="flex justify-between items-start">
+                            <span class="font-bold text-slate-800 text-xs">Problem 2: Percent Weight-in-Volume (% w/v)</span>
+                            <span class="text-[10px] bg-pharmacy-100 text-pharmacy-800 px-2 py-0.5 rounded font-semibold">Concentration Practice</span>
+                        </div>
+                        <p class="text-xs text-slate-600">
+                            How many grams of active Sodium Chloride powder are required to prepare <strong>500 mL of a 0.9% (w/v) Normal Saline solution</strong>?
+                        </p>
+
+                        <div class="flex items-center space-x-3 text-xs">
+                            <input type="number" step="0.1" id="mathInput2" placeholder="Enter grams of NaCl" class="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-pharmacy-500 w-48 font-mono">
+                            <button onclick="checkMathProblem2()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2 rounded-lg transition text-xs">Check Answer</button>
+                        </div>
+                        <div id="mathFeedback2" class="text-xs hidden"></div>
+                    </div>
+
+                    <!-- Math Problem 3 -->
+                    <div class="border border-slate-200 rounded-xl p-4 space-y-3 bg-white shadow-2xs">
+                        <div class="flex justify-between items-start">
+                            <span class="font-bold text-slate-800 text-xs">Problem 3: Dilution Formula ($C_1 V_1 = C_2 V_2$)</span>
+                            <span class="text-[10px] bg-pharmacy-100 text-pharmacy-800 px-2 py-0.5 rounded font-semibold">Dilution Practice</span>
+                        </div>
+                        <p class="text-xs text-slate-600">
+                            You have <strong>250 mL of a 70% Isopropyl Alcohol solution</strong>. How many mL of purified water must be added to dilute this solution to a <strong>50% concentration</strong>?
+                        </p>
+
+                        <div class="flex items-center space-x-3 text-xs">
+                            <input type="number" id="mathInput3" placeholder="Enter mL of water to add" class="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-pharmacy-500 w-48 font-mono">
+                            <button onclick="checkMathProblem3()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2 rounded-lg transition text-xs">Check Answer</button>
+                        </div>
+                        <div id="mathFeedback3" class="text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod4')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Previous Module</span>
+                    </button>
+                    <button onclick="completeModule(5); switchTab('mod6')" class="bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Final Examination</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 6 -->
+            <div id="tab-mod6" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-pharmacy-600 uppercase tracking-wider">Module 6 of 6 • Final Evaluation</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-clipboard-check mr-1"></i> Comprehensive Knowledge Check</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Day 8 Comprehensive Evaluation & Case Studies</h2>
+                </div>
+
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Answer the 10 examination questions below. You must achieve a passing score of at least **80% (8/10)** to earn your South Coast Mission Pharmacy Day 8 Completion Certificate.
+                </p>
+
+                <div id="examContainer" class="space-y-4">
+                    <!-- 10 Questions Rendered dynamically via JS -->
+                </div>
+
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between shadow-2xs">
+                    <div>
+                        <div class="text-xs font-semibold text-slate-500">Your Calculated Score:</div>
+                        <div id="examScoreText" class="text-2xl font-extrabold text-slate-800">Not Completed</div>
+                    </div>
+                    <button onclick="gradeExam()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-md transition flex items-center space-x-2 text-xs">
+                        <i class="fa-solid fa-check-double"></i>
+                        <span>Submit Exam Answers</span>
+                    </button>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod5')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Previous Module</span>
+                    </button>
+                    <button id="goToCertBtn" onclick="switchTab('certificate')" disabled class="opacity-50 cursor-not-allowed bg-slate-400 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>View Certificate</span>
+                        <i class="fa-solid fa-award"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: CERTIFICATE -->
+            <div id="tab-certificate" class="tab-content hidden space-y-6">
+                <div class="no-print">
+                    <h2 class="text-2xl font-bold text-slate-900">Day 8 Completion Certificate</h2>
+                    <p class="text-xs text-slate-600">Congratulations on completing the 2-Hour Drug Compounding Curriculum!</p>
+                </div>
+
+                <!-- Printable Certificate Container -->
+                <div class="bg-amber-50/40 border-8 border-double border-amber-800/40 p-8 rounded-xl text-center space-y-6 shadow-xl relative my-4">
+                    <div class="flex justify-between items-center border-b border-amber-800/20 pb-4">
+                        <div class="text-left">
+                            <div class="font-extrabold text-lg text-slate-900 tracking-wider">SOUTH COAST MISSION PHARMACY</div>
+                            <div class="text-xs text-slate-600">California Pharmacy Technician Program</div>
+                        </div>
+                        <i class="fa-solid fa-award text-amber-600 text-4xl"></i>
+                    </div>
+
+                    <div class="space-y-2 py-4">
+                        <p class="text-xs uppercase tracking-widest text-slate-500 font-semibold">Official Certificate of Accomplishment</p>
+                        <h1 class="text-3xl font-serif font-bold text-slate-900 italic" id="certStudentName">Pharmacy Student</h1>
+                        <p class="text-xs text-slate-600 max-w-lg mx-auto leading-relaxed">
+                            has successfully satisfied all requirements, interactive simulations, math laboratories, and safety protocols for:
+                        </p>
+                        <div class="text-xl font-bold text-pharmacy-800 py-2">DAY 8: INTRODUCTION TO PHARMACEUTICAL COMPOUNDING</div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 pt-6 border-t border-amber-800/20 text-xs text-slate-600">
+                        <div>
+                            <div class="font-bold text-slate-800" id="certDate">August 12, 2026</div>
+                            <div class="text-[10px] text-slate-400">Date Issued</div>
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-800 font-mono" id="certTimeSpent">02:00:00</div>
+                            <div class="text-[10px] text-slate-400">Instruction Time</div>
+                        </div>
+                        <div>
+                            <div class="font-bold text-emerald-700 font-mono" id="certScore">100%</div>
+                            <div class="text-[10px] text-slate-400">Final Assessment Score</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 no-print">
+                    <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-6 py-2.5 rounded-lg transition flex items-center space-x-2 text-xs">
+                        <i class="fa-solid fa-print"></i>
+                        <span>Print Official Certificate</span>
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Notes Modal -->
+    <div id="notesModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 hidden no-print">
+        <div class="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-md p-5 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-800 flex items-center text-sm">
+                    <i class="fa-solid fa-pen-to-square text-pharmacy-600 mr-2"></i> Trainee Notes Notepad
+                </h3>
+                <button onclick="toggleNotesModal()" class="text-slate-400 hover:text-slate-600 text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <textarea id="studentNotesText" rows="8" placeholder="Type key takeaways, math formulas, or questions for your instructor..." class="w-full text-xs p-3 border border-slate-200 rounded-lg focus:outline-none focus:border-pharmacy-500 font-mono custom-scrollbar"></textarea>
+            <div class="flex justify-end space-x-2">
+                <button onclick="saveNotes()" class="bg-pharmacy-600 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-pharmacy-700 transition">Save Notes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application State Management
+        let state = {
+            studentName: "Pharmacy Student",
+            startTime: Date.now(),
+            secondsElapsed: 0,
+            completedModules: new Set(),
+            examPassed: false,
+            examScore: 0
+        };
+
+        // Live Timer
+        setInterval(() => {
+            state.secondsElapsed++;
+            const hours = String(Math.floor(state.secondsElapsed / 3600)).padStart(2, '0');
+            const minutes = String(Math.floor((state.secondsElapsed % 3600) / 60)).padStart(2, '0');
+            const seconds = String(state.secondsElapsed % 60).padStart(2, '0');
+            const formatted = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('sessionTimer').innerText = formatted;
+            document.getElementById('certTimeSpent').innerText = formatted;
+        }, 1000);
+
+        function updateStudentName() {
+            const val = document.getElementById('studentNameInput').value.trim();
+            if (val) {
+                state.studentName = val;
+                document.getElementById('certStudentName').innerText = val;
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            
+            const target = document.getElementById(`tab-${tabId}`);
+            if (target) target.classList.remove('hidden');
+
+            const navButtons = document.querySelectorAll('nav button');
+            navButtons.forEach(btn => {
+                btn.classList.remove('bg-pharmacy-50', 'text-pharmacy-800');
+                btn.classList.add('text-slate-600');
+            });
+
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.add('bg-pharmacy-50', 'text-pharmacy-800');
+                activeNav.classList.remove('text-slate-600');
+            }
+        }
+
+        function completeModule(modNum) {
+            state.completedModules.add(modNum);
+            document.getElementById(`modulesCompletedCount`).innerText = `${state.completedModules.size} / 6 Modules`;
+            
+            const badge = document.getElementById(`status-mod${modNum}`);
+            if (badge) {
+                badge.className = "text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold flex items-center";
+                badge.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Done';
+            }
+
+            const pct = Math.round((state.completedModules.size / 6) * 100);
+            document.getElementById('overallProgressBar').style.width = `${pct}%`;
+        }
+
+        // USP Interactive Quiz Data
+        const uspQuizData = [
+            { id: 1, text: "Preparing a Pediatric Hydrocortisone Oral Liquid Suspension using Ora-Sweet", correct: "795" },
+            { id: 2, text: "Aseptic compounding of an Intravenous Vancomycin Infusion Bag in an ISO 5 Hood", correct: "797" },
+            { id: 3, text: "Compounding Cisplatin Chemotherapy Infusion in a Biological Safety Cabinet (BSC)", correct: "800" },
+            { id: 4, text: "Formulating a topical Progesterone 10% Liposomal Cream on an ointment slab", correct: "795" },
+            { id: 5, text: "Compounding Sterile Ophthalmic (Eye) Drops in a cleanroom buffer area", correct: "797" },
+            { id: 6, text: "Receiving and unpacking a shipment of Oral Methotrexate antineoplastic tablets", correct: "800" }
+        ];
+
+        function renderUspQuiz() {
+            const container = document.getElementById('uspQuizContainer');
+            container.innerHTML = uspQuizData.map(item => `
+                <div class="p-3 bg-white border border-slate-200 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 shadow-2xs">
+                    <span class="text-slate-700 font-medium text-xs">${item.id}. ${item.text}</span>
+                    <div class="flex space-x-1 shrink-0">
+                        <button onclick="answerUspQuiz(${item.id}, '795')" id="usp-${item.id}-795" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded font-mono font-semibold text-slate-700 transition text-[11px]">&lt;795&gt;</button>
+                        <button onclick="answerUspQuiz(${item.id}, '797')" id="usp-${item.id}-797" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded font-mono font-semibold text-slate-700 transition text-[11px]">&lt;797&gt;</button>
+                        <button onclick="answerUspQuiz(${item.id}, '800')" id="usp-${item.id}-800" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded font-mono font-semibold text-slate-700 transition text-[11px]">&lt;800&gt;</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function answerUspQuiz(itemId, selected) {
+            const item = uspQuizData.find(x => x.id === itemId);
+            ['795', '797', '800'].forEach(code => {
+                const btn = document.getElementById(`usp-${itemId}-${code}`);
+                btn.className = "px-2.5 py-1 bg-slate-100 text-slate-400 rounded font-mono text-[11px]";
+            });
+
+            const activeBtn = document.getElementById(`usp-${itemId}-${selected}`);
+            if (selected === item.correct) {
+                activeBtn.className = "px-2.5 py-1 bg-emerald-600 text-white font-bold rounded font-mono text-[11px]";
+            } else {
+                activeBtn.className = "px-2.5 py-1 bg-rose-600 text-white font-bold rounded font-mono text-[11px]";
+            }
+        }
+
+        // Module 2 Dosage Sorter
+        const dosageItems = [
+            { name: "Ointments & Creams", type: "Non-Sterile (USP <795>)" },
+            { name: "Total Parenteral Nutrition (TPN)", type: "Sterile (USP <797>)" },
+            { name: "Oral Capsules & Troches", type: "Non-Sterile (USP <795>)" },
+            { name: "Ophthalmic Eye Drops", type: "Sterile (USP <797>)" },
+            { name: "Rectal Suppositories", type: "Non-Sterile (USP <795>)" },
+            { name: "Epidural Pain Injections", type: "Sterile (USP <797>)" }
+        ];
+
+        function renderDosageSorter() {
+            const container = document.getElementById('dosageSorterContainer');
+            container.innerHTML = dosageItems.map((item, idx) => `
+                <div onclick="toggleDosageItem(${idx})" id="dosage-item-${idx}" class="p-3 bg-white border border-slate-200 rounded-lg cursor-pointer shadow-2xs hover:border-pharmacy-400 transition flex justify-between items-center text-xs">
+                    <div>
+                        <span class="font-semibold text-slate-800">${item.name}</span>
+                        <div class="text-[10px] text-slate-500 mt-0.5">${item.type}</div>
+                    </div>
+                    <i class="fa-solid fa-circle-check text-slate-300 text-base" id="dosage-icon-${idx}"></i>
+                </div>
+            `).join('');
+        }
+
+        function toggleDosageItem(idx) {
+            const el = document.getElementById(`dosage-item-${idx}`);
+            const icon = document.getElementById(`dosage-icon-${idx}`);
+            if (el.classList.contains('border-emerald-500')) {
+                el.classList.remove('border-emerald-500', 'bg-emerald-50');
+                icon.className = "fa-solid fa-circle-check text-slate-300 text-base";
+            } else {
+                el.classList.add('border-emerald-500', 'bg-emerald-50');
+                icon.className = "fa-solid fa-circle-check text-emerald-600 text-base";
+            }
+        }
+
+        // Garbing Steps Rationale Data
+        const garbingSteps = [
+            { id: 1, title: "1. Dedicated Cleanroom Shoe Covers", desc: "Donned first upon stepping across the cleanroom bench boundary to prevent room floor particulates from contaminating the ante-room." },
+            { id: 2, title: "2. Head Cover / Beard Cover", desc: "Covers all facial hair and scalp hair to prevent shedding skin cells and hair follicles." },
+            { id: 3, title: "3. Face Mask & Eye Shield", desc: "Secured over nose and mouth to trap respiratory droplets generated by talking or breathing." },
+            { id: 4, title: "4. Aseptic Hand Washing Scrub (30 sec)", desc: "Performed after hair/mask garbing so that touching dirty face masks does not contaminate washed hands." },
+            { id: 5, title: "5. Non-Shedding Cleanroom Gown", desc: "Fastened securely at neck and wrists to contain epidermal shedding from skin and clothing." },
+            { id: 6, title: "6. Sterile Powder-Free Gloves + 70% IPA", desc: "Donned inside buffer area over gown cuffs and continuously sanitized with 70% Sterile IPA." }
+        ];
+
+        function renderGarbingGame() {
+            const container = document.getElementById('garbingGameArea');
+            container.innerHTML = garbingSteps.map((step) => `
+                <div class="p-3 bg-slate-800/90 border border-slate-700 rounded-lg flex items-start space-x-3 text-xs">
+                    <div class="w-6 h-6 rounded-full bg-pharmacy-600 text-white font-bold flex items-center justify-center shrink-0 text-[11px] mt-0.5">
+                        ${step.id}
+                    </div>
+                    <div>
+                        <div class="font-bold text-emerald-400">${step.title}</div>
+                        <div class="text-slate-300 text-[11px] mt-0.5">${step.desc}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Math Practice Checkers
+        function checkMathProblem1() {
+            const val = parseFloat(document.getElementById('mathInput1').value);
+            const feedback = document.getElementById('mathFeedback1');
+            feedback.classList.remove('hidden');
+
+            // 50% vs 10% target 20%, Total 200mL -> 50 mL
+            if (val === 50) {
+                feedback.className = "text-xs p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> <strong>Correct!</strong> Calculation: (20 - 10 = 10 parts of 50%), (50 - 20 = 30 parts of 10%). Total parts = 40. Volume of 50% = (10 / 40) × 200 mL = 50 mL.';
+            } else {
+                feedback.className = "text-xs p-3 bg-rose-50 text-rose-800 border border-rose-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-xmark mr-1 text-rose-600"></i> <strong>Incorrect.</strong> Hint: Parts of 50% = 20 - 10 = 10 parts. Total parts = 40 parts. (10/40) × 200 = 50 mL.';
+            }
+        }
+
+        function checkMathProblem2() {
+            const val = parseFloat(document.getElementById('mathInput2').value);
+            const feedback = document.getElementById('mathFeedback2');
+            feedback.classList.remove('hidden');
+
+            // 0.9% w/v = 0.9g per 100mL -> 500mL = 4.5g
+            if (val === 4.5) {
+                feedback.className = "text-xs p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> <strong>Correct!</strong> Calculation: 0.9% (w/v) = 0.9 g / 100 mL. For 500 mL: (0.9 g / 100 mL) × 500 mL = 4.5 grams NaCl.';
+            } else {
+                feedback.className = "text-xs p-3 bg-rose-50 text-rose-800 border border-rose-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-xmark mr-1 text-rose-600"></i> <strong>Incorrect.</strong> Hint: 0.9% means 0.9 g in 100 mL. Multiply 0.9 by 5 = 4.5 grams.';
+            }
+        }
+
+        function checkMathProblem3() {
+            const val = parseFloat(document.getElementById('mathInput3').value);
+            const feedback = document.getElementById('mathFeedback3');
+            feedback.classList.remove('hidden');
+
+            // C1*V1 = C2*V2 -> 70% * 250mL = 50% * V2 -> V2 = 350 mL. Water to add = 350 - 250 = 100 mL
+            if (val === 100) {
+                feedback.className = "text-xs p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> <strong>Correct!</strong> Calculation: C1 × V1 = C2 × V2 → (70% × 250 mL) = (50% × V2) → V2 = 350 mL total volume. Water to add = 350 mL - 250 mL = 100 mL.';
+            } else {
+                feedback.className = "text-xs p-3 bg-rose-50 text-rose-800 border border-rose-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-xmark mr-1 text-rose-600"></i> <strong>Incorrect.</strong> Hint: Total volume V2 = (70 × 250) / 50 = 350 mL. Subtract initial 250 mL = 100 mL of water.';
+            }
+        }
+
+        // 10 Comprehensive Exam Questions
+        const examQuestions = [
+            {
+                q: "1. Which USP chapter establishes legally enforceable standards for sterile medication preparations?",
+                options: ["USP <795>", "USP <797>", "USP <800>", "USP <711>"],
+                correct: 1
+            },
+            {
+                q: "2. What is the Minimum Weighable Quantity (MWQ) on a Class III torsion balance with a Sensitivity Requirement (SR) of 6 mg at 5% error?",
+                options: ["60 mg", "100 mg", "120 mg", "300 mg"],
+                correct: 2
+            },
+            {
+                q: "3. How far inside a Laminar Airflow Workbench (LAFW) must all compounding manipulations be performed?",
+                options: ["At least 2 inches", "At least 4 inches", "At least 6 inches", "At least 12 inches"],
+                correct: 2
+            },
+            {
+                q: "4. What is the maximum Beyond-Use Date (BUD) for a non-sterile water-containing oral liquid stored under refrigeration?",
+                options: ["7 Days", "14 Days", "30 Days", "6 Months"],
+                correct: 1
+            },
+            {
+                q: "5. Which mortar and pestle is best suited for grinding coarse tablet particles into fine powder (trituration)?",
+                options: ["Glass Mortar", "Wedgewood / Porcelain Mortar", "Plastic Mortar", "Stainless Steel Vessel"],
+                correct: 1
+            },
+            {
+                q: "6. During cleanroom garbing, which item is applied LAST?",
+                options: ["Shoe Covers", "Face Mask", "Gown", "Sterile Powder-Free Gloves"],
+                correct: 3
+            },
+            {
+                q: "7. Under USP <800>, what room pressure differential is mandatory for hazardous drug compounding environments?",
+                options: ["Positive Pressure", "Negative Pressure", "Neutral Pressure", "Ambient Pressure"],
+                correct: 1
+            },
+            {
+                q: "8. What technique involves blending a small active ingredient powder incrementally with equal parts of diluent powder?",
+                options: ["Levigation", "Trituration", "Geometric Dilution", "Pulverization"],
+                correct: 2
+            },
+            {
+                q: "9. How many grams of Sodium Chloride are required to compound 250 mL of a 2% (w/v) solution?",
+                options: ["2.5 g", "5.0 g", "10.0 g", "50.0 g"],
+                correct: 1
+            },
+            {
+                q: "10. What percentage of 0.3 micron particles does a certified HEPA filter remove from laminar air?",
+                options: ["90.00%", "95.00%", "99.97%", "100.00%"],
+                correct: 2
+            }
+        ];
+
+        function renderExam() {
+            const container = document.getElementById('examContainer');
+            container.innerHTML = examQuestions.map((q, idx) => `
+                <div class="p-4 border border-slate-200 rounded-xl space-y-3 bg-white shadow-2xs">
+                    <div class="font-bold text-slate-800 text-xs">${q.q}</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        ${q.options.map((opt, optIdx) => `
+                            <label class="flex items-center space-x-2.5 p-2 rounded hover:bg-slate-50 cursor-pointer border border-slate-100 hover:border-slate-200 transition">
+                                <input type="radio" name="exam-q-${idx}" value="${optIdx}" class="text-pharmacy-600 focus:ring-pharmacy-500">
+                                <span class="text-slate-700">${opt}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function gradeExam() {
+            let correctCount = 0;
+            examQuestions.forEach((q, idx) => {
+                const selected = document.querySelector(`input[name="exam-q-${idx}"]:checked`);
+                if (selected && parseInt(selected.value) === q.correct) {
+                    correctCount++;
+                }
+            });
+
+            const scorePct = Math.round((correctCount / examQuestions.length) * 100);
+            state.examScore = scorePct;
+
+            const scoreText = document.getElementById('examScoreText');
+            scoreText.innerText = `${correctCount} / ${examQuestions.length} (${scorePct}%)`;
+
+            if (scorePct >= 80) {
+                scoreText.className = "text-2xl font-extrabold text-emerald-600";
+                state.examPassed = true;
+                completeModule(6);
+
+                const btn = document.getElementById('goToCertBtn');
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-400');
+                btn.classList.add('bg-pharmacy-600', 'hover:bg-pharmacy-700');
+
+                document.getElementById('certLockIcon').className = "fa-solid fa-check text-xs text-emerald-500";
+                document.getElementById('overallScoreDisplay').innerText = `${scorePct}%`;
+                document.getElementById('certScore').innerText = `${scorePct}%`;
+            } else {
+                scoreText.className = "text-2xl font-extrabold text-rose-600";
+                alert(`You scored ${scorePct}%. You need at least 80% to earn the certificate. Please review the modules and try again!`);
+            }
+        }
+
+        function toggleNotesModal() {
+            document.getElementById('notesModal').classList.toggle('hidden');
+        }
+
+        function saveNotes() {
+            toggleNotesModal();
+        }
+
+        window.onload = function() {
+            renderUspQuiz();
+            renderDosageSorter();
+            renderGarbingGame();
+            renderExam();
+
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('certDate').innerText = dateStr;
+        };
+    </script>
+</body>
+</html>
