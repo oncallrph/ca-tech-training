@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 10: Sterile Compounding Techniques Curriculum - Pharmacy Tech Training</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- KaTeX for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
+        });
+    </script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        pharmacy: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        },
+                        sterile: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            900: '#0c4a6e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-800 antialiased flex flex-col bg-slate-50 custom-scrollbar">
+
+    <!-- Top Header / App Bar -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Branding -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg bg-sterile-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                        <i class="fa-solid fa-syringe"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-lg tracking-wide leading-tight">SOUTH COAST MISSION PHARMACY</div>
+                        <div class="text-xs text-sky-200 font-medium">California Technician Training Program • Day 10</div>
+                    </div>
+                </div>
+
+                <!-- Timer & Session Stats -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <!-- Session Duration Tracker -->
+                    <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                        <i class="fa-regular fa-clock text-sky-400"></i>
+                        <span class="text-xs text-slate-300">Time Spent:</span>
+                        <span id="sessionTimer" class="font-mono text-sm font-semibold text-emerald-400">00:00:00</span>
+                    </div>
+
+                    <!-- Target Time Indicator -->
+                    <div class="text-xs text-slate-400 flex items-center space-x-1">
+                        <i class="fa-solid fa-hourglass-half text-amber-400"></i>
+                        <span>Target: 120 Minutes</span>
+                    </div>
+
+                    <!-- Quick Action Notes Modal Trigger -->
+                    <button onclick="toggleNotesModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-1 transition">
+                        <i class="fa-solid fa-note-sticky text-yellow-400"></i>
+                        <span>Study Notes</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Module Progress Bar -->
+        <div class="w-full bg-slate-800 h-2 relative">
+            <div id="overallProgressBar" class="bg-gradient-to-r from-sky-500 to-emerald-400 h-2 transition-all duration-500" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <!-- Main Application Container -->
+    <div class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col lg:flex-row gap-6">
+
+        <!-- Sidebar Navigation -->
+        <aside class="w-full lg:w-80 shrink-0 space-y-4 no-print">
+            <!-- Student Profile Card -->
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold border border-slate-200">
+                        <i class="fa-solid fa-user-nurse"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Trainee Session</div>
+                        <input type="text" id="studentNameInput" value="Pharmacy Student" onchange="updateStudentName()" class="font-semibold text-slate-800 text-sm bg-transparent border-b border-dashed border-slate-300 focus:outline-none focus:border-sterile-500 w-full" title="Click to edit name">
+                    </div>
+                </div>
+                <div class="space-y-2 text-xs text-slate-600">
+                    <div class="flex justify-between">
+                        <span>Curriculum Progress:</span>
+                        <span id="modulesCompletedCount" class="font-semibold text-slate-800">0 / 6 Modules</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Assessment Score:</span>
+                        <span id="overallScoreDisplay" class="font-semibold text-sterile-600">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="bg-white rounded-xl shadow-sm border border-slate-200 p-2 space-y-1">
+                <div class="px-3 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Day 10 Curriculum</div>
+
+                <button onclick="switchTab('overview')" id="nav-overview" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition bg-sky-50 text-sky-900">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-compass w-5 text-center text-sky-600"></i>
+                        <span>Course Overview</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+                </button>
+
+                <button onclick="switchTab('mod1')" id="nav-mod1" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-shield-halved w-5 text-center text-slate-400"></i>
+                        <span>1. Cleanroom Design & USP &lt;797&gt;</span>
+                    </div>
+                    <span id="status-mod1" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod2')" id="nav-mod2" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-user-shield w-5 text-center text-slate-400"></i>
+                        <span>2. Garbing, Hygiene & Hand Scrub</span>
+                    </div>
+                    <span id="status-mod2" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">25m</span>
+                </button>
+
+                <button onclick="switchTab('mod3')" id="nav-mod3" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-vial-circle-check w-5 text-center text-slate-400"></i>
+                        <span>3. Aseptic Technique & Critical Sites</span>
+                    </div>
+                    <span id="status-mod3" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod4')" id="nav-mod4" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-microscope w-5 text-center text-slate-400"></i>
+                        <span>4. QC, Testing & BUD Matrix</span>
+                    </div>
+                    <span id="status-mod4" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod5')" id="nav-mod5" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-calculator w-5 text-center text-slate-400"></i>
+                        <span>5. Sterile Compounding Math Lab</span>
+                    </div>
+                    <span id="status-mod5" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod6')" id="nav-mod6" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-clipboard-check w-5 text-center text-slate-400"></i>
+                        <span>6. Examination & Case Scenarios</span>
+                    </div>
+                    <span id="status-mod6" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">15m</span>
+                </button>
+            </nav>
+
+            <!-- Quick Reference Drawer Box -->
+            <div class="bg-slate-900 text-slate-200 rounded-xl p-4 shadow-sm text-xs space-y-2">
+                <div class="font-bold text-sky-400 uppercase tracking-wider flex items-center justify-between">
+                    <span><i class="fa-solid fa-lightbulb mr-1"></i> Cleanroom Key Rules</span>
+                    <span class="text-[10px] text-slate-400">Reference</span>
+                </div>
+                <ul class="space-y-1.5 text-slate-300 list-disc list-inside">
+                    <li><strong class="text-sky-300">USP &lt;797&gt;:</strong> Compounded Sterile Preparations (CSPs)</li>
+                    <li><strong class="text-sky-300">ISO Class 5:</strong> PEC (LAFW/BSC) &lt; 3,520 particles/m³</li>
+                    <li><strong class="text-sky-300">ISO Class 7:</strong> Buffer Area (Cleanroom)</li>
+                    <li><strong class="text-sky-300">ISO Class 8:</strong> Ante-Room (Garbing / Prep)</li>
+                    <li><strong class="text-sky-300">First Air:</strong> Unobstructed HEPA airflow over critical sites</li>
+                    <li><strong class="text-sky-300">70% IPA:</strong> Swab for 10-15s, allow complete air drying</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto custom-scrollbar">
+
+            <!-- TAB: OVERVIEW -->
+            <div id="tab-overview" class="tab-content space-y-6">
+                <div>
+                    <div class="inline-flex items-center space-x-2 bg-sky-100 text-sky-900 text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <span>California Technician Training Program</span>
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Day 10: Sterile Compounding Techniques</h1>
+                    <p class="mt-2 text-slate-600 text-sm leading-relaxed">
+                        Welcome to Day 10 of the California Pharmacy Technician Training Program. Sterile compounding is one of the highest-responsibility roles in pharmacy practice. Compounded Sterile Preparations (CSPs)—including intravenous (IV) infusions, total parenteral nutrition (TPN), epidurals, and ophthalmic solutions—must be completely free of microorganisms, endotoxins, and particulate matter.
+                    </p>
+                </div>
+
+                <!-- Detailed Syllabus Breakdown -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-sky-600"></i>
+                        <span>2-Hour Curriculum Time Allocation & Modular Objectives</span>
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-sky-700">Module 1 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Cleanroom Architecture & USP &lt;797&gt;</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">ISO Class 5/7/8 air classifications, Primary Engineering Controls (PECs), Buffer vs Ante Rooms, positive/negative pressure air dynamics.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-sky-700">Module 2 (25 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Garbing & Hand Hygiene Protocols</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Dirtiest-to-cleanest garbing order, antiseptic hand scrubbing techniques, 70% IPA gloved sanitization, and Gloved Fingertip Testing (GFT).</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-sky-700">Module 3 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Aseptic Techniques & Critical Sites</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">First Air flow protection, non-touch technique for critical sites, vial pressure equalization, ampule filter needles, and IV bag manipulation.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-sky-700">Module 4 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Quality Assurance & BUD Assignment</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Environmental air/surface sampling, media fill testing, Category 1 vs Category 2 CSP definitions, and temperature-based BUD assignment.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-sky-700">Module 5 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Sterile Compounding Mathematics Lab</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">IV flow rates (mL/hr, gtt/min), electrolyte milliequivalents (mEq), powder reconstitution displacement, and alligations.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-sky-700">Module 6 (15 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Comprehensive Evaluation Exam</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">15-question professional certification check, clinical cleanroom scenarios, and practical skill verification.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Objectives -->
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Core Learning Competencies</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="flex items-start space-x-3 p-3 bg-sky-50/60 border border-sky-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-sky-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Cleanroom Engineering Mastery:</strong> Differentiate ISO Class 5, 7, and 8 environments and pressure differentials required by USP &lt;797&gt;.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-sky-50/60 border border-sky-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-sky-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Flawless Aseptic Garbing:</strong> Execute dirtiest-to-cleanest garbing and hand hygiene without introducing particulate or microflora contamination.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-sky-50/60 border border-sky-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-sky-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>First Air Manipulation:</strong> Preserve unobstructed HEPA laminar airflow over critical sites during vial, ampule, and syringe manipulations.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-sky-50/60 border border-sky-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-sky-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Calculations & Quality Control:</strong> Calculate precise infusion rates and reconstitutions, assign accurate USP BUDs, and conduct environmental monitoring.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end">
+                    <button onclick="switchTab('mod1')" class="bg-sky-600 hover:bg-sky-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition">
+                        <span>Begin Module 1: Cleanroom Architecture</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 1 -->
+            <div id="tab-mod1" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-sky-600 uppercase tracking-wider">Module 1 of 6 • Estimated Reading Time: 20 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-shield-halved mr-1"></i> Cleanroom Architecture</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Cleanroom Design, ISO Classifications & USP &lt;797&gt;</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        Compounded Sterile Preparations (CSPs) require strict environmental controls to prevent microbial contamination. **USP &lt;797&gt;** governs the policies, physical environments, and quality controls necessary for sterile compounding.
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">1.1 ISO Air Cleanliness Classifications</h3>
+                    <p>
+                        Air cleanliness is classified by the International Organization for Standardization (ISO) based on the maximum allowable particle count (&ge; 0.5 µm) per cubic meter (m³) of air:
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-4">
+                        <div class="bg-sky-50/80 border border-sky-200 rounded-xl p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="bg-sky-700 text-white font-mono text-xs font-bold px-2.5 py-1 rounded-md">ISO Class 5</span>
+                                <i class="fa-solid fa-fan text-sky-500 text-lg"></i>
+                            </div>
+                            <h4 class="font-bold text-sky-900 text-xs">Primary Engineering Control (PEC)</h4>
+                            <p class="text-[11px] text-slate-600">
+                                Maximum <strong>3,520</strong> particles/m³. Directly surrounds critical sites during compounding.
+                            </p>
+                            <ul class="text-[10px] text-slate-700 list-disc list-inside space-y-1 font-medium">
+                                <li>Laminar Airflow Workbenches (LAFW)</li>
+                                <li>Biological Safety Cabinets (BSC)</li>
+                                <li>Compounding Aseptic Isolators (CAI)</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-emerald-50/80 border border-emerald-200 rounded-xl p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="bg-emerald-700 text-white font-mono text-xs font-bold px-2.5 py-1 rounded-md">ISO Class 7</span>
+                                <i class="fa-solid fa-door-closed text-emerald-500 text-lg"></i>
+                            </div>
+                            <h4 class="font-bold text-emerald-900 text-xs">Buffer Area (Cleanroom)</h4>
+                            <p class="text-[11px] text-slate-600">
+                                Maximum <strong>352,000</strong> particles/m³. Room housing the PECs where sterile preparation occurs.
+                            </p>
+                            <ul class="text-[10px] text-slate-700 list-disc list-inside space-y-1 font-medium">
+                                <li>HEPA-filtered air ceiling diffusers</li>
+                                <li>No sinks or floor drains near PEC</li>
+                                <li>Positive air pressure (non-hazardous)</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-amber-50/80 border border-amber-200 rounded-xl p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="bg-amber-700 text-white font-mono text-xs font-bold px-2.5 py-1 rounded-md">ISO Class 8</span>
+                                <i class="fa-solid fa-sink text-amber-500 text-lg"></i>
+                            </div>
+                            <h4 class="font-bold text-amber-900 text-xs">Ante-Area (Gowning & Prep)</h4>
+                            <p class="text-[11px] text-slate-600">
+                                Maximum <strong>3,520,000</strong> particles/m³. Transition zone between unclassified pharmacy & buffer room.
+                            </p>
+                            <ul class="text-[10px] text-slate-700 list-disc list-inside space-y-1 font-medium">
+                                <li>Garbing & hand hygiene station</li>
+                                <li>Order entry & component staging</li>
+                                <li>Demarcation line separating clean side</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">1.2 Air Pressure Differentials: Positive vs. Negative Pressure</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs my-2">
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="font-bold text-slate-800 flex items-center"><i class="fa-solid fa-arrow-right-from-bracket text-sky-600 mr-2"></i> Positive Pressure Cleanroom (Non-Hazardous)</div>
+                            <p class="text-slate-600 text-[11px] mt-1">Air flows OUT of the buffer room into the ante-room (higher pressure to lower pressure) to prevent dirty air from entering the sterile preparation space. Minimum pressure differential: 0.02 to 0.05 inches water column.</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="font-bold text-slate-800 flex items-center"><i class="fa-solid fa-arrow-right-to-bracket text-rose-600 mr-2"></i> Negative Pressure Cleanroom (Hazardous USP &lt;800&gt;)</div>
+                            <p class="text-slate-600 text-[11px] mt-1">Air flows INWARD toward the compounding room to trap hazardous chemotherapy vapors inside. Air is vented externally through HEPA filters to protect pharmacy personnel.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Cleanroom Area Identification -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold text-slate-800 flex items-center space-x-2 uppercase tracking-wider">
+                            <i class="fa-solid fa-gamepad text-sky-600"></i>
+                            <span>Interactive Practice: Identify ISO Class & Cleanroom Area</span>
+                        </h3>
+                        <span class="text-[11px] text-slate-500">6 Questions</span>
+                    </div>
+                    <p class="text-xs text-slate-600">Match each cleanroom location or piece of equipment to its mandated ISO air cleanliness class:</p>
+
+                    <div id="cleanroomQuizContainer" class="space-y-3 text-xs">
+                        <!-- JS Rendered -->
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('overview')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Back to Overview</span>
+                    </button>
+                    <button onclick="completeModule(1); switchTab('mod2')" class="bg-sky-600 hover:bg-sky-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Module 2</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 2 -->
+            <div id="tab-mod2" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-sky-600 uppercase tracking-wider">Module 2 of 6 • Estimated Reading Time: 25 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-user-shield mr-1"></i> Garbing & Hygiene</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Personnel Garbing, Hand Hygiene & Gloved Fingertip Testing</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        Human personnel are the leading source of particle shed and contamination in sterile compounding. Rigorous garbing and antiseptic hand cleansing protocols are mandatory under **USP &lt;797&gt;**.
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">2.1 The Dirtiest-to-Cleanest Garbing Order</h3>
+                    <p>
+                        Garbing must proceed in order from the dirtiest parts of the body to the cleanest to prevent cross-contamination:
+                    </p>
+
+                    <div class="space-y-2 text-xs font-mono">
+                        <div class="p-2.5 bg-slate-900 text-slate-100 rounded-lg flex items-center justify-between">
+                            <span><strong class="text-amber-400">Step 1:</strong> Dedicated Shoe Covers (or dedicated cleanroom shoes)</span>
+                            <span class="text-[10px] text-slate-400">Ante-Room</span>
+                        </div>
+                        <div class="p-2.5 bg-slate-900 text-slate-100 rounded-lg flex items-center justify-between">
+                            <span><strong class="text-amber-400">Step 2:</strong> Head & Facial Hair Covers (beard covers)</span>
+                            <span class="text-[10px] text-slate-400">Ante-Room</span>
+                        </div>
+                        <div class="p-2.5 bg-slate-900 text-slate-100 rounded-lg flex items-center justify-between">
+                            <span><strong class="text-amber-400">Step 3:</strong> Face Mask & Eye Shield (if required)</span>
+                            <span class="text-[10px] text-slate-400">Ante-Room</span>
+                        </div>
+                        <div class="p-2.5 bg-slate-800 text-emerald-300 rounded-lg flex items-center justify-between border border-emerald-500/40">
+                            <span><strong class="text-emerald-400">Step 4:</strong> Antiseptic Hand Cleansing (30 sec scrub up to elbows)</span>
+                            <span class="text-[10px] text-emerald-300">Sink Station</span>
+                        </div>
+                        <div class="p-2.5 bg-slate-900 text-slate-100 rounded-lg flex items-center justify-between">
+                            <span><strong class="text-amber-400">Step 5:</strong> Non-Shedding Cleanroom Gown (snug cuffs, tied back)</span>
+                            <span class="text-[10px] text-slate-400">Clean Side of Ante-Room</span>
+                        </div>
+                        <div class="p-2.5 bg-slate-900 text-slate-100 rounded-lg flex items-center justify-between">
+                            <span><strong class="text-amber-400">Step 6:</strong> Alcohol Hand Rub (70% IPA) & Dry</span>
+                            <span class="text-[10px] text-slate-400">Entering Buffer Room</span>
+                        </div>
+                        <div class="p-2.5 bg-slate-900 text-slate-100 rounded-lg flex items-center justify-between">
+                            <span><strong class="text-amber-400">Step 7:</strong> Sterile Powder-Free Gloves (over gown cuffs)</span>
+                            <span class="text-[10px] text-slate-400">Inside Buffer Room / PEC</span>
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">2.2 Antiseptic Hand Wash & Gloved Fingertip Testing (GFT)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs my-2">
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1">
+                            <strong class="text-slate-800 font-bold block"><i class="fa-solid fa-soap text-sky-600 mr-1"></i> Hand Washing Technique:</strong>
+                            <p class="text-slate-600 text-[11px]">Remove jewelry, rings, and watches. Clean nails under warm running water using a single-use nail cleaner. Wash hands and forearms up to the elbows for at least **30 seconds** with soap and water. Dry with non-shedding disposable towels.</p>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1">
+                            <strong class="text-slate-800 font-bold block"><i class="fa-solid fa-hand-sparkles text-sky-600 mr-1"></i> Gloved Fingertip & Thumb Sampling:</strong>
+                            <p class="text-slate-600 text-[11px]">Compounding personnel must pass Gloved Fingertip Testing (GFT) on agar plates. Initial competency requires **0 Colony Forming Units (CFU)** on both hands (3 consecutive passes). Re-evaluation occurs annually (Category 1/2) or semi-annually (Category 3/Hazardous).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Garbing Drag-and-Drop Sequence Simulator -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-2">
+                        <i class="fa-solid fa-list-ol text-sky-600"></i>
+                        <span>Interactive Exercise: Verify the Correct Garbing Order</span>
+                    </h3>
+                    <p class="text-xs text-slate-600">Click the garbing steps in their exact required sequential order (1 to 6):</p>
+
+                    <div id="garbingSequenceContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+                        <!-- JS Generated -->
+                    </div>
+                    <div id="garbingSequenceFeedback" class="text-xs font-semibold text-sky-700 hidden"></div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod1')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Previous Module</span>
+                    </button>
+                    <button onclick="completeModule(2); switchTab('mod3')" class="bg-sky-600 hover:bg-sky-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Module 3</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 3 -->
+            <div id="tab-mod3" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-sky-600 uppercase tracking-wider">Module 3 of 6 • Estimated Reading Time: 20 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-vial-circle-check mr-1"></i> Aseptic Manipulations</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Aseptic Technique, Critical Sites & Equipment Manipulation</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        Aseptic technique is the procedure of compounding sterile products without introducing contamination. The core rule is maintaining **First Air** over all **Critical Sites**.
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">3.1 Concept of First Air & Critical Site Identification</h3>
+                    <p>
+                        **First Air** is the direct, unobstructed air exiting the HEPA filter inside the ISO Class 5 Primary Engineering Control (PEC).
+                    </p>
+
+                    <div class="bg-slate-900 text-slate-100 rounded-xl p-4 space-y-3 font-mono text-xs shadow-md">
+                        <div class="text-sky-400 font-bold uppercase tracking-wider text-[11px]"><i class="fa-solid fa-triangle-exclamation text-amber-400 mr-1"></i> Universal Critical Sites (Never Touch or Block First Air!)</div>
+                        <ul class="space-y-1.5 text-slate-300 font-sans text-[11px] list-disc list-inside">
+                            <li><strong class="text-sky-300">Needle:</strong> Hub, shaft, bevel tip, and bevel heel.</li>
+                            <li><strong class="text-sky-300">Syringe:</strong> Syringe tip, inner plunger shaft/ribs (holding the flat plunger end is permitted).</li>
+                            <li><strong class="text-sky-300">Vial:</strong> Rubber stopper after swabbing with 70% IPA.</li>
+                            <li><strong class="text-sky-300">IV Bag:</strong> Injection additive port and spike port membrane.</li>
+                            <li><strong class="text-sky-300">Glass Ampule:</strong> Open neck edge after snapping.</li>
+                        </ul>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">3.2 Proper Swabbing and Solution Manipulations</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs my-2">
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1">
+                            <strong class="text-slate-800 font-bold block"><i class="fa-solid fa-whiskey-glass text-sky-600 mr-1"></i> Vial Pressure Equalization:</strong>
+                            <p class="text-slate-600 text-[11px]">Vials are closed systems. To withdraw liquid without creating a vacuum, inject a volume of air equal to the desired liquid volume into the vial before withdrawing solution (except when working with hazardous cytotoxic drugs).</p>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1">
+                            <strong class="text-slate-800 font-bold block"><i class="fa-solid fa-Prescription-bottle text-sky-600 mr-1"></i> Glass Ampule Manipulation:</strong>
+                            <p class="text-slate-600 text-[11px]">Ampules are open systems. Swab the neck with 70% IPA, snap away from the HEPA filter. Always use a **5-micron filter needle or filter straw** when withdrawing liquid to prevent glass fragments from entering the final IV bag.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Workflow Step Sequence -->
+                <div class="bg-slate-900 text-white rounded-xl p-5 space-y-4 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold text-sky-300 uppercase tracking-wider flex items-center space-x-2">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span>Aseptic Workflow: Reconstituting a Powdered Drug Vial</span>
+                        </h3>
+                        <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">6 Steps</span>
+                    </div>
+
+                    <div id="asepticStepsArea" class="space-y-2 text-xs">
+                        <!-- JS Generated -->
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod2')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Previous Module</span>
+                    </button>
+                    <button onclick="completeModule(3); switchTab('mod4')" class="bg-sky-600 hover:bg-sky-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Module 4</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 4 -->
+            <div id="tab-mod4" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-sky-600 uppercase tracking-wider">Module 4 of 6 • Estimated Reading Time: 20 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-microscope mr-1"></i> QC & BUD Rules</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Quality Assurance, Environmental Testing & USP &lt;797&gt; BUDs</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        Quality Assurance (QA) in sterile compounding encompasses environmental monitoring, media-fill sterility testing, particulate verification, and Beyond-Use Date (BUD) calculations.
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">4.1 Environmental Monitoring & Competency Requirements</h3>
+                    <div class="overflow-x-auto my-3">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-800 text-white font-semibold">
+                                    <th class="p-2 border border-slate-700">Test Type</th>
+                                    <th class="p-2 border border-slate-700">Minimum Frequency</th>
+                                    <th class="p-2 border border-slate-700">Pass Criteria / Action Level</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 bg-slate-50 text-[11px]">
+                                <tr>
+                                    <td class="p-2 border font-bold text-sky-700">Air Sampling (Viable Particles)</td>
+                                    <td class="p-2 border">Every 6 Months</td>
+                                    <td class="p-2 border">ISO 5: &gt; 1 CFU/m³; ISO 7: &gt; 10 CFU; ISO 8: &gt; 100 CFU triggers action</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 border font-bold text-slate-800">Surface Sampling (Touch Plates)</td>
+                                    <td class="p-2 border">Monthly (or per USP guidelines)</td>
+                                    <td class="p-2 border">ISO 5: &gt; 3 CFU/plate; ISO 7: &gt; 5 CFU; ISO 8: &gt; 50 CFU triggers cleaning</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 border font-bold text-slate-800">Media Fill Testing</td>
+                                    <td class="p-2 border">Annually (Category 1 & 2), Semi-Annually (Cat 3/Haz)</td>
+                                    <td class="p-2 border">14-day incubation using Soybean-Casein Digest Medium; zero turbidity (growth)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">4.2 USP &lt;797&gt; CSP Categories & Beyond-Use Dates (BUD)</h3>
+                    <p>
+                        Under revised USP &lt;797&gt; standards, Compounded Sterile Preparations (CSPs) are classified into **Category 1** or **Category 2** (and Category 3 for extended stability):
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 my-3">
+                        <div class="p-4 bg-teal-50 border border-teal-200 rounded-xl space-y-1">
+                            <span class="text-xs font-bold text-teal-800 uppercase tracking-wider">Category 1 CSPs (SCA Environment)</span>
+                            <div class="text-lg font-extrabold text-teal-700 font-mono">Controlled Room Temp: &le; 12 Hours<br>Refrigerated: &le; 24 Hours</div>
+                            <p class="text-[11px] text-slate-600">Prepared in an unclassified Segregated Compounding Area (SCA) inside an ISO 5 PEC.</p>
+                        </div>
+
+                        <div class="p-4 bg-sky-50 border border-sky-200 rounded-xl space-y-1">
+                            <span class="text-xs font-bold text-sky-800 uppercase tracking-wider">Category 2 CSPs (Cleanroom Suite)</span>
+                            <div class="text-lg font-extrabold text-sky-700 font-mono">Room Temp: Up to 4 Days<br>Refrigerated: Up to 10 Days<br>Frozen: Up to 45 Days</div>
+                            <p class="text-[11px] text-slate-600">Aseptically prepared with sterile components in an ISO 7 Buffer Room + ISO 8 Ante-Room (without sterility testing).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive BUD Practice -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-2">
+                        <i class="fa-solid fa-calendar-check text-sky-600"></i>
+                        <span>Interactive Practice: Assign CSP Beyond-Use Dates (BUD)</span>
+                    </h3>
+                    <p class="text-xs text-slate-600">Select the correct maximum BUD for each sterile compounding scenario:</p>
+
+                    <div id="budSterilePracticeContainer" class="space-y-3 text-xs">
+                        <!-- JS Generated -->
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod3')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Previous Module</span>
+                    </button>
+                    <button onclick="completeModule(4); switchTab('mod5')" class="bg-sky-600 hover:bg-sky-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Module 5</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 5 -->
+            <div id="tab-mod5" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-sky-600 uppercase tracking-wider">Module 5 of 6 • Estimated Reading Time: 20 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-calculator mr-1"></i> Calculations Laboratory</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Sterile Compounding Mathematics & Infusion Rate Lab</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        Sterile compounding math requires precise mastery of infusion flow rates (mL/hr), drip rates (gtt/min), electrolyte conversions (mEq), and powder displacement volumes.
+                    </p>
+
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                        <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center">
+                            <i class="fa-solid fa-square-root-variable text-sky-600 mr-2"></i> Key IV Formulas Quick Reference
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] font-mono">
+                            <div class="p-2 bg-white border border-slate-200 rounded">
+                                <strong>IV Drip Rate Formula:</strong><br>
+                                $$\text{Drip Rate (gtt/min)} = \frac{\text{Volume (mL)} \times \text{Drop Factor (gtt/mL)}}{\text{Time (minutes)}}$$
+                            </div>
+                            <div class="p-2 bg-white border border-slate-200 rounded">
+                                <strong>Infusion Duration Formula:</strong><br>
+                                $$\text{Time (hours)} = \frac{\text{Total Bag Volume (mL)}}{\text{Flow Rate (mL/hr)}}$$
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Math Practice Problems -->
+                <div class="space-y-4 pt-2">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Sterile Calculation Practice Lab</h3>
+
+                    <!-- Math Problem 1 -->
+                    <div class="border border-slate-200 rounded-xl p-4 space-y-3 bg-white shadow-2xs">
+                        <div class="flex justify-between items-start">
+                            <span class="font-bold text-slate-800 text-xs">Problem 1: IV Drip Rate Calculation</span>
+                            <span class="text-[10px] bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-semibold">IV Flow Practice</span>
+                        </div>
+                        <p class="text-xs text-slate-600">
+                            An order calls for <strong>1,000 mL of 0.9% NaCl</strong> to be infused over <strong>8 hours</strong>. The tubing drop factor is <strong>15 gtt/mL</strong>. Calculate the IV drip rate in drops per minute (gtt/min). (Round to nearest whole drop).
+                        </p>
+
+                        <div class="flex items-center space-x-3 text-xs">
+                            <input type="number" id="mathInputSterile1" placeholder="Enter gtt/min" class="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-sky-500 w-48 font-mono">
+                            <button onclick="checkMathSterile1()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2 rounded-lg transition text-xs">Check Answer</button>
+                        </div>
+                        <div id="mathFeedbackSterile1" class="text-xs hidden"></div>
+                    </div>
+
+                    <!-- Math Problem 2 -->
+                    <div class="border border-slate-200 rounded-xl p-4 space-y-3 bg-white shadow-2xs">
+                        <div class="flex justify-between items-start">
+                            <span class="font-bold text-slate-800 text-xs">Problem 2: Electrolyte Additive Volume</span>
+                            <span class="text-[10px] bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-semibold">Electrolyte Practice</span>
+                        </div>
+                        <p class="text-xs text-slate-600">
+                            A physician orders <strong>40 mEq of Potassium Chloride (KCl)</strong> to be added to an IV bag. The stock vial contains <strong>2 mEq/mL</strong>. How many milliliters (mL) of KCl stock solution must be drawn into the syringe?
+                        </p>
+
+                        <div class="flex items-center space-x-3 text-xs">
+                            <input type="number" id="mathInputSterile2" placeholder="Enter mL required" class="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-sky-500 w-48 font-mono">
+                            <button onclick="checkMathSterile2()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2 rounded-lg transition text-xs">Check Answer</button>
+                        </div>
+                        <div id="mathFeedbackSterile2" class="text-xs hidden"></div>
+                    </div>
+
+                    <!-- Math Problem 3 -->
+                    <div class="border border-slate-200 rounded-xl p-4 space-y-3 bg-white shadow-2xs">
+                        <div class="flex justify-between items-start">
+                            <span class="font-bold text-slate-800 text-xs">Problem 3: Powder Displacement Volume</span>
+                            <span class="text-[10px] bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-semibold">Reconstitution Practice</span>
+                        </div>
+                        <p class="text-xs text-slate-600">
+                            A 1 g drug vial reconstituted with <strong>3.5 mL of diluent</strong> yields a total final solution concentration of <strong>250 mg/mL</strong> (total final volume = 4.0 mL). What is the powder displacement volume (mL) of the dry drug powder?
+                        </p>
+
+                        <div class="flex items-center space-x-3 text-xs">
+                            <input type="number" step="0.1" id="mathInputSterile3" placeholder="Enter displacement mL" class="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-sky-500 w-48 font-mono">
+                            <button onclick="checkMathSterile3()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2 rounded-lg transition text-xs">Check Answer</button>
+                        </div>
+                        <div id="mathFeedbackSterile3" class="text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod4')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Previous Module</span>
+                    </button>
+                    <button onclick="completeModule(5); switchTab('mod6')" class="bg-sky-600 hover:bg-sky-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Final Examination</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 6 -->
+            <div id="tab-mod6" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-sky-600 uppercase tracking-wider">Module 6 of 6 • Comprehensive Evaluation</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-clipboard-check mr-1"></i> Certification Knowledge Check</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Day 10 Comprehensive Evaluation Examination</h2>
+                </div>
+
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Answer the **15 comprehensive examination questions** below covering cleanroom engineering, garbing order, aseptic technique, critical sites, USP &lt;797&gt; BUDs, and calculations. Passing score: **80% (12/15)**.
+                </p>
+
+                <div id="examContainer" class="space-y-4">
+                    <!-- 15 Questions Rendered via JS -->
+                </div>
+
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+                    <div>
+                        <div class="text-xs font-semibold text-slate-500">Your Calculated Score:</div>
+                        <div id="examScoreText" class="text-2xl font-extrabold text-slate-800">Not Completed</div>
+                    </div>
+                    <button onclick="gradeExam()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-md transition flex items-center space-x-2 text-xs">
+                        <i class="fa-solid fa-check-double"></i>
+                        <span>Submit Exam Answers</span>
+                    </button>
+                </div>
+
+                <!-- Completion Status Alert Banner -->
+                <div id="completionStatusBox" class="hidden p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 space-y-2 text-xs">
+                    <div class="font-bold flex items-center text-emerald-800 text-sm">
+                        <i class="fa-solid fa-circle-check text-emerald-600 mr-2"></i> Day 10 Module Requirements Satisfied
+                    </div>
+                    <p class="text-[11px] text-emerald-700">
+                        Congratulations! You have successfully mastered Day 10: Sterile Compounding Techniques, passed all calculations, and achieved certification-level competency on the USP &lt;797&gt; examination.
+                    </p>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod5')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Previous Module</span>
+                    </button>
+                    <button onclick="switchTab('overview')" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Return to Course Overview</span>
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Notes Modal -->
+    <div id="notesModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 hidden no-print">
+        <div class="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-md p-5 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-800 flex items-center text-sm">
+                    <i class="fa-solid fa-pen-to-square text-sky-600 mr-2"></i> Trainee Notes Notepad
+                </h3>
+                <button onclick="toggleNotesModal()" class="text-slate-400 hover:text-slate-600 text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <textarea id="studentNotesText" rows="8" placeholder="Type key takeaways, cleanroom rules, or sterile calculation notes..." class="w-full text-xs p-3 border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-mono custom-scrollbar"></textarea>
+            <div class="flex justify-end space-x-2">
+                <button onclick="saveNotes()" class="bg-sky-600 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-sky-700 transition">Save Notes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let state = {
+            studentName: "Pharmacy Student",
+            startTime: Date.now(),
+            secondsElapsed: 0,
+            completedModules: new Set(),
+            examPassed: false,
+            examScore: 0
+        };
+
+        // Session Timer
+        setInterval(() => {
+            state.secondsElapsed++;
+            const hours = String(Math.floor(state.secondsElapsed / 3600)).padStart(2, '0');
+            const minutes = String(Math.floor((state.secondsElapsed % 3600) / 60)).padStart(2, '0');
+            const seconds = String(state.secondsElapsed % 60).padStart(2, '0');
+            document.getElementById('sessionTimer').innerText = `${hours}:${minutes}:${seconds}`;
+        }, 1000);
+
+        function updateStudentName() {
+            const val = document.getElementById('studentNameInput').value.trim();
+            if (val) state.studentName = val;
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            
+            const target = document.getElementById(`tab-${tabId}`);
+            if (target) target.classList.remove('hidden');
+
+            const navButtons = document.querySelectorAll('nav button');
+            navButtons.forEach(btn => {
+                btn.classList.remove('bg-sky-50', 'text-sky-900');
+                btn.classList.add('text-slate-600');
+            });
+
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.add('bg-sky-50', 'text-sky-900');
+                activeNav.classList.remove('text-slate-600');
+            }
+        }
+
+        function completeModule(modNum) {
+            state.completedModules.add(modNum);
+            document.getElementById(`modulesCompletedCount`).innerText = `${state.completedModules.size} / 6 Modules`;
+            
+            const badge = document.getElementById(`status-mod${modNum}`);
+            if (badge) {
+                badge.className = "text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold flex items-center";
+                badge.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Done';
+            }
+
+            const pct = Math.round((state.completedModules.size / 6) * 100);
+            document.getElementById('overallProgressBar').style.width = `${pct}%`;
+        }
+
+        // Module 1 Cleanroom ISO Data
+        const cleanroomQuizData = [
+            { id: 1, text: "Laminar Airflow Workbench (LAFW) hood interior", correct: "iso5" },
+            { id: 2, text: "Buffer Room (Cleanroom surrounding the PEC)", correct: "iso7" },
+            { id: 3, text: "Ante-Room housing the hand washing sink & garbing supplies", correct: "iso8" },
+            { id: 4, text: "Biological Safety Cabinet (BSC) air zone for chemotherapy", correct: "iso5" },
+            { id: 5, text: "Compounding Aseptic Isolator (CAI) glove box interior", correct: "iso5" },
+            { id: 6, text: "Clean side of Ante-Room transition line", correct: "iso8" }
+        ];
+
+        function renderCleanroomQuiz() {
+            const container = document.getElementById('cleanroomQuizContainer');
+            container.innerHTML = cleanroomQuizData.map(item => `
+                <div class="p-3 bg-white border border-slate-200 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 shadow-2xs">
+                    <span class="text-slate-700 font-medium text-xs">${item.id}. ${item.text}</span>
+                    <div class="flex space-x-1 shrink-0">
+                        <button onclick="answerCleanroomQuiz(${item.id}, 'iso5')" id="cr-${item.id}-iso5" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded font-sans font-semibold text-slate-700 transition text-[11px]">ISO Class 5</button>
+                        <button onclick="answerCleanroomQuiz(${item.id}, 'iso7')" id="cr-${item.id}-iso7" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded font-sans font-semibold text-slate-700 transition text-[11px]">ISO Class 7</button>
+                        <button onclick="answerCleanroomQuiz(${item.id}, 'iso8')" id="cr-${item.id}-iso8" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded font-sans font-semibold text-slate-700 transition text-[11px]">ISO Class 8</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function answerCleanroomQuiz(itemId, selected) {
+            const item = cleanroomQuizData.find(x => x.id === itemId);
+            ['iso5', 'iso7', 'iso8'].forEach(type => {
+                const btn = document.getElementById(`cr-${itemId}-${type}`);
+                btn.className = "px-2.5 py-1 bg-slate-100 text-slate-400 rounded font-sans text-[11px]";
+            });
+
+            const activeBtn = document.getElementById(`cr-${itemId}-${selected}`);
+            if (selected === item.correct) {
+                activeBtn.className = "px-2.5 py-1 bg-emerald-600 text-white font-bold rounded font-sans text-[11px]";
+            } else {
+                activeBtn.className = "px-2.5 py-1 bg-rose-600 text-white font-bold rounded font-sans text-[11px]";
+            }
+        }
+
+        // Module 2 Garbing Interactive
+        const garbingStepsList = [
+            { id: 'shoes', name: "Shoe Covers", order: 1 },
+            { id: 'head', name: "Head & Beard Cover", order: 2 },
+            { id: 'mask', name: "Face Mask", order: 3 },
+            { id: 'wash', name: "Hand Scrub (30s)", order: 4 },
+            { id: 'gown', name: "Non-Shedding Gown", order: 5 },
+            { id: 'gloves', name: "Sterile Gloves", order: 6 }
+        ];
+        let userGarbingSelection = [];
+
+        function renderGarbingSequence() {
+            const container = document.getElementById('garbingSequenceContainer');
+            // Shuffle steps for display
+            const shuffled = [...garbingStepsList].sort(() => Math.random() - 0.5);
+            container.innerHTML = shuffled.map(step => `
+                <button onclick="clickGarbingStep('${step.id}')" id="btn-garb-${step.id}" class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs hover:border-sky-400 text-left transition text-xs font-semibold text-slate-800 flex items-center justify-between">
+                    <span>${step.name}</span>
+                    <span id="badge-garb-${step.id}" class="w-5 h-5 rounded-full bg-slate-100 text-slate-400 font-bold text-[10px] flex items-center justify-center">--</span>
+                </button>
+            `).join('');
+        }
+
+        function clickGarbingStep(id) {
+            const idx = userGarbingSelection.indexOf(id);
+            if (idx > -1) {
+                userGarbingSelection.splice(idx, 1);
+            } else {
+                if (userGarbingSelection.length < 6) {
+                    userGarbingSelection.push(id);
+                }
+            }
+
+            // Update display badges
+            garbingStepsList.forEach(step => {
+                const badge = document.getElementById(`badge-garb-${step.id}`);
+                const pos = userGarbingSelection.indexOf(step.id);
+                if (pos > -1) {
+                    badge.innerText = pos + 1;
+                    badge.className = "w-5 h-5 rounded-full bg-sky-600 text-white font-bold text-[10px] flex items-center justify-center";
+                } else {
+                    badge.innerText = "--";
+                    badge.className = "w-5 h-5 rounded-full bg-slate-100 text-slate-400 font-bold text-[10px] flex items-center justify-center";
+                }
+            });
+
+            if (userGarbingSelection.length === 6) {
+                const feedback = document.getElementById('garbingSequenceFeedback');
+                feedback.classList.remove('hidden');
+                const correctOrder = ['shoes', 'head', 'mask', 'wash', 'gown', 'gloves'];
+                const isCorrect = userGarbingSelection.every((val, index) => val === correctOrder[index]);
+                if (isCorrect) {
+                    feedback.className = "text-xs font-bold text-emerald-600 p-2 bg-emerald-50 rounded border border-emerald-200 mt-2";
+                    feedback.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Perfect! You correctly sequenced the dirtiest-to-cleanest garbing protocol.';
+                } else {
+                    feedback.className = "text-xs font-bold text-rose-600 p-2 bg-rose-50 rounded border border-rose-200 mt-2";
+                    feedback.innerHTML = '<i class="fa-solid fa-circle-xmark mr-1"></i> Incorrect sequence order. Remember: Shoe covers -> Head cover -> Face mask -> Hand scrub -> Gown -> Sterile gloves.';
+                }
+            }
+        }
+
+        // Module 3 Aseptic Steps Data
+        const asepticSteps = [
+            { id: 1, title: "1. Clean PEC Surface", desc: "Clean LAFW with sterile water then 70% IPA from top to bottom, back to front, moving away from HEPA filter." },
+            { id: 2, title: "2. Arrange Supplies in First Air", desc: "Place items 6 inches inside hood without blocking HEPA airflow. Maintain side-by-side placement." },
+            { id: 3, title: "3. Swab Critical Rubber Stopper", desc: "Swab rubber stopper with sterile 70% IPA alcohol wipe in one direction 3 times. Allow to air dry for 10s." },
+            { id: 4, title: "4. Equalize Pressure in Vial", desc: "Draw air equal to diluent volume, inject air into vial at a 45-degree angle to prevent coring, then withdraw liquid." },
+            { id: 5, title: "5. Reconstitute Powder & Dissolve", desc: "Inject diluent along vial inner wall, gently swirl (never shake forcefully) until powder is clear." },
+            { id: 6, title: "6. Inject into Final IV Bag", desc: "Swab IV bag additive port, inject drug solution, invert bag gently 3 times, inspect for precipitation." }
+        ];
+
+        function renderAsepticSteps() {
+            const container = document.getElementById('asepticStepsArea');
+            container.innerHTML = asepticSteps.map(step => `
+                <div class="p-3 bg-slate-800/90 border border-slate-700 rounded-lg flex items-start space-x-3 text-xs">
+                    <div class="w-6 h-6 rounded-full bg-sky-600 text-white font-bold flex items-center justify-center shrink-0 text-[11px] mt-0.5">
+                        ${step.id}
+                    </div>
+                    <div>
+                        <div class="font-bold text-sky-300">${step.title}</div>
+                        <div class="text-slate-300 text-[11px] mt-0.5">${step.desc}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Module 4 BUD Scenarios
+        const budSterileScenarios = [
+            { id: 1, text: "Category 1 CSP prepared in an unclassified Segregated Compounding Area (Stored under refrigeration)", correct: "24h" },
+            { id: 2, text: "Category 2 CSP prepared aseptically in ISO 7 Cleanroom suite with sterile components (Refrigerated)", correct: "10d" },
+            { id: 3, text: "Category 2 CSP prepared aseptically in cleanroom suite stored at Controlled Room Temperature", correct: "4d" },
+            { id: 4, text: "Category 2 CSP prepared aseptically with sterile components stored in deep freezer (-25°C to -10°C)", correct: "45d" }
+        ];
+
+        function renderBudSterilePractice() {
+            const container = document.getElementById('budSterilePracticeContainer');
+            container.innerHTML = budSterileScenarios.map(item => `
+                <div class="p-3 bg-white border border-slate-200 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 shadow-2xs">
+                    <span class="text-slate-700 font-medium text-xs">${item.id}. ${item.text}</span>
+                    <div class="flex space-x-1 shrink-0">
+                        <button onclick="answerBudSterileQuiz(${item.id}, '24h')" id="buds-${item.id}-24h" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded font-mono font-semibold text-slate-700 transition text-[11px]">24 Hours</button>
+                        <button onclick="answerBudSterileQuiz(${item.id}, '4d')" id="buds-${item.id}-4d" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded font-mono font-semibold text-slate-700 transition text-[11px]">4 Days</button>
+                        <button onclick="answerBudSterileQuiz(${item.id}, '10d')" id="buds-${item.id}-10d" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded font-mono font-semibold text-slate-700 transition text-[11px]">10 Days</button>
+                        <button onclick="answerBudSterileQuiz(${item.id}, '45d')" id="buds-${item.id}-45d" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded font-mono font-semibold text-slate-700 transition text-[11px]">45 Days</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function answerBudSterileQuiz(itemId, selected) {
+            const item = budSterileScenarios.find(x => x.id === itemId);
+            ['24h', '4d', '10d', '45d'].forEach(val => {
+                const btn = document.getElementById(`buds-${itemId}-${val}`);
+                btn.className = "px-2.5 py-1 bg-slate-100 text-slate-400 rounded font-mono text-[11px]";
+            });
+
+            const activeBtn = document.getElementById(`buds-${itemId}-${selected}`);
+            if (selected === item.correct) {
+                activeBtn.className = "px-2.5 py-1 bg-emerald-600 text-white font-bold rounded font-mono text-[11px]";
+            } else {
+                activeBtn.className = "px-2.5 py-1 bg-rose-600 text-white font-bold rounded font-mono text-[11px]";
+            }
+        }
+
+        // Module 5 Math Checks
+        function checkMathSterile1() {
+            const val = parseFloat(document.getElementById('mathInputSterile1').value);
+            const feedback = document.getElementById('mathFeedbackSterile1');
+            feedback.classList.remove('hidden');
+
+            if (val === 31) {
+                feedback.className = "text-xs p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> <strong>Correct!</strong> Calculation: Flow rate = 1000 mL / 8 hr = 125 mL/hr. Drip rate = (125 mL × 15 gtt/mL) / 60 min = 31.25 ≈ 31 gtt/min.';
+            } else {
+                feedback.className = "text-xs p-3 bg-rose-50 text-rose-800 border border-rose-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-xmark mr-1 text-rose-600"></i> <strong>Incorrect.</strong> Hint: Flow rate = 125 mL/hr. Multiply by 15 gtt/mL and divide by 60 minutes = 31 gtt/min.';
+            }
+        }
+
+        function checkMathSterile2() {
+            const val = parseFloat(document.getElementById('mathInputSterile2').value);
+            const feedback = document.getElementById('mathFeedbackSterile2');
+            feedback.classList.remove('hidden');
+
+            if (val === 20) {
+                feedback.className = "text-xs p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> <strong>Correct!</strong> Calculation: 40 mEq / (2 mEq/mL) = 20 mL of KCl stock solution.';
+            } else {
+                feedback.className = "text-xs p-3 bg-rose-50 text-rose-800 border border-rose-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-xmark mr-1 text-rose-600"></i> <strong>Incorrect.</strong> Hint: Divide required mEq (40) by concentration (2 mEq/mL) = 20 mL.';
+            }
+        }
+
+        function checkMathSterile3() {
+            const val = parseFloat(document.getElementById('mathInputSterile3').value);
+            const feedback = document.getElementById('mathFeedbackSterile3');
+            feedback.classList.remove('hidden');
+
+            if (val === 0.5) {
+                feedback.className = "text-xs p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> <strong>Correct!</strong> Calculation: Total final volume = 1000 mg / 250 mg/mL = 4.0 mL. Displacement volume = 4.0 mL - 3.5 mL diluent = 0.5 mL.';
+            } else {
+                feedback.className = "text-xs p-3 bg-rose-50 text-rose-800 border border-rose-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-xmark mr-1 text-rose-600"></i> <strong>Incorrect.</strong> Hint: Total volume = 4.0 mL. Subtract 3.5 mL added diluent = 0.5 mL.';
+            }
+        }
+
+        // Module 6 Exam Questions (15 Questions)
+        const examQuestions = [
+            {
+                q: "1. Which USP chapter sets the enforceable national standard for Compounded Sterile Preparations (CSPs)?",
+                options: ["USP <795>", "USP <797>", "USP <800>", "USP <1163>"],
+                correct: 1
+            },
+            {
+                q: "2. What is the minimum required ISO air cleanliness classification inside a Primary Engineering Control (PEC) such as a Laminar Airflow Workbench?",
+                options: ["ISO Class 3", "ISO Class 5", "ISO Class 7", "ISO Class 8"],
+                correct: 1
+            },
+            {
+                q: "3. What is the minimum ISO air classification required for a cleanroom Buffer Area housing non-hazardous PECs?",
+                options: ["ISO Class 5", "ISO Class 7", "ISO Class 8", "Unclassified"],
+                correct: 1
+            },
+            {
+                q: "4. What is the proper sequence for personnel garbing prior to sterile compounding?",
+                options: [
+                    "Sterile gloves -> Gown -> Face mask -> Shoe covers -> Hand wash",
+                    "Shoe covers -> Head/Beard cover -> Face mask -> Hand scrub -> Gown -> Sterile gloves",
+                    "Hand scrub -> Gown -> Shoe covers -> Face mask -> Head cover -> Gloves",
+                    "Gown -> Shoe covers -> Head cover -> Sterile gloves -> Face mask"
+                ],
+                correct: 1
+            },
+            {
+                q: "5. What term defines the direct, unobstructed air exiting the HEPA filter that sweeps across critical sites in a PEC?",
+                options: ["Laminar draft", "First Air", "Positive plenum air", "HEPA exhaust"],
+                correct: 1
+            },
+            {
+                q: "6. Which part of a syringe is NOT considered a critical site and MAY be touched during aseptic manipulation?",
+                options: ["Syringe tip", "Inner plunger shaft ribs", "Exterior of syringe barrel", "Luer lock connection hub"],
+                correct: 2
+            },
+            {
+                q: "7. When withdrawing solution from a glass ampule, what specialized equipment MUST be used to prevent patient harm?",
+                options: ["Ventilated needle", "5-micron filter needle or filter straw", "18-gauge blunt needle", "Twin port syringe"],
+                correct: 1
+            },
+            {
+                q: "8. How long must an aseptic hand wash scrub be performed under running water according to USP <797>?",
+                options: ["10 Seconds", "15 Seconds", "At least 30 Seconds", "5 Minutes"],
+                correct: 2
+            },
+            {
+                q: "9. To pass initial Gloved Fingertip Testing (GFT) competency for sterile compounding, how many Colony Forming Units (CFUs) are permitted?",
+                options: ["0 CFUs on both hands combined", "3 CFUs per hand", "5 CFUs total", "10 CFUs"],
+                correct: 0
+            },
+            {
+                q: "10. What type of room pressure differential is required for compounding hazardous drugs under USP <800> to protect personnel?",
+                options: ["Positive pressure", "Negative pressure", "Atmospheric equilibrium", "Neutral pressure"],
+                correct: 1
+            },
+            {
+                q: "11. What is the maximum Beyond-Use Date (BUD) for a Category 1 CSP stored under refrigeration (2°C to 8°C)?",
+                options: ["12 Hours", "24 Hours", "4 Days", "10 Days"],
+                correct: 1
+            },
+            {
+                q: "12. What is the maximum BUD for an aseptically prepared Category 2 CSP with sterile components stored in a refrigerator (2°C to 8°C)?",
+                options: ["24 Hours", "4 Days", "10 Days", "45 Days"],
+                correct: 2
+            },
+            {
+                q: "13. How many mL of 10% Sodium Chloride solution are needed to prepare 500 mL of 0.9% NaCl solution?",
+                options: ["45 mL", "90 mL", "4.5 mL", "50 mL"],
+                correct: 0
+            },
+            {
+                q: "14. How frequently must viable air sampling be conducted in cleanrooms according to USP <797> standards?",
+                options: ["Every 3 Months", "Every 6 Months", "Annually", "Every 2 Years"],
+                correct: 1
+            },
+            {
+                q: "15. In what directional motion should the work surface of a Laminar Airflow Workbench be cleaned with 70% IPA?",
+                options: [
+                    "Circular motion from front to back",
+                    "Back to front, top to bottom, away from HEPA filter",
+                    "Side to side starting at the front edge",
+                    "Random overlapping strokes"
+                ],
+                correct: 1
+            }
+        ];
+
+        function renderExam() {
+            const container = document.getElementById('examContainer');
+            container.innerHTML = examQuestions.map((q, idx) => `
+                <div class="p-4 border border-slate-200 rounded-xl space-y-3 bg-white shadow-2xs">
+                    <div class="font-bold text-slate-800 text-xs">${q.q}</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        ${q.options.map((opt, optIdx) => `
+                            <label class="flex items-center space-x-2.5 p-2 rounded hover:bg-slate-50 cursor-pointer border border-slate-100 hover:border-slate-200 transition">
+                                <input type="radio" name="exam-q-${idx}" value="${optIdx}" class="text-sky-600 focus:ring-sky-500">
+                                <span class="text-slate-700">${opt}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function gradeExam() {
+            let correctCount = 0;
+            examQuestions.forEach((q, idx) => {
+                const selected = document.querySelector(`input[name="exam-q-${idx}"]:checked`);
+                if (selected && parseInt(selected.value) === q.correct) {
+                    correctCount++;
+                }
+            });
+
+            const scorePct = Math.round((correctCount / examQuestions.length) * 100);
+            state.examScore = scorePct;
+
+            const scoreText = document.getElementById('examScoreText');
+            scoreText.innerText = `${correctCount} / ${examQuestions.length} (${scorePct}%)`;
+
+            if (scorePct >= 80) {
+                scoreText.className = "text-2xl font-extrabold text-emerald-600";
+                state.examPassed = true;
+                completeModule(6);
+
+                document.getElementById('completionStatusBox').classList.remove('hidden');
+                document.getElementById('overallScoreDisplay').innerText = `${scorePct}%`;
+            } else {
+                scoreText.className = "text-2xl font-extrabold text-rose-600";
+                document.getElementById('completionStatusBox').classList.add('hidden');
+                alert(`You scored ${scorePct}%. You need at least 80% (12/15) to pass the evaluation. Please review the modules and re-try.`);
+            }
+        }
+
+        function toggleNotesModal() {
+            document.getElementById('notesModal').classList.toggle('hidden');
+        }
+
+        function saveNotes() {
+            toggleNotesModal();
+        }
+
+        window.onload = function() {
+            renderCleanroomQuiz();
+            renderGarbingSequence();
+            renderAsepticSteps();
+            renderBudSterilePractice();
+            renderExam();
+        };
+    </script>
+</body>
+</html>
