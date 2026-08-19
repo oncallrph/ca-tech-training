@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 11: Introduction to Packaging and Labeling - Pharmacy Tech Training</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- KaTeX for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
+        });
+    </script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        pharmacy: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        },
+                        pkg: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-800 antialiased flex flex-col bg-slate-50 custom-scrollbar">
+
+    <!-- Top Header / App Bar -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Branding -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg bg-pkg-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                        <i class="fa-solid fa-box-archive"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-lg tracking-wide leading-tight">SOUTH COAST MISSION PHARMACY</div>
+                        <div class="text-xs text-amber-200 font-medium">California Technician Training Program • Day 11</div>
+                    </div>
+                </div>
+
+                <!-- Timer & Session Stats -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <!-- Session Duration Tracker -->
+                    <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                        <i class="fa-regular fa-clock text-amber-400"></i>
+                        <span class="text-xs text-slate-300">Time Spent:</span>
+                        <span id="sessionTimer" class="font-mono text-sm font-semibold text-emerald-400">00:00:00</span>
+                    </div>
+
+                    <!-- Target Time Indicator -->
+                    <div class="text-xs text-slate-400 flex items-center space-x-1">
+                        <i class="fa-solid fa-hourglass-half text-amber-400"></i>
+                        <span>Target: 120 Minutes</span>
+                    </div>
+
+                    <!-- Quick Action Notes Modal Trigger -->
+                    <button onclick="toggleNotesModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-1 transition">
+                        <i class="fa-solid fa-note-sticky text-yellow-400"></i>
+                        <span>Study Notes</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Module Progress Bar -->
+        <div class="w-full bg-slate-800 h-2 relative">
+            <div id="overallProgressBar" class="bg-gradient-to-r from-amber-500 to-emerald-400 h-2 transition-all duration-500" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <!-- Main Application Container -->
+    <div class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col lg:flex-row gap-6">
+
+        <!-- Sidebar Navigation -->
+        <aside class="w-full lg:w-80 shrink-0 space-y-4 no-print">
+            <!-- Student Profile Card -->
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold border border-slate-200">
+                        <i class="fa-solid fa-user-nurse"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Trainee Session</div>
+                        <input type="text" id="studentNameInput" value="Pharmacy Student" onchange="updateStudentName()" class="font-semibold text-slate-800 text-sm bg-transparent border-b border-dashed border-slate-300 focus:outline-none focus:border-pkg-500 w-full" title="Click to edit name">
+                    </div>
+                </div>
+                <div class="space-y-2 text-xs text-slate-600">
+                    <div class="flex justify-between">
+                        <span>Curriculum Progress:</span>
+                        <span id="modulesCompletedCount" class="font-semibold text-slate-800">0 / 6 Modules</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Assessment Score:</span>
+                        <span id="overallScoreDisplay" class="font-semibold text-pkg-600">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="bg-white rounded-xl shadow-sm border border-slate-200 p-2 space-y-1">
+                <div class="px-3 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Day 11 Curriculum</div>
+
+                <button onclick="switchTab('overview')" id="nav-overview" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition bg-amber-50 text-amber-900">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-compass w-5 text-center text-amber-600"></i>
+                        <span>Course Overview</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+                </button>
+
+                <button onclick="switchTab('mod1')" id="nav-mod1" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-boxes-packing w-5 text-center text-slate-400"></i>
+                        <span>1. Packaging Materials & USP &lt;659&gt;</span>
+                    </div>
+                    <span id="status-mod1" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod2')" id="nav-mod2" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-child-reaching w-5 text-center text-slate-400"></i>
+                        <span>2. Child-Resistant Packaging (PPPA)</span>
+                    </div>
+                    <span id="status-mod2" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">25m</span>
+                </button>
+
+                <button onclick="switchTab('mod3')" id="nav-mod3" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-file-prescription w-5 text-center text-slate-400"></i>
+                        <span>3. Prescription Label Anatomy & Auxiliary Labels</span>
+                    </div>
+                    <span id="status-mod3" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod4')" id="nav-mod4" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-shield-cat w-5 text-center text-slate-400"></i>
+                        <span>4. Tamper-Evident & Unit-Dose Systems</span>
+                    </div>
+                    <span id="status-mod4" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod5')" id="nav-mod5" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-calculator w-5 text-center text-slate-400"></i>
+                        <span>5. Packaging & Labeling Math Lab</span>
+                    </div>
+                    <span id="status-mod5" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod6')" id="nav-mod6" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-clipboard-check w-5 text-center text-slate-400"></i>
+                        <span>6. Examination & Case Scenarios</span>
+                    </div>
+                    <span id="status-mod6" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">15m</span>
+                </button>
+            </nav>
+
+            <!-- Quick Reference Drawer Box -->
+            <div class="bg-slate-900 text-slate-200 rounded-xl p-4 shadow-sm text-xs space-y-2">
+                <div class="font-bold text-amber-400 uppercase tracking-wider flex items-center justify-between">
+                    <span><i class="fa-solid fa-lightbulb mr-1"></i> Packaging Quick Rules</span>
+                    <span class="text-[10px] text-slate-400">Reference</span>
+                </div>
+                <ul class="space-y-1.5 text-slate-300 list-disc list-inside">
+                    <li><strong class="text-amber-300">PPPA 1970:</strong> Child-resistant caps for oral Rx drugs</li>
+                    <li><strong class="text-amber-300">Blanket Waiver:</strong> PATIENT ONLY (not doctor)</li>
+                    <li><strong class="text-amber-300">SL Nitroglycerin:</strong> ALWAYS EXEMPT from C-R caps</li>
+                    <li><strong class="text-amber-300">CA B&amp;P 4076:</strong> 10-pt bold for 4 critical elements</li>
+                    <li><strong class="text-amber-300">Unit-Dose BUD:</strong> 1 yr max or 25% manufacturer exp</li>
+                    <li><strong class="text-amber-300">Light Protection:</strong> Amber glass/plastic &lt; 10% transmission</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto custom-scrollbar">
+
+            <!-- TAB: OVERVIEW -->
+            <div id="tab-overview" class="tab-content space-y-6">
+                <div>
+                    <div class="inline-flex items-center space-x-2 bg-amber-100 text-amber-900 text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <span>California Technician Training Program</span>
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Day 11: Introduction to Packaging and Labeling</h1>
+                    <p class="mt-2 text-slate-600 text-sm leading-relaxed">
+                        Welcome to Day 11 of the California Pharmacy Technician Training Program. Medication packaging and labeling represent the final critical line of defense before a pharmaceutical product reaches the patient. Proper packaging protects drug stability against environmental degradation, prevents accidental pediatric poisoning through child-resistant closures, and ensures clear, unambiguous dosing instructions in compliance with California Board of Pharmacy and federal standards.
+                    </p>
+                </div>
+
+                <!-- Detailed Syllabus Breakdown -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-amber-600"></i>
+                        <span>2-Hour Curriculum Time Allocation & Modular Objectives</span>
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-amber-700">Module 1 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Packaging Materials & USP Standards</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Glass Types I-III, plastics (HDPE, PET, PP), amber light protection (&lt;10% transmission), USP &lt;659&gt; container definitions.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-amber-700">Module 2 (25 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Child-Resistant Packaging (PPPA 1970)</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Poison Prevention Packaging Act rules, statutory exemptions (Sublingual NTG, Oral Contraceptives), patient vs prescriber waiver mandates.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-amber-700">Module 3 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Prescription Label Anatomy & Auxiliary Labels</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">California B&amp;P Code 4076 mandatory label elements, 10-point bold prominent items, physical description rule, and essential auxiliary warnings.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-amber-700">Module 4 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Tamper-Evident & Unit-Dose Systems</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Federal Anti-Tampering Act of 1982, shrink bands, induction seals, unit-dose repackaging standards, and USP Beyond-Use Date (BUD) calculations.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-amber-700">Module 5 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Packaging & Labeling Math Lab</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Eye drop drop-factor conversions (20 gtt/mL), day supply calculations, insulin pen box metrics, and unit-dose repackaging BUD limits.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-amber-700">Module 6 (15 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Comprehensive Evaluation Exam</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">15-question professional certification check, practical packaging scenarios, and regulatory compliance verification.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Objectives -->
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Core Learning Competencies</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="flex items-start space-x-3 p-3 bg-amber-50/60 border border-amber-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-amber-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Container & Material Selection:</strong> Classify USP &lt;659&gt; containers (Tight, Well-Closed, Hermetic, Light-Resistant) and select appropriate materials based on drug stability.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-amber-50/60 border border-amber-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-amber-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>PPPA & Legal Exemption Master:</strong> Identify products requiring child-resistant packaging, manage patient/prescriber waivers, and list mandatory legal exemptions.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-amber-50/60 border border-amber-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-amber-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>California Label Compliance:</strong> Apply California Board of Pharmacy (B&amp;P Code 4076) prescription labeling standards, including 10-point bold fonts and physical drug descriptions.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-amber-50/60 border border-amber-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-amber-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Repackaging & Calculations:</strong> Calculate precise day supply for liquid/ophthalmic/insulin orders, execute unit-dose repackaging, and assign accurate BUDs.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end">
+                    <button onclick="switchTab('mod1')" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition">
+                        <span>Begin Module 1: Packaging Materials</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 1 -->
+            <div id="tab-mod1" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Module 1 of 6 • Estimated Reading Time: 20 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-boxes-packing mr-1"></i> Packaging Materials</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Packaging Materials, Container Types & USP &lt;659&gt; Standards</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        Pharmaceutical packaging is defined as the container, closure, and exterior carton that holds, protects, and delivers a drug product. Primary packaging directly contacts the medication (e.g., amber vial, blister pack, glass ampule), while secondary packaging holds primary containers (e.g., outer cardboard box).
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">1.1 Primary Packaging Materials: Glass vs. Plastics</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+                        <div class="bg-amber-50/80 border border-amber-200 rounded-xl p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="bg-amber-700 text-white font-mono text-xs font-bold px-2.5 py-1 rounded-md">Glass Containers</span>
+                                <i class="fa-solid fa-vial text-amber-500 text-lg"></i>
+                            </div>
+                            <h4 class="font-bold text-amber-900 text-xs">USP Glass Types I, II & III</h4>
+                            <p class="text-[11px] text-slate-600">
+                                Glass is impermeable to moisture and gases, heat resistant, and highly chemical-resistant.
+                            </p>
+                            <ul class="text-[10px] text-slate-700 list-disc list-inside space-y-1 font-medium">
+                                <li><strong>Type I (Borosilicate):</strong> Highly resistant; required for parenterals & IV solutions.</li>
+                                <li><strong>Type II (Treated Soda-Lime):</strong> Suitable for acidic/neutral aqueous parenterals.</li>
+                                <li><strong>Type III (Soda-Lime):</strong> Used for non-aqueous parenterals & dry powders.</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-sky-50/80 border border-sky-200 rounded-xl p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="bg-sky-700 text-white font-mono text-xs font-bold px-2.5 py-1 rounded-md">Plastic Polymers</span>
+                                <i class="fa-solid fa-bottle-droplet text-sky-500 text-lg"></i>
+                            </div>
+                            <h4 class="font-bold text-sky-900 text-xs">HDPE, PET & Polypropylene</h4>
+                            <p class="text-[11px] text-slate-600">
+                                Plastics are lightweight, shatterproof, and cost-effective, but may allow gas permeability or leaching.
+                            </p>
+                            <ul class="text-[10px] text-slate-700 list-disc list-inside space-y-1 font-medium">
+                                <li><strong>HDPE:</strong> Standard for solid oral stock bottles and amber prescription vials.</li>
+                                <li><strong>PET / PETG:</strong> Clear plastic used for oral liquid bottles.</li>
+                                <li><strong>Polypropylene:</strong> Autoclavable plastic used for syringe bodies & closures.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">1.2 USP &lt;659&gt; Container Definitions & Light Protection</h3>
+                    <p>
+                        United States Pharmacopeia (USP) General Chapter **&lt;659&gt;** defines the specific performance metrics required for pharmaceutical containers:
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs my-3">
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="font-bold text-slate-800 text-xs flex items-center"><i class="fa-solid fa-box text-amber-600 mr-1"></i> Well-Closed</div>
+                            <p class="text-slate-600 text-[11px] mt-1">Protects contents from extraneous solids and loss of drug under normal handling and storage conditions.</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="font-bold text-slate-800 text-xs flex items-center"><i class="fa-solid fa-lock text-amber-600 mr-1"></i> Tight Container</div>
+                            <p class="text-slate-600 text-[11px] mt-1">Protects contents from contamination by liquids, solids, or vapors, and prevents effervescence or deliquescence.</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="font-bold text-slate-800 text-xs flex items-center"><i class="fa-solid fa-syringe text-amber-600 mr-1"></i> Hermetic Container</div>
+                            <p class="text-slate-600 text-[11px] mt-1">Impervious to air or any other gas under customary conditions. Standard for sterile injectables & ampules.</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="font-bold text-slate-800 text-xs flex items-center"><i class="fa-solid fa-sun text-amber-600 mr-1"></i> Light-Resistant</div>
+                            <p class="text-slate-600 text-[11px] mt-1">Amber glass/plastic that limits light transmission between 290nm and 450nm to <strong>less than 10%</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Material Selection Quiz -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold text-slate-800 flex items-center space-x-2 uppercase tracking-wider">
+                            <i class="fa-solid fa-gamepad text-amber-600"></i>
+                            <span>Interactive Practice: Container Classification & Selection</span>
+                        </h3>
+                        <span class="text-[11px] text-slate-500">6 Questions</span>
+                    </div>
+                    <p class="text-xs text-slate-600">Match each drug product or packaging scenario to its mandated USP container classification or material:</p>
+
+                    <div id="containerQuizContainer" class="space-y-3 text-xs">
+                        <!-- JS Rendered -->
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('overview')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Back to Overview</span>
+                    </button>
+                    <button onclick="completeModule(1); switchTab('mod2')" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Module 2</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 2 -->
+            <div id="tab-mod2" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Module 2 of 6 • Estimated Reading Time: 25 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-child-reaching mr-1"></i> Child-Resistant Packaging</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Poison Prevention Packaging Act (PPPA) & Waiver Protocols</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        Enacted in 1970 and enforced by the **Consumer Product Safety Commission (CPSC)**, the **Poison Prevention Packaging Act (PPPA)** requires child-resistant (C-R) packaging for almost all oral prescription drugs and hazardous OTC products to protect children under 5 years of age from accidental ingestion.
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">2.1 C-R Testing Standards & Re-Use Restrictions</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs my-2">
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1">
+                            <strong class="text-slate-800 font-bold block"><i class="fa-solid fa-vial-circle-check text-amber-600 mr-1"></i> Performance Criteria:</strong>
+                            <p class="text-slate-600 text-[11px]">To qualify as child-resistant, at least **80%** of tested children under 5 years old must be unable to open the container within 10 minutes, while at least **90%** of tested adults must easily open and reclose it.</p>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1">
+                            <strong class="text-slate-800 font-bold block"><i class="fa-solid fa-recycle text-amber-600 mr-1"></i> Re-Use Rule:</strong>
+                            <p class="text-slate-600 text-[11px]">Pharmacy technicians **MUST NOT reuse plastic prescription vials or C-R caps** when dispensing refills, because plastic stress leads to loss of safety integrity. Glass bottles may be reused IF a new plastic cap is provided.</p>
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">2.2 Patient Blanket Waivers vs. Prescriber Waivers</h3>
+                    <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-2 text-xs">
+                        <div class="font-bold text-amber-900 uppercase tracking-wider text-[11px]"><i class="fa-solid fa-signature text-amber-700 mr-1"></i> Legal Waiver Mandates (Critical Exam Rule)</div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px]">
+                            <div class="bg-white p-3 rounded-lg border border-amber-100">
+                                <strong class="text-slate-800 block font-bold mb-1"><i class="fa-solid fa-user text-amber-600 mr-1"></i> Patient Request (Blanket Waiver):</strong>
+                                <p class="text-slate-600">A patient may request a **blanket waiver** requesting non-child-resistant (easy-open) caps on ALL current and future prescriptions. Signed written documentation is strongly recommended for pharmacy risk records.</p>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg border border-amber-100">
+                                <strong class="text-slate-800 block font-bold mb-1"><i class="fa-solid fa-user-doctor text-amber-600 mr-1"></i> Prescriber Request (Single Rx Waiver):</strong>
+                                <p class="text-slate-600">A physician/prescriber can request non-C-R caps **ONLY on an individual prescription basis**. Prescribers **CANNOT** issue a blanket waiver for all of a patient's prescriptions or refills.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">2.3 Statutory Exemptions from PPPA</h3>
+                    <p>
+                        Certain oral medications are legally **EXEMPT** from child-resistant packaging requirements because immediate access during an emergency is critical, or because dose packaging poses low risk:
+                    </p>
+                    <ul class="text-[11px] text-slate-700 list-disc list-inside space-y-1 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <li><strong class="text-amber-800">Sublingual Nitroglycerin (SL NTG):</strong> Emergency angina treatment (must remain in original glass bottle).</li>
+                        <li><strong class="text-amber-800">Sublingual & Chewable Isosorbide Dinitrate:</strong> Doses of 10 mg or less.</li>
+                        <li><strong class="text-amber-800">Oral Contraceptives:</strong> Memory-pack dial dispensers.</li>
+                        <li><strong class="text-amber-800">Corticosteroid Dose Packs:</strong> E.g., Methylprednisolone (Medrol Dosepak), Prednisone dose packs.</li>
+                        <li><strong class="text-amber-800">Anhydrous Cholestyramine Powder & Potassium Supplements:</strong> Unit-dose packets & effervescent tablets (&lt;50 mEq per dose).</li>
+                        <li><strong class="text-amber-800">Aerosol Inhalers:</strong> Metered Dose Inhalers (MDIs) for asthma emergency relief.</li>
+                    </ul>
+                </div>
+
+                <!-- Interactive Scenario Checker -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-2">
+                        <i class="fa-solid fa-list-check text-amber-600"></i>
+                        <span>Interactive Exercise: PPPA C-R Packaging Exemption Checker</span>
+                    </h3>
+                    <p class="text-xs text-slate-600">Determine whether each order REQUIRES a Child-Resistant closure or is LEGALLY EXEMPT under PPPA rules:</p>
+
+                    <div id="pppaQuizContainer" class="space-y-3 text-xs">
+                        <!-- JS Rendered -->
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod1')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Previous Module</span>
+                    </button>
+                    <button onclick="completeModule(2); switchTab('mod3')" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Module 3</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 3 -->
+            <div id="tab-mod3" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Module 3 of 6 • Estimated Reading Time: 20 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-file-prescription mr-1"></i> Label Anatomy</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Prescription Label Anatomy, California Board Rules & Auxiliary Labels</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        Prescription labels must clearly convey all vital patient directions. Under **California Business & Professions Code 4076**, California enforces patient-centered label standards to minimize medication errors.
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">3.1 California 10-Point Bold Prominence Rule (B&amp;P Code 4076)</h3>
+                    <p>
+                        In California, the following **4 Critical Elements** must comprise at least **50% of the total label area**, printed in <strong>10-point bold sans-serif font</strong>:
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 font-mono text-xs my-3">
+                        <div class="p-3 bg-amber-900 text-amber-100 rounded-lg border border-amber-700 space-y-1">
+                            <span class="text-[10px] text-amber-300 font-sans font-bold uppercase">Critical Element 1</span>
+                            <div class="font-bold text-sm text-white">Patient Name</div>
+                            <div class="text-[10px] text-amber-200 font-sans">First & Last Name of Patient</div>
+                        </div>
+                        <div class="p-3 bg-amber-900 text-amber-100 rounded-lg border border-amber-700 space-y-1">
+                            <span class="text-[10px] text-amber-300 font-sans font-bold uppercase">Critical Element 2</span>
+                            <div class="font-bold text-sm text-white">Drug Name & Strength</div>
+                            <div class="text-[10px] text-amber-200 font-sans">Generic + Manufacturer or Brand Name</div>
+                        </div>
+                        <div class="p-3 bg-amber-900 text-amber-100 rounded-lg border border-amber-700 space-y-1">
+                            <span class="text-[10px] text-amber-300 font-sans font-bold uppercase">Critical Element 3</span>
+                            <div class="font-bold text-sm text-white">Directions for Use</div>
+                            <div class="text-[10px] text-amber-200 font-sans">Explicit Patient Instructions (Sig)</div>
+                        </div>
+                        <div class="p-3 bg-amber-900 text-amber-100 rounded-lg border border-amber-700 space-y-1">
+                            <span class="text-[10px] text-amber-300 font-sans font-bold uppercase">Critical Element 4</span>
+                            <div class="font-bold text-sm text-white">Condition / Purpose</div>
+                            <div class="text-[10px] text-amber-200 font-sans">If included on prescription order</div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">3.2 Additional CA Mandated Elements & Physical Description</h3>
+                    <p>
+                        In addition to the 4 critical elements, California prescription labels must include:
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <ul class="list-disc list-inside space-y-1 text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-200 text-[11px]">
+                            <li><strong>Pharmacy Name, Address & Phone Number</strong></li>
+                            <li><strong>Prescription (Rx) Number</strong></li>
+                            <li><strong>Prescriber Name</strong></li>
+                            <li><strong>Date of Dispensing / Filling</strong></li>
+                            <li><strong>Quantity Dispensed</strong></li>
+                        </ul>
+                        <ul class="list-disc list-inside space-y-1 text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-200 text-[11px]">
+                            <li><strong>Expiration Date / Beyond-Use Date (BUD)</strong></li>
+                            <li><strong>Physical Description of Drug:</strong> Color, shape, and imprint code (e.g., "Yellow, oval tablet stamped 'A 01'").</li>
+                            <li><strong>Number of Refills Remaining</strong></li>
+                            <li><strong>Cautionary Auxiliary Warning Labels</strong></li>
+                        </ul>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">3.3 Essential Auxiliary Warning Labels</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs my-2">
+                        <div class="p-3 bg-yellow-100 border border-yellow-300 rounded-lg space-y-1 text-yellow-900">
+                            <div class="font-bold text-xs"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Shake Well Before Use</div>
+                            <p class="text-[11px]">Mandatory for all <strong>oral & topical suspensions</strong> to ensure uniform active drug distribution.</p>
+                        </div>
+                        <div class="p-3 bg-blue-100 border border-blue-300 rounded-lg space-y-1 text-blue-900">
+                            <div class="font-bold text-xs"><i class="fa-solid fa-snowflake mr-1"></i> Refrigerate • Do Not Freeze</div>
+                            <p class="text-[11px]">Required for reconstitutable antibiotics (e.g., Amoxicillin/Clavulanate, Augmentin), insulins, and biologicals.</p>
+                        </div>
+                        <div class="p-3 bg-rose-100 border border-rose-300 rounded-lg space-y-1 text-rose-900">
+                            <div class="font-bold text-xs"><i class="fa-solid fa-ban-smoking mr-1"></i> Opioid / Controlled Risk</div>
+                            <p class="text-[11px]">Required for Schedule II-V opioids: "Caution: Federal law prohibits transfer to any person other than patient."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Auxiliary Matching -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-2">
+                        <i class="fa-solid fa-tags text-amber-600"></i>
+                        <span>Interactive Practice: Assign Auxiliary Warning Labels</span>
+                    </h3>
+                    <p class="text-xs text-slate-600">Select the primary auxiliary label required for each drug formulation:</p>
+
+                    <div id="auxiliaryQuizContainer" class="space-y-3 text-xs">
+                        <!-- JS Rendered -->
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod2')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Previous Module</span>
+                    </button>
+                    <button onclick="completeModule(3); switchTab('mod4')" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Module 4</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 4 -->
+            <div id="tab-mod4" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Module 4 of 6 • Estimated Reading Time: 20 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-shield-cat mr-1"></i> Tamper-Evident & Repackaging</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Tamper-Evident Packaging & Unit-Dose Repackaging Rules</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        In 1982, following the tragic Tylenol cyanide tampering incidents in Chicago, Congress passed the **Federal Anti-Tampering Act**. This act mandates tamper-evident packaging for consumer OTC drug products and cosmetic items.
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">4.1 Tamper-Evident Technologies</h3>
+                    <p>
+                        A tamper-evident package is equipped with one or more indicators or barriers to entry which, if breached or missing, provide visible evidence to consumers that tampering has occurred:
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs my-3">
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <strong class="text-amber-800 font-bold block text-xs"><i class="fa-solid fa-circle-dot mr-1"></i> Induction Seals</strong>
+                            <p class="text-slate-600 text-[11px]">Foil seals heat-sealed across container mouth beneath screw cap.</p>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <strong class="text-amber-800 font-bold block text-xs"><i class="fa-solid fa-ring mr-1"></i> Breakable Ring Caps</strong>
+                            <p class="text-slate-600 text-[11px]">Plastic/metal cap ring that breaks away upon initial unscrewing.</p>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <strong class="text-amber-800 font-bold block text-xs"><i class="fa-solid fa-border-all mr-1"></i> Blister Packaging</strong>
+                            <p class="text-slate-600 text-[11px]">Medication sealed between thermoformed plastic bubble & foil backing.</p>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <strong class="text-amber-800 font-bold block text-xs"><i class="fa-solid fa-tape mr-1"></i> Shrink Bands</strong>
+                            <p class="text-slate-600 text-[11px]">Cellophane bands heat-shrunk around outer cap-to-bottle junction.</p>
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">4.2 Unit-Dose Repackaging & Expiration BUD Standards</h3>
+                    <p>
+                        Hospital and institutional pharmacies frequently repackage oral solid medications from commercial bulk bottles into single unit-dose blister cards (Bingo cards) or foil packets.
+                    </p>
+
+                    <div class="p-4 bg-slate-900 text-slate-100 rounded-xl space-y-2 font-mono text-xs">
+                        <div class="text-amber-400 font-bold uppercase tracking-wider text-[11px]"><i class="fa-solid fa-calculator text-amber-400 mr-1"></i> USP Unit-Dose Beyond-Use Date (BUD) Calculation Rule</div>
+                        <p class="text-slate-300 font-sans text-[11px]">
+                            Under USP packaging standards, the maximum Beyond-Use Date (BUD) assigned to repackaged solid oral dosage forms is:
+                        </p>
+                        <div class="p-3 bg-slate-800 rounded-lg border border-slate-700 text-amber-300 font-bold text-xs">
+                            BUD = 1 Year OR 25% of the remaining manufacturer expiration date on the bulk bottle (WHICHEVER IS SHORTER, not to exceed 1 year).
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Repackaging Scenarios -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-2">
+                        <i class="fa-solid fa-calendar-day text-amber-600"></i>
+                        <span>Interactive Practice: Assign Unit-Dose Repackaging BUDs</span>
+                    </h3>
+                    <p class="text-xs text-slate-600">Today's Date is <strong>March 1, 2026</strong>. Determine the correct maximum BUD for each repackaging job:</p>
+
+                    <div id="repackagingQuizContainer" class="space-y-3 text-xs">
+                        <!-- JS Rendered -->
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod3')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Previous Module</span>
+                    </button>
+                    <button onclick="completeModule(4); switchTab('mod5')" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Module 5</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 5 -->
+            <div id="tab-mod5" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Module 5 of 6 • Estimated Reading Time: 20 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-calculator mr-1"></i> Calculations Laboratory</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Packaging & Labeling Mathematics Laboratory</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        Pharmacy technicians must perform accurate calculations for day supply, liquid container drop calibrations, insulin pen carton metrics, and unit-dose BUD limits.
+                    </p>
+
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                        <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center">
+                            <i class="fa-solid fa-square-root-variable text-amber-600 mr-2"></i> Key Packaging Calculation Standards
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] font-mono">
+                            <div class="p-2 bg-white border border-slate-200 rounded">
+                                <strong>Eye Drop Calibration Standard:</strong><br>
+                                $$\text{1 mL of Ophthalmic Solution} = 20\text{ drops (gtt)}$$
+                            </div>
+                            <div class="p-2 bg-white border border-slate-200 rounded">
+                                <strong>Insulin FlexPen Standard:</strong><br>
+                                $$\text{U-100 Insulin} = 100\text{ units/mL}$$
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Math Practice Problems -->
+                <div class="space-y-4 pt-2">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Packaging Calculation Practice Lab</h3>
+
+                    <!-- Math Problem 1 -->
+                    <div class="border border-slate-200 rounded-xl p-4 space-y-3 bg-white shadow-2xs">
+                        <div class="flex justify-between items-start">
+                            <span class="font-bold text-slate-800 text-xs">Problem 1: Ophthalmic Solution Day Supply</span>
+                            <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-semibold">Eye Drop Practice</span>
+                        </div>
+                        <p class="text-xs text-slate-600">
+                            A prescription calls for <strong>Xalatan (latanoprost 0.005%)</strong> ophthalmic solution, <strong>1 drop in both eyes once daily at bedtime</strong>. The pharmacy dispenses one <strong>2.5 mL bottle</strong>. Assuming standard eye drop calibration of <strong>20 drops per mL</strong>, calculate the total day supply.
+                        </p>
+
+                        <div class="flex items-center space-x-3 text-xs">
+                            <input type="number" id="mathInputPkg1" placeholder="Enter days supply" class="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-amber-500 w-48 font-mono">
+                            <button onclick="checkMathPkg1()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2 rounded-lg transition text-xs">Check Answer</button>
+                        </div>
+                        <div id="mathFeedbackPkg1" class="text-xs hidden"></div>
+                    </div>
+
+                    <!-- Math Problem 2 -->
+                    <div class="border border-slate-200 rounded-xl p-4 space-y-3 bg-white shadow-2xs">
+                        <div class="flex justify-between items-start">
+                            <span class="font-bold text-slate-800 text-xs">Problem 2: Insulin Pen Box Day Supply</span>
+                            <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-semibold">Insulin Practice</span>
+                        </div>
+                        <p class="text-xs text-slate-600">
+                            A patient is prescribed <strong>Lantus SoloStar (U-100 insulin)</strong>, <strong>30 units injected subcutaneously once daily</strong>. The pharmacy dispenses one box containing <strong>5 pens (3 mL per pen)</strong>. Calculate the total day supply for this box.
+                        </p>
+
+                        <div class="flex items-center space-x-3 text-xs">
+                            <input type="number" id="mathInputPkg2" placeholder="Enter days supply" class="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-amber-500 w-48 font-mono">
+                            <button onclick="checkMathPkg2()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2 rounded-lg transition text-xs">Check Answer</button>
+                        </div>
+                        <div id="mathFeedbackPkg2" class="text-xs hidden"></div>
+                    </div>
+
+                    <!-- Math Problem 3 -->
+                    <div class="border border-slate-200 rounded-xl p-4 space-y-3 bg-white shadow-2xs">
+                        <div class="flex justify-between items-start">
+                            <span class="font-bold text-slate-800 text-xs">Problem 3: Unit-Dose 25% Rule BUD Calculation</span>
+                            <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-semibold">Repackaging Practice</span>
+                        </div>
+                        <p class="text-xs text-slate-600">
+                            On March 1, 2026, a technician repackages tablets from a stock bottle with a manufacturer expiration date of November 1, 2026 (exactly <strong>8 months</strong> away). Applying the 25% remaining manufacturer expiration rule, how many months from today is the maximum allowed BUD?
+                        </p>
+
+                        <div class="flex items-center space-x-3 text-xs">
+                            <input type="number" id="mathInputPkg3" placeholder="Enter months" class="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-amber-500 w-48 font-mono">
+                            <button onclick="checkMathPkg3()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2 rounded-lg transition text-xs">Check Answer</button>
+                        </div>
+                        <div id="mathFeedbackPkg3" class="text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod4')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Previous Module</span>
+                    </button>
+                    <button onclick="completeModule(5); switchTab('mod6')" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Final Examination</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 6 -->
+            <div id="tab-mod6" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Module 6 of 6 • Comprehensive Evaluation</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-clipboard-check mr-1"></i> Certification Knowledge Check</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Day 11 Comprehensive Evaluation Examination</h2>
+                </div>
+
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Answer the **15 comprehensive examination questions** below covering packaging materials, USP container standards, PPPA child-resistant rules, California B&amp;P 4076 label laws, tamper-evident systems, and calculations. Passing score: **80% (12/15)**.
+                </p>
+
+                <div id="examContainer" class="space-y-4">
+                    <!-- 15 Questions Rendered via JS -->
+                </div>
+
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+                    <div>
+                        <div class="text-xs font-semibold text-slate-500">Your Calculated Score:</div>
+                        <div id="examScoreText" class="text-2xl font-extrabold text-slate-800">Not Completed</div>
+                    </div>
+                    <button onclick="gradeExam()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-md transition flex items-center space-x-2 text-xs">
+                        <i class="fa-solid fa-check-double"></i>
+                        <span>Submit Exam Answers</span>
+                    </button>
+                </div>
+
+                <!-- Completion Status Alert Banner -->
+                <div id="completionStatusBox" class="hidden p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 space-y-2 text-xs">
+                    <div class="font-bold flex items-center text-emerald-800 text-sm">
+                        <i class="fa-solid fa-circle-check text-emerald-600 mr-2"></i> Day 11 Module Requirements Satisfied
+                    </div>
+                    <p class="text-[11px] text-emerald-700">
+                        Congratulations! You have successfully mastered Day 11: Introduction to Packaging and Labeling, passed all mathematical evaluations, and achieved certification-level competency on the California technician examination.
+                    </p>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod5')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Previous Module</span>
+                    </button>
+                    <button onclick="switchTab('overview')" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Return to Course Overview</span>
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Notes Modal -->
+    <div id="notesModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 hidden no-print">
+        <div class="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-md p-5 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-800 flex items-center text-sm">
+                    <i class="fa-solid fa-pen-to-square text-amber-600 mr-2"></i> Trainee Notes Notepad
+                </h3>
+                <button onclick="toggleNotesModal()" class="text-slate-400 hover:text-slate-600 text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <textarea id="studentNotesText" rows="8" placeholder="Type key takeaways, PPPA exemptions, CA label laws, or packaging math notes..." class="w-full text-xs p-3 border border-slate-200 rounded-lg focus:outline-none focus:border-amber-500 font-mono custom-scrollbar"></textarea>
+            <div class="flex justify-end space-x-2">
+                <button onclick="saveNotes()" class="bg-amber-600 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-amber-700 transition">Save Notes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let state = {
+            studentName: "Pharmacy Student",
+            startTime: Date.now(),
+            secondsElapsed: 0,
+            completedModules: new Set(),
+            examPassed: false,
+            examScore: 0
+        };
+
+        // Session Timer
+        setInterval(() => {
+            state.secondsElapsed++;
+            const hours = String(Math.floor(state.secondsElapsed / 3600)).padStart(2, '0');
+            const minutes = String(Math.floor((state.secondsElapsed % 3600) / 60)).padStart(2, '0');
+            const seconds = String(state.secondsElapsed % 60).padStart(2, '0');
+            document.getElementById('sessionTimer').innerText = `${hours}:${minutes}:${seconds}`;
+        }, 1000);
+
+        function updateStudentName() {
+            const val = document.getElementById('studentNameInput').value.trim();
+            if (val) state.studentName = val;
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            
+            const target = document.getElementById(`tab-${tabId}`);
+            if (target) target.classList.remove('hidden');
+
+            const navButtons = document.querySelectorAll('nav button');
+            navButtons.forEach(btn => {
+                btn.classList.remove('bg-amber-50', 'text-amber-900');
+                btn.classList.add('text-slate-600');
+            });
+
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.add('bg-amber-50', 'text-amber-900');
+                activeNav.classList.remove('text-slate-600');
+            }
+        }
+
+        function completeModule(modNum) {
+            state.completedModules.add(modNum);
+            document.getElementById(`modulesCompletedCount`).innerText = `${state.completedModules.size} / 6 Modules`;
+            
+            const badge = document.getElementById(`status-mod${modNum}`);
+            if (badge) {
+                badge.className = "text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold flex items-center";
+                badge.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Done';
+            }
+
+            const pct = Math.round((state.completedModules.size / 6) * 100);
+            document.getElementById('overallProgressBar').style.width = `${pct}%`;
+        }
+
+        // Module 1 Container Quiz Data
+        const containerQuizData = [
+            { id: 1, text: "Injectable morphine solution ampule or IV bag", correct: "hermetic" },
+            { id: 2, text: "Amber plastic prescription vial housing oral tablets", correct: "tight" },
+            { id: 3, text: "Light-sensitive Nitroprusside IV infusion container", correct: "amber" },
+            { id: 4, text: "Bulk stock bottle of aspirin tablets stored in dry warehouse", correct: "closed" },
+            { id: 5, text: "Glass type required for high-purity parenteral liquids", correct: "type1" },
+            { id: 6, text: "Plastic polymer used for transparent oral liquid bottles", correct: "pet" }
+        ];
+
+        function renderContainerQuiz() {
+            const container = document.getElementById('containerQuizContainer');
+            container.innerHTML = containerQuizData.map(item => `
+                <div class="p-3 bg-white border border-slate-200 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 shadow-2xs">
+                    <span class="text-slate-700 font-medium text-xs">${item.id}. ${item.text}</span>
+                    <div class="flex space-x-1 shrink-0 flex-wrap gap-1">
+                        <button onclick="answerContainerQuiz(${item.id}, 'hermetic')" id="cq-${item.id}-hermetic" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded font-sans font-semibold text-slate-700 transition text-[10px]">Hermetic</button>
+                        <button onclick="answerContainerQuiz(${item.id}, 'tight')" id="cq-${item.id}-tight" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded font-sans font-semibold text-slate-700 transition text-[10px]">Tight</button>
+                        <button onclick="answerContainerQuiz(${item.id}, 'amber')" id="cq-${item.id}-amber" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded font-sans font-semibold text-slate-700 transition text-[10px]">Light-Resistant</button>
+                        <button onclick="answerContainerQuiz(${item.id}, 'closed')" id="cq-${item.id}-closed" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded font-sans font-semibold text-slate-700 transition text-[10px]">Well-Closed</button>
+                        <button onclick="answerContainerQuiz(${item.id}, 'type1')" id="cq-${item.id}-type1" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded font-sans font-semibold text-slate-700 transition text-[10px]">Type I Glass</button>
+                        <button onclick="answerContainerQuiz(${item.id}, 'pet')" id="cq-${item.id}-pet" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded font-sans font-semibold text-slate-700 transition text-[10px]">PET Plastic</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function answerContainerQuiz(itemId, selected) {
+            const item = containerQuizData.find(x => x.id === itemId);
+            ['hermetic', 'tight', 'amber', 'closed', 'type1', 'pet'].forEach(type => {
+                const btn = document.getElementById(`cq-${itemId}-${type}`);
+                if (btn) btn.className = "px-2 py-1 bg-slate-100 text-slate-400 rounded font-sans text-[10px]";
+            });
+
+            const activeBtn = document.getElementById(`cq-${itemId}-${selected}`);
+            if (selected === item.correct) {
+                activeBtn.className = "px-2 py-1 bg-emerald-600 text-white font-bold rounded font-sans text-[10px]";
+            } else {
+                activeBtn.className = "px-2 py-1 bg-rose-600 text-white font-bold rounded font-sans text-[10px]";
+            }
+        }
+
+        // Module 2 PPPA Quiz
+        const pppaQuizData = [
+            { id: 1, text: "Sublingual Nitroglycerin tablets 0.4 mg", correct: "exempt" },
+            { id: 2, text: "Amoxicillin 500 mg capsules for a 6-year-old patient", correct: "cr" },
+            { id: 3, text: "Oral Contraceptive Ortho Tri-Cyclen dial-pack", correct: "exempt" },
+            { id: 4, text: "Prednisone 10 mg Dosepack (21 tablets)", correct: "exempt" },
+            { id: 5, text: "Prescription order for Ibuprofen 800 mg with a signed patient blanket waiver", correct: "exempt" },
+            { id: 6, text: "Prescription order for Lisinopril 20 mg where doctor wrote 'Easy Open Cap' on Rx", correct: "exempt" }
+        ];
+
+        function renderPppaQuiz() {
+            const container = document.getElementById('pppaQuizContainer');
+            container.innerHTML = pppaQuizData.map(item => `
+                <div class="p-3 bg-white border border-slate-200 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 shadow-2xs">
+                    <span class="text-slate-700 font-medium text-xs">${item.id}. ${item.text}</span>
+                    <div class="flex space-x-1 shrink-0">
+                        <button onclick="answerPppaQuiz(${item.id}, 'cr')" id="pppa-${item.id}-cr" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded font-sans font-semibold text-slate-700 transition text-[11px]">Requires C-R Cap</button>
+                        <button onclick="answerPppaQuiz(${item.id}, 'exempt')" id="pppa-${item.id}-exempt" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded font-sans font-semibold text-slate-700 transition text-[11px]">Exempt / Easy-Open</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function answerPppaQuiz(itemId, selected) {
+            const item = pppaQuizData.find(x => x.id === itemId);
+            ['cr', 'exempt'].forEach(type => {
+                const btn = document.getElementById(`pppa-${itemId}-${type}`);
+                btn.className = "px-2.5 py-1 bg-slate-100 text-slate-400 rounded font-sans text-[11px]";
+            });
+
+            const activeBtn = document.getElementById(`pppa-${itemId}-${selected}`);
+            if (selected === item.correct) {
+                activeBtn.className = "px-2.5 py-1 bg-emerald-600 text-white font-bold rounded font-sans text-[11px]";
+            } else {
+                activeBtn.className = "px-2.5 py-1 bg-rose-600 text-white font-bold rounded font-sans text-[11px]";
+            }
+        }
+
+        // Module 3 Auxiliary Quiz
+        const auxiliaryQuizData = [
+            { id: 1, text: "Amoxicillin/Clavulanate (Augmentin) oral suspension after reconstitution", correct: "shakerefrig" },
+            { id: 2, text: "Zolpidem (Ambien) 10 mg oral tablet", correct: "drowsy" },
+            { id: 3, text: "Nystatin oral suspension 100,000 units/mL", correct: "shake" },
+            { id: 4, text: "Metronidazole (Flagyl) 500 mg tablets", correct: "alcohol" }
+        ];
+
+        function renderAuxiliaryQuiz() {
+            const container = document.getElementById('auxiliaryQuizContainer');
+            container.innerHTML = auxiliaryQuizData.map(item => `
+                <div class="p-3 bg-white border border-slate-200 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 shadow-2xs">
+                    <span class="text-slate-700 font-medium text-xs">${item.id}. ${item.text}</span>
+                    <div class="flex space-x-1 shrink-0 flex-wrap gap-1">
+                        <button onclick="answerAuxiliaryQuiz(${item.id}, 'shakerefrig')" id="aux-${item.id}-shakerefrig" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded font-sans font-semibold text-slate-700 transition text-[10px]">Shake Well & Refrigerate</button>
+                        <button onclick="answerAuxiliaryQuiz(${item.id}, 'drowsy')" id="aux-${item.id}-drowsy" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded font-sans font-semibold text-slate-700 transition text-[10px]">May Cause Drowsiness</button>
+                        <button onclick="answerAuxiliaryQuiz(${item.id}, 'shake')" id="aux-${item.id}-shake" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded font-sans font-semibold text-slate-700 transition text-[10px]">Shake Well Only</button>
+                        <button onclick="answerAuxiliaryQuiz(${item.id}, 'alcohol')" id="aux-${item.id}-alcohol" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded font-sans font-semibold text-slate-700 transition text-[10px]">Do Not Drink Alcohol</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function answerAuxiliaryQuiz(itemId, selected) {
+            const item = auxiliaryQuizData.find(x => x.id === itemId);
+            ['shakerefrig', 'drowsy', 'shake', 'alcohol'].forEach(type => {
+                const btn = document.getElementById(`aux-${itemId}-${type}`);
+                if (btn) btn.className = "px-2 py-1 bg-slate-100 text-slate-400 rounded font-sans text-[10px]";
+            });
+
+            const activeBtn = document.getElementById(`aux-${itemId}-${selected}`);
+            if (selected === item.correct) {
+                activeBtn.className = "px-2 py-1 bg-emerald-600 text-white font-bold rounded font-sans text-[10px]";
+            } else {
+                activeBtn.className = "px-2 py-1 bg-rose-600 text-white font-bold rounded font-sans text-[10px]";
+            }
+        }
+
+        // Module 4 Repackaging Quiz
+        const repackagingQuizData = [
+            { id: 1, text: "Bulk stock bottle exp date: March 1, 2028 (2 years from today)", correct: "1yr" },
+            { id: 2, text: "Bulk stock bottle exp date: July 1, 2026 (4 months from today)", correct: "1mo" },
+            { id: 3, text: "Bulk stock bottle exp date: November 1, 2026 (8 months from today)", correct: "2mo" }
+        ];
+
+        function renderRepackagingQuiz() {
+            const container = document.getElementById('repackagingQuizContainer');
+            container.innerHTML = repackagingQuizData.map(item => `
+                <div class="p-3 bg-white border border-slate-200 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 shadow-2xs">
+                    <span class="text-slate-700 font-medium text-xs">${item.id}. ${item.text}</span>
+                    <div class="flex space-x-1 shrink-0">
+                        <button onclick="answerRepackagingQuiz(${item.id}, '1yr')" id="rp-${item.id}-1yr" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded font-mono font-semibold text-slate-700 transition text-[11px]">1 Year Max</button>
+                        <button onclick="answerRepackagingQuiz(${item.id}, '1mo')" id="rp-${item.id}-1mo" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded font-mono font-semibold text-slate-700 transition text-[11px]">1 Month (25%)</button>
+                        <button onclick="answerRepackagingQuiz(${item.id}, '2mo')" id="rp-${item.id}-2mo" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded font-mono font-semibold text-slate-700 transition text-[11px]">2 Months (25%)</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function answerRepackagingQuiz(itemId, selected) {
+            const item = repackagingQuizData.find(x => x.id === itemId);
+            ['1yr', '1mo', '2mo'].forEach(type => {
+                const btn = document.getElementById(`rp-${itemId}-${type}`);
+                btn.className = "px-2.5 py-1 bg-slate-100 text-slate-400 rounded font-mono text-[11px]";
+            });
+
+            const activeBtn = document.getElementById(`rp-${itemId}-${selected}`);
+            if (selected === item.correct) {
+                activeBtn.className = "px-2.5 py-1 bg-emerald-600 text-white font-bold rounded font-mono text-[11px]";
+            } else {
+                activeBtn.className = "px-2.5 py-1 bg-rose-600 text-white font-bold rounded font-mono text-[11px]";
+            }
+        }
+
+        // Module 5 Math Checks
+        function checkMathPkg1() {
+            const val = parseFloat(document.getElementById('mathInputPkg1').value);
+            const feedback = document.getElementById('mathFeedbackPkg1');
+            feedback.classList.remove('hidden');
+
+            if (val === 25) {
+                feedback.className = "text-xs p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> <strong>Correct!</strong> Calculation: Total drops in bottle = 2.5 mL × 20 gtt/mL = 50 drops. Daily dose = 1 drop/eye × 2 eyes = 2 drops/day. Day supply = 50 drops / 2 drops/day = 25 days.';
+            } else {
+                feedback.className = "text-xs p-3 bg-rose-50 text-rose-800 border border-rose-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-xmark mr-1 text-rose-600"></i> <strong>Incorrect.</strong> Hint: Total drops = 2.5 mL × 20 = 50 drops. Patient uses 2 drops per day. 50 / 2 = 25 days.';
+            }
+        }
+
+        function checkMathPkg2() {
+            const val = parseFloat(document.getElementById('mathInputPkg2').value);
+            const feedback = document.getElementById('mathFeedbackPkg2');
+            feedback.classList.remove('hidden');
+
+            if (val === 50) {
+                feedback.className = "text-xs p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> <strong>Correct!</strong> Calculation: 5 pens × 3 mL = 15 mL total. Total units = 15 mL × 100 units/mL = 1,500 units. Day supply = 1,500 units / 30 units/day = 50 days.';
+            } else {
+                feedback.className = "text-xs p-3 bg-rose-50 text-rose-800 border border-rose-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-xmark mr-1 text-rose-600"></i> <strong>Incorrect.</strong> Hint: 5 pens × 3 mL = 15 mL = 1,500 units. Divide 1,500 units by 30 units/day = 50 days.';
+            }
+        }
+
+        function checkMathPkg3() {
+            const val = parseFloat(document.getElementById('mathInputPkg3').value);
+            const feedback = document.getElementById('mathFeedbackPkg3');
+            feedback.classList.remove('hidden');
+
+            if (val === 2) {
+                feedback.className = "text-xs p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> <strong>Correct!</strong> Calculation: 25% of 8 months remaining = 2 months. Max BUD is May 1, 2026 (2 months from March 1, 2026).';
+            } else {
+                feedback.className = "text-xs p-3 bg-rose-50 text-rose-800 border border-rose-200 rounded-lg font-medium";
+                feedback.innerHTML = '<i class="fa-solid fa-circle-xmark mr-1 text-rose-600"></i> <strong>Incorrect.</strong> Hint: Multiply 8 months by 0.25 (25%) = 2 months.';
+            }
+        }
+
+        // Module 6 Exam Questions (15 Questions)
+        const examQuestions = [
+            {
+                q: "1. Which federal legislation enacted in 1970 requires child-resistant packaging for prescription oral drugs?",
+                options: ["Pure Food and Drug Act", "Poison Prevention Packaging Act (PPPA)", "Federal Anti-Tampering Act", "Kefauver-Harris Amendment"],
+                correct: 1
+            },
+            {
+                q: "2. Which of the following medications is legally strictly EXEMPT from child-resistant closure requirements?",
+                options: ["Amoxicillin 500mg capsules", "Sublingual Nitroglycerin tablets", "Lisinopril 10mg tablets", "Atorvastatin 20mg tablets"],
+                correct: 1
+            },
+            {
+                q: "3. Who is legally permitted to request a 'blanket waiver' for easy-open (non-child-resistant) caps on ALL current and future refills?",
+                options: ["The Prescribing Physician", "The Patient only", "The Pharmacy Technician", "The Drug Manufacturer"],
+                correct: 1
+            },
+            {
+                q: "4. Under California Business & Professions Code 4076, what font size and formatting must the 4 critical elements on a label possess?",
+                options: ["8-point regular font", "10-point bold sans-serif font", "12-point italic font", "6-point ALL CAPS"],
+                correct: 1
+            },
+            {
+                q: "5. What percentage of the total label area must the 4 critical elements occupy under California Board rules?",
+                options: ["At least 25%", "At least 50%", "At least 75%", "100%"],
+                correct: 1
+            },
+            {
+                q: "6. Which USP General Chapter defines container standards such as Tight, Well-Closed, Hermetic, and Light-Resistant?",
+                options: ["USP <795>", "USP <659>", "USP <797>", "USP <800>"],
+                correct: 1
+            },
+            {
+                q: "7. Light-resistant amber containers must limit light transmission in the 290nm to 450nm wavelength spectrum to less than what threshold?",
+                options: ["50%", "25%", "10%", "1%"],
+                correct: 2
+            },
+            {
+                q: "8. What historical event led directly to the enactment of the Federal Anti-Tampering Act of 1982?",
+                options: ["Thalidomide birth defect crisis", "Chicago Tylenol cyanide poisoning incidents", "Sulfanilamide elixir tragedy", "New England Compounding Center meningitis outbreak"],
+                correct: 1
+            },
+            {
+                q: "9. When calculating the day supply for an ophthalmic solution order without specific drop metrics, what standard drop calibration factor is used?",
+                options: ["10 drops per mL", "15 drops per mL", "20 drops per mL", "30 drops per mL"],
+                correct: 2
+            },
+            {
+                q: "10. What is the maximum Beyond-Use Date (BUD) for repackaged unit-dose solid oral dosage forms under USP guidelines?",
+                options: [
+                    "6 months fixed",
+                    "1 year OR 25% of remaining manufacturer expiration (whichever is shorter)",
+                    "2 years from repackaging date",
+                    "Equal to the exact manufacturer expiration date without limit"
+                ],
+                correct: 1
+            },
+            {
+                q: "11. Under California law, prescription labels must include a physical description of the medication. Which is a valid example?",
+                options: ["'Antibiotic for infection'", "'White, round tablet stamped MSD 711'", "'Take 1 tablet daily'", "'Rx # 6001234'"],
+                correct: 1
+            },
+            {
+                q: "12. What primary auxiliary label MUST be affixed to an reconstituted oral antibiotic suspension such as Augmentin?",
+                options: ["'Do Not Drink Alcohol'", "'Shake Well & Refrigerate'", "'For External Use Only'", "'Take On An Empty Stomach'"],
+                correct: 1
+            },
+            {
+                q: "13. How can a prescriber legally request a non-child-resistant container for a patient?",
+                options: [
+                    "By issuing a blanket waiver for all prescriptions for that patient",
+                    "On an individual prescription-by-prescription basis only",
+                    "By calling the FDA",
+                    "Prescribers cannot request easy-open caps under any circumstances"
+                ],
+                correct: 1
+            },
+            {
+                q: "14. Which plastic polymer is commonly used for standard amber prescription vials due to its durability and moisture resistance?",
+                options: ["Polypropylene / HDPE", "Polystyrene", "PVC", "Cellophane"],
+                correct: 0
+            },
+            {
+                q: "15. Why is a pharmacy technician prohibited from reusing a plastic amber prescription vial when filling a patient's refill?",
+                options: [
+                    "It violates copyright laws",
+                    "Plastic wear and stress cause loss of child-resistant locking integrity",
+                    "It is allowed as long as the bottle is washed with warm water",
+                    "It causes the drug to lose color"
+                ],
+                correct: 1
+            }
+        ];
+
+        function renderExam() {
+            const container = document.getElementById('examContainer');
+            container.innerHTML = examQuestions.map((q, idx) => `
+                <div class="p-4 border border-slate-200 rounded-xl space-y-3 bg-white shadow-2xs">
+                    <div class="font-bold text-slate-800 text-xs">${q.q}</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        ${q.options.map((opt, optIdx) => `
+                            <label class="flex items-center space-x-2.5 p-2 rounded hover:bg-slate-50 cursor-pointer border border-slate-100 hover:border-slate-200 transition">
+                                <input type="radio" name="exam-q-${idx}" value="${optIdx}" class="text-amber-600 focus:ring-amber-500">
+                                <span class="text-slate-700">${opt}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function gradeExam() {
+            let correctCount = 0;
+            examQuestions.forEach((q, idx) => {
+                const selected = document.querySelector(`input[name="exam-q-${idx}"]:checked`);
+                if (selected && parseInt(selected.value) === q.correct) {
+                    correctCount++;
+                }
+            });
+
+            const scorePct = Math.round((correctCount / examQuestions.length) * 100);
+            state.examScore = scorePct;
+
+            const scoreText = document.getElementById('examScoreText');
+            scoreText.innerText = `${correctCount} / ${examQuestions.length} (${scorePct}%)`;
+
+            if (scorePct >= 80) {
+                scoreText.className = "text-2xl font-extrabold text-emerald-600";
+                state.examPassed = true;
+                completeModule(6);
+
+                document.getElementById('completionStatusBox').classList.remove('hidden');
+                document.getElementById('overallScoreDisplay').innerText = `${scorePct}%`;
+            } else {
+                scoreText.className = "text-2xl font-extrabold text-rose-600";
+                document.getElementById('completionStatusBox').classList.add('hidden');
+                alert(`You scored ${scorePct}%. You need at least 80% (12/15) to pass the evaluation. Please review the modules and re-try.`);
+            }
+        }
+
+        function toggleNotesModal() {
+            document.getElementById('notesModal').classList.toggle('hidden');
+        }
+
+        function saveNotes() {
+            toggleNotesModal();
+        }
+
+        window.onload = function() {
+            renderContainerQuiz();
+            renderPppaQuiz();
+            renderAuxiliaryQuiz();
+            renderRepackagingQuiz();
+            renderExam();
+        };
+    </script>
+</body>
+</html>

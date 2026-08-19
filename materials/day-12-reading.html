@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 12: Medication Storage Requirements - Pharmacy Tech Training</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- KaTeX for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
+        });
+    </script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        pharmacy: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        },
+                        storage: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-800 antialiased flex flex-col bg-slate-50 custom-scrollbar">
+
+    <!-- Top Header / App Bar -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Branding -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg bg-pharmacy-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-lg tracking-wide leading-tight">SOUTH COAST MISSION PHARMACY</div>
+                        <div class="text-xs text-teal-300 font-medium">California Technician Training Program • Day 12</div>
+                    </div>
+                </div>
+
+                <!-- Timer & Session Stats -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <!-- Session Duration Tracker -->
+                    <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                        <i class="fa-regular fa-clock text-teal-400"></i>
+                        <span class="text-xs text-slate-300">Time Spent:</span>
+                        <span id="sessionTimer" class="font-mono text-sm font-semibold text-emerald-400">00:00:00</span>
+                    </div>
+
+                    <!-- Target Time Indicator -->
+                    <div class="text-xs text-slate-400 flex items-center space-x-1">
+                        <i class="fa-solid fa-hourglass-half text-teal-400"></i>
+                        <span>Target: 120 Minutes</span>
+                    </div>
+
+                    <!-- Quick Action Notes Modal Trigger -->
+                    <button onclick="toggleNotesModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-1 transition">
+                        <i class="fa-solid fa-note-sticky text-yellow-400"></i>
+                        <span>Study Notes</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Module Progress Bar -->
+        <div class="w-full bg-slate-800 h-2 relative">
+            <div id="overallProgressBar" class="bg-gradient-to-r from-teal-500 to-emerald-400 h-2 transition-all duration-500" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <!-- Main Application Container -->
+    <div class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col lg:flex-row gap-6">
+
+        <!-- Sidebar Navigation -->
+        <aside class="w-full lg:w-80 shrink-0 space-y-4 no-print">
+            <!-- Student Profile Card -->
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold border border-slate-200">
+                        <i class="fa-solid fa-user-nurse"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Trainee Session</div>
+                        <input type="text" id="studentNameInput" value="Pharmacy Student" onchange="updateStudentName()" class="font-semibold text-slate-800 text-sm bg-transparent border-b border-dashed border-slate-300 focus:outline-none focus:border-pharmacy-500 w-full" title="Click to edit name">
+                    </div>
+                </div>
+                <div class="space-y-2 text-xs text-slate-600">
+                    <div class="flex justify-between">
+                        <span>Curriculum Progress:</span>
+                        <span id="modulesCompletedCount" class="font-semibold text-slate-800">0 / 6 Modules</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Assessment Score:</span>
+                        <span id="overallScoreDisplay" class="font-semibold text-pharmacy-600">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="bg-white rounded-xl shadow-sm border border-slate-200 p-2 space-y-1">
+                <div class="px-3 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Day 12 Curriculum</div>
+
+                <button onclick="switchTab('overview')" id="nav-overview" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition bg-teal-50 text-teal-900">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-compass w-5 text-center text-teal-600"></i>
+                        <span>Course Overview</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+                </button>
+
+                <button onclick="switchTab('mod1')" id="nav-mod1" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-gavel w-5 text-center text-slate-400"></i>
+                        <span>1. Storage Regulations & USP Standards</span>
+                    </div>
+                    <span id="status-mod1" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod2')" id="nav-mod2" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-temperature-half w-5 text-center text-slate-400"></i>
+                        <span>2. Temperature Ranges & Excursions</span>
+                    </div>
+                    <span id="status-mod2" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">25m</span>
+                </button>
+
+                <button onclick="switchTab('mod3')" id="nav-mod3" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-layer-group w-5 text-center text-slate-400"></i>
+                        <span>3. Area Layout, FEFO & USP &lt;800&gt;</span>
+                    </div>
+                    <span id="status-mod3" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod4')" id="nav-mod4" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-vault w-5 text-center text-slate-400"></i>
+                        <span>4. Controlled Substance Security</span>
+                    </div>
+                    <span id="status-mod4" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod5')" id="nav-mod5" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-calculator w-5 text-center text-slate-400"></i>
+                        <span>5. Storage & Expiration Math Lab</span>
+                    </div>
+                    <span id="status-mod5" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod6')" id="nav-mod6" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-clipboard-check w-5 text-center text-slate-400"></i>
+                        <span>6. Examination & Case Scenarios</span>
+                    </div>
+                    <span id="status-mod6" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">15m</span>
+                </button>
+            </nav>
+
+            <!-- Quick Reference Drawer Box -->
+            <div class="bg-slate-900 text-slate-200 rounded-xl p-4 shadow-sm text-xs space-y-2">
+                <div class="font-bold text-teal-400 uppercase tracking-wider flex items-center justify-between">
+                    <span><i class="fa-solid fa-lightbulb mr-1"></i> Storage Quick Rules</span>
+                    <span class="text-[10px] text-slate-400">Reference</span>
+                </div>
+                <ul class="space-y-1.5 text-slate-300 list-disc list-inside">
+                    <li><strong class="text-teal-300">Freezer Temp:</strong> -25°C to -10°C (-13°F to 14°F)</li>
+                    <li><strong class="text-teal-300">Fridge Temp:</strong> 2°C to 8°C (36°F to 46°F)</li>
+                    <li><strong class="text-teal-300">Room Temp (CRT):</strong> 20°C to 25°C (68°F to 77°F)</li>
+                    <li><strong class="text-teal-300">FEFO Rule:</strong> First Expired, First Out stock placement</li>
+                    <li><strong class="text-teal-300">Expiration Rule:</strong> MM/YYYY = valid thru LAST day of month</li>
+                    <li><strong class="text-teal-300">C-II Security:</strong> Locked safe/vault or dispersed stock</li>
+                    <li><strong class="text-teal-300">DEA Form 41:</strong> Destruction of controlled stock</li>
+                    <li><strong class="text-teal-300">Class I Recall:</strong> Serious health hazard/fatal risk</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto custom-scrollbar">
+
+            <!-- TAB: OVERVIEW -->
+            <div id="tab-overview" class="tab-content space-y-6">
+                <div>
+                    <div class="inline-flex items-center space-x-2 bg-teal-100 text-teal-900 text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <span>California Technician Training Program</span>
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Day 12: Medication Storage Requirements</h1>
+                    <p class="mt-2 text-slate-600 text-sm leading-relaxed">
+                        Welcome to Day 12 of the California Pharmacy Technician Training Program. Medication storage, security, and environmental stability form the structural foundation of safe pharmacy operations. Proper storage safeguards active pharmaceutical ingredients against degradation, maintains controlled substance accountability, prevents hazardous exposure, and ensures emergency recall preparedness under strict state and federal mandates.
+                    </p>
+                </div>
+
+                <!-- Detailed Syllabus Breakdown -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-pharmacy-600"></i>
+                        <span>2-Hour Curriculum Time Allocation & Modular Objectives</span>
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-pharmacy-700">Module 1 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Storage Regulations & Standards</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">USP, FDA, DEA, and California Board of Pharmacy (Title 16 CCR) storage rules, facility cleanliness, lighting, and access controls.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-pharmacy-700">Module 2 (25 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Temperature Ranges & Excursions</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">USP &lt;659&gt; temperature definitions (Freezer, Fridge, Cool, CRT, Warm), NIST probe monitoring, and excursion containment protocols.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-pharmacy-700">Module 3 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Area Layout, FEFO & USP &lt;800&gt;</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">First Expired First Out (FEFO) stock rotation, LASA drug isolation with Tall Man lettering, and USP &lt;800&gt; negative-pressure hazardous drug containment.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-pharmacy-700">Module 4 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Controlled Substance Security</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Schedule II vault/safe security, C-III-V stock dispersion, perpetual inventory logs, key access controls, and DEA Form 106 loss reporting.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-pharmacy-700">Module 5 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Storage & Expiration Math Lab</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Month-end expiration calculations, temperature conversions (°C to °F), inventory turnover rates, and reverse distributor credit metrics.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-1">
+                            <div class="font-bold text-pharmacy-700">Module 6 (15 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Comprehensive Evaluation Exam</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">15-question professional certification check, FDA recall classification scenarios, and regulatory compliance verification.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Objectives -->
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Core Learning Competencies</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/60 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Regulatory Compliance:</strong> Interpret USP, DEA, FDA, and California Board regulations governing medication storage, facility access, and recordkeeping.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/60 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Temperature Control & Excursions:</strong> Master USP &lt;659&gt; temperature ranges and execute immediate action plans during cold-chain excursion events.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/60 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Organization & Safety Protocols:</strong> Implement FEFO stock rotation, LASA drug separation, and USP &lt;800&gt; hazardous drug isolation.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/60 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Vault Security & Recall Execution:</strong> Maintain double-lock controlled substance security, execute DEA disposal protocols, and manage FDA Class I-III recalls.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end">
+                    <button onclick="switchTab('mod1')" class="bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition">
+                        <span>Begin Module 1: Storage Regulations</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 1 -->
+            <div id="tab-mod1" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-pharmacy-600 uppercase tracking-wider">Module 1 of 6 • Estimated Reading Time: 20 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-gavel mr-1"></i> Storage Regulations</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Medication Storage Regulations & Governance Standards</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        Pharmacy medication storage areas must comply strictly with federal and California state laws. Regulations established by the **United States Pharmacopeia (USP)**, **Food and Drug Administration (FDA)**, **Drug Enforcement Administration (DEA)**, and the **California State Board of Pharmacy** mandate that all drug stock be preserved in conditions that maintain identity, strength, quality, and purity.
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">1.1 California Board of Pharmacy Facility Requirements (CCR Title 16)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+                        <div class="bg-teal-50/80 border border-teal-200 rounded-xl p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="bg-pharmacy-700 text-white font-mono text-xs font-bold px-2.5 py-1 rounded-md">Environmental Controls</span>
+                                <i class="fa-solid fa-house-medical-flag text-pharmacy-500 text-lg"></i>
+                            </div>
+                            <h4 class="font-bold text-pharmacy-900 text-xs">Sanitation, Lighting & Ventilation</h4>
+                            <p class="text-[11px] text-slate-600">
+                                Storage areas must be kept dry, well-ventilated, well-lit, and clean. Direct sunlight and excess moisture must be shielded.
+                            </p>
+                            <ul class="text-[10px] text-slate-700 list-disc list-inside space-y-1 font-medium">
+                                <li><strong>Sink Access:</strong> Clean hot/cold running water dedicated for compounding/hands.</li>
+                                <li><strong>Food Prohibition:</strong> Food or beverages strictly forbidden in drug storage units.</li>
+                                <li><strong>Security Locks:</strong> Prescription area fully locked when a pharmacist is not on duty.</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-sky-50/80 border border-sky-200 rounded-xl p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="bg-sky-700 text-white font-mono text-xs font-bold px-2.5 py-1 rounded-md">Regulatory Oversight</span>
+                                <i class="fa-solid fa-clipboard-check text-sky-500 text-lg"></i>
+                            </div>
+                            <h4 class="font-bold text-sky-900 text-xs">USP & Board Inspection Criteria</h4>
+                            <p class="text-[11px] text-slate-600">
+                                State inspectors verify daily temperature logs, cleanroom pressure gauges, and physical separation of stock.
+                            </p>
+                            <ul class="text-[10px] text-slate-700 list-disc list-inside space-y-1 font-medium">
+                                <li><strong>Record Retention:</strong> California law requires keeping storage & temp logs for **3 years**.</li>
+                                <li><strong>Quarantine Isolation:</strong> Expired, damaged, or recalled drugs must be immediately sequestered.</li>
+                                <li><strong>Unvetted Access:</strong> Unlicensed personnel must be supervised at all times.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">1.2 Primary Regulatory Agencies and Roles</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs my-3">
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="font-bold text-slate-800 text-xs flex items-center"><i class="fa-solid fa-book-medical text-pharmacy-600 mr-1"></i> USP</div>
+                            <p class="text-slate-600 text-[11px] mt-1">Sets public standards for drug quality, packaging, and temperature definitions (USP &lt;659&gt;, &lt;800&gt;, &lt;1079&gt;).</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="font-bold text-slate-800 text-xs flex items-center"><i class="fa-solid fa-building-shield text-pharmacy-600 mr-1"></i> FDA</div>
+                            <p class="text-slate-600 text-[11px] mt-1">Enforces manufacturing standards, drug stability guidelines, packaging seals, and oversees nationwide drug recalls.</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="font-bold text-slate-800 text-xs flex items-center"><i class="fa-solid fa-user-shield text-pharmacy-600 mr-1"></i> DEA</div>
+                            <p class="text-slate-600 text-[11px] mt-1">Regulates physical security, locks, safes, vaults, and disposal procedures for all controlled substances.</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="font-bold text-slate-800 text-xs flex items-center"><i class="fa-solid fa-scale-balanced text-pharmacy-600 mr-1"></i> CA Board</div>
+                            <p class="text-slate-600 text-[11px] mt-1">Enforces CCR Title 16, conducts unannounced inspections, and verifies pharmacy security and compliance.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Exercise: Regulatory Matching -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold text-slate-800 flex items-center space-x-2 uppercase tracking-wider">
+                            <i class="fa-solid fa-gamepad text-pharmacy-600"></i>
+                            <span>Interactive Practice: Storage Regulation Matching</span>
+                        </h3>
+                        <span class="text-[11px] text-slate-500">4 Scenarios</span>
+                    </div>
+                    <p class="text-xs text-slate-600">Match each pharmacy storage scenario to the appropriate governing regulatory standard:</p>
+
+                    <div id="regQuizContainer" class="space-y-3 text-xs">
+                        <!-- JS Rendered -->
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('overview')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Back to Overview</span>
+                    </button>
+                    <button onclick="completeModule(1); switchTab('mod2')" class="bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Module 2</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 2 -->
+            <div id="tab-mod2" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-pharmacy-600 uppercase tracking-wider">Module 2 of 6 • Estimated Reading Time: 25 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-temperature-half mr-1"></i> Temperature Controls</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Temperature Ranges, Monitoring & Excursion Containment</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        Temperature stability is critical for pharmaceuticals. Heat accelerates chemical degradation, while freezing can denature biological proteins, destroy emulsions, or crack glass containers. **USP General Chapter &lt;659&gt;** explicitly defines mandatory storage temperature ranges.
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">2.1 USP &lt;659&gt; Temperature Classifications Table</h3>
+                    
+                    <div class="overflow-x-auto my-3">
+                        <table class="w-full text-left text-xs border-collapse border border-slate-200 rounded-lg overflow-hidden">
+                            <thead>
+                                <tr class="bg-slate-100 border-b border-slate-200 text-slate-700 font-bold">
+                                    <th class="p-2.5">USP Designation</th>
+                                    <th class="p-2.5">Celsius Range</th>
+                                    <th class="p-2.5">Fahrenheit Range</th>
+                                    <th class="p-2.5">Representative Medication Examples</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-[11px]">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-blue-700"><i class="fa-solid fa-snowflake mr-1"></i> Freezer</td>
+                                    <td class="p-2.5 font-mono">-25°C to -10°C</td>
+                                    <td class="p-2.5 font-mono">-13°F to 14°F</td>
+                                    <td class="p-2.5">Varicella vaccine (Varivax), MMRV vaccine, Zostavax</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-teal-700"><i class="fa-solid fa-temperature-arrow-down mr-1"></i> Refrigerator (Cold)</td>
+                                    <td class="p-2.5 font-mono">2°C to 8°C</td>
+                                    <td class="p-2.5 font-mono">36°F to 46°F</td>
+                                    <td class="p-2.5">Insulins, NuvaRing, Vaccines (Shingrix, Flu), Latanoprost drops</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-cyan-700"><i class="fa-solid fa-droplet mr-1"></i> Cool</td>
+                                    <td class="p-2.5 font-mono">8°C to 15°C</td>
+                                    <td class="p-2.5 font-mono">46°F to 59°F</td>
+                                    <td class="p-2.5">Specialty suppository bases, specific compounded topicals</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-emerald-700"><i class="fa-solid fa-house mr-1"></i> Controlled Room Temp (CRT)</td>
+                                    <td class="p-2.5 font-mono">20°C to 25°C</td>
+                                    <td class="p-2.5 font-mono">68°F to 77°F</td>
+                                    <td class="p-2.5">Oral solids (Amoxicillin, Lisinopril), inhalers, topicals (excursions 15-30°C)</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-rose-700"><i class="fa-solid fa-fire mr-1"></i> Excessive Heat</td>
+                                    <td class="p-2.5 font-mono">&gt; 40°C</td>
+                                    <td class="p-2.5 font-mono">&gt; 104°F</td>
+                                    <td class="p-2.5">PROHIBITED; causes rapid chemical decomposition and potency loss</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">2.2 Temperature Excursion Protocol & NIST Probe Monitoring</h3>
+                    <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-2 text-xs">
+                        <div class="font-bold text-amber-900 uppercase tracking-wider text-[11px]"><i class="fa-solid fa-triangle-exclamation text-amber-700 mr-1"></i> Excursion Standard Operating Procedure (SOP)</div>
+                        <ol class="list-decimal pl-5 space-y-1 text-[11px] text-slate-700">
+                            <li><strong>Immediate Quarantine:</strong> Move affected medications to an active, compliant unit or mark "QUARANTINED - DO NOT DISPENSE" inside the unit.</li>
+                            <li><strong>Log Duration & Extent:</strong> Record min/max temperatures reached and exact duration of excursion.</li>
+                            <li><strong>Contact Manufacturer/CDC:</strong> Contact drug manufacturers or local health department (for Vaccines for Children / VFC) to determine stability data.</li>
+                            <li><strong>Document Resolution:</strong> Log action taken before returning stock to inventory or sending to reverse distributor.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Interactive Temperature Simulator -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-2">
+                            <i class="fa-solid fa-temperature-full text-pharmacy-600"></i>
+                            <span>Interactive Lab: NIST Refrigerator Probe Logging Simulator</span>
+                        </h3>
+                        <span class="text-[11px] text-slate-500">Live Temperature Evaluator</span>
+                    </div>
+                    <p class="text-xs text-slate-600">Enter a simulated probe temperature reading to test system status and determine necessary technician response:</p>
+
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 space-y-4">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div class="flex items-center space-x-3">
+                                <label for="simTempInput" class="text-xs font-bold text-slate-700">Simulate Temp (°C):</label>
+                                <input type="number" id="simTempInput" value="4.5" step="0.5" class="w-24 px-3 py-1.5 border border-slate-300 rounded-lg font-mono text-sm font-bold text-center focus:border-pharmacy-500 focus:outline-none">
+                            </div>
+                            <button onclick="evaluateSimTemp()" class="bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-semibold text-xs px-4 py-2 rounded-lg transition shadow-xs">
+                                Evaluate Temperature
+                            </button>
+                        </div>
+
+                        <div id="simTempResultBox" class="p-4 rounded-xl border bg-teal-50 border-teal-200 flex items-center justify-between gap-4">
+                            <div class="flex items-center space-x-3">
+                                <div id="simTempIcon" class="w-12 h-12 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-lg font-mono">
+                                    4.5°
+                                </div>
+                                <div>
+                                    <div id="simTempStatusTitle" class="font-bold text-teal-900 text-xs">Compliant Refrigerator Reading (2°C - 8°C)</div>
+                                    <div id="simTempStatusDesc" class="text-[11px] text-teal-700">All biologicals, insulins, and vaccines remain fully stable. No excursion logged.</div>
+                                </div>
+                            </div>
+                            <span id="simTempBadge" class="bg-teal-200 text-teal-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">Compliant</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod1')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Back to Module 1</span>
+                    </button>
+                    <button onclick="completeModule(2); switchTab('mod3')" class="bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Module 3</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STREAMING_CHUNK:Rendering Tab Content - Module 3 Area Layout & FEFO & USP <800>... -->
+            <!-- TAB: MODULE 3 -->
+            <div id="tab-mod3" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-pharmacy-600 uppercase tracking-wider">Module 3 of 6 • Estimated Reading Time: 20 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-layer-group mr-1"></i> Area Layout & FEFO</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Storage Area Layout, FEFO Rotation & USP &lt;800&gt; Containment</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        A systematically organized pharmacy layout reduces medication selection errors, minimizes inventory waste, and protects personnel from exposure to hazardous agents.
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">3.1 FEFO / FIFO Inventory Management & LASA Separation</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-3">
+                        <div class="bg-slate-50 p-4 border border-slate-200 rounded-xl space-y-2">
+                            <h4 class="font-bold text-slate-800 text-xs flex items-center"><i class="fa-solid fa-arrow-rotate-right text-pharmacy-600 mr-1.5"></i> FEFO (First Expired, First Out) Rule</h4>
+                            <p class="text-[11px] text-slate-600">
+                                Always place newly received stock with longer expiration dates **BEHIND** existing stock on shelves. Ensures medications closest to expiration are dispensed first.
+                            </p>
+                        </div>
+                        <div class="bg-slate-50 p-4 border border-slate-200 rounded-xl space-y-2">
+                            <h4 class="font-bold text-slate-800 text-xs flex items-center"><i class="fa-solid fa-font text-amber-600 mr-1.5"></i> LASA & Tall Man Lettering</h4>
+                            <p class="text-[11px] text-slate-600">
+                                Look-Alike Sound-Alike drugs must be physically separated. Utilize **Tall Man Lettering** on shelf tags (e.g., <em>HydrOXYzine</em> vs <em>HydrALAzine</em>, <em>buPROPion</em> vs <em>busPIRone</em>).
+                            </p>
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">3.2 USP &lt;800&gt; Hazardous Drug (HD) Storage Requirements</h3>
+                    <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl space-y-2 text-xs">
+                        <div class="font-bold text-rose-900 uppercase tracking-wider text-[11px]"><i class="fa-solid fa-biohazard text-rose-600 mr-1"></i> Hazardous Drug Containment Standards</div>
+                        <ul class="list-disc pl-5 space-y-1 text-[11px] text-slate-700">
+                            <li><strong>Negative Pressure Room:</strong> Hazardous antineoplastic drugs must be stored in a dedicated room with negative pressure (12+ air changes per hour / ACPH) vented externally.</li>
+                            <li><strong>Physical Isolation:</strong> HD stock must NEVER be stored on carpeted floors or mixed with non-hazardous general inventory.</li>
+                            <li><strong>Spill Kits:</strong> Chemical spill kits and appropriate PPE (chemo gloves, gowns, eye protection) must be immediately available adjacent to storage.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Interactive Sorting Exercise -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-2">
+                            <i class="fa-solid fa-dolly text-pharmacy-600"></i>
+                            <span>Interactive Exercise: Medication Placement & Zone Sorting</span>
+                        </h3>
+                        <span class="text-[11px] text-slate-500">Stocking Game</span>
+                    </div>
+                    <p class="text-xs text-slate-600">Assign each incoming pharmacy item to its designated storage area:</p>
+
+                    <div id="sortingGameContainer" class="space-y-3 text-xs">
+                        <!-- JS Rendered -->
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod2')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Back to Module 2</span>
+                    </button>
+                    <button onclick="completeModule(3); switchTab('mod4')" class="bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Module 4</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 4 -->
+            <div id="tab-mod4" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-pharmacy-600 uppercase tracking-wider">Module 4 of 6 • Estimated Reading Time: 20 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-vault mr-1"></i> Controlled Substances</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Controlled Substance Vault Security & Loss Protocol</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        Controlled substances are categorized under Federal Schedules I through V. Because of their high potential for abuse and diversion, security regulations mandate strict physical controls, key access restrictions, and exact perpetual auditing.
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">4.1 Schedule II vs Schedule III-V Security Rules</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-3">
+                        <div class="bg-amber-50/80 border border-amber-200 rounded-xl p-4 space-y-2">
+                            <span class="bg-amber-700 text-white font-mono text-[10px] font-bold px-2 py-0.5 rounded">Schedule II (C-II) Storage</span>
+                            <h4 class="font-bold text-amber-900 text-xs">Substantially Built Locked Safe / Vault</h4>
+                            <p class="text-[11px] text-slate-600">
+                                In California community/hospital pharmacies, Schedule II narcotics (e.g., Oxycodone, Morphine, Fentanyl) are typically locked in a heavy-gauge steel safe anchored to the floor.
+                            </p>
+                            <ul class="text-[10px] text-slate-700 list-disc list-inside space-y-1">
+                                <li>Key or keycard access restricted to licensed pharmacists.</li>
+                                <li>Perpetual inventory logs must be updated continuously.</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+                            <span class="bg-slate-700 text-white font-mono text-[10px] font-bold px-2 py-0.5 rounded">Schedule III-V Storage</span>
+                            <h4 class="font-bold text-slate-800 text-xs">Locked Cabinet or Dispersed Stock</h4>
+                            <p class="text-[11px] text-slate-600">
+                                May be stored in a locked cabinet OR dispersed throughout regular prescription stock on general shelves in a manner that obstructs theft or diversion.
+                            </p>
+                            <ul class="text-[10px] text-slate-700 list-disc list-inside space-y-1">
+                                <li>Biennial (2-year) physical count inventory mandated by federal law.</li>
+                                <li>California requires exact counts for all C-II and high-risk controls.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">4.2 Theft & Significant Loss Reporting (DEA Form 106)</h3>
+                    <div class="p-4 bg-slate-900 text-slate-200 rounded-xl space-y-2 text-xs">
+                        <div class="font-bold text-teal-400 uppercase tracking-wider text-[11px]"><i class="fa-solid fa-shield-cat text-teal-400 mr-1"></i> DEA Loss Reporting Timeline</div>
+                        <p class="text-slate-300 text-[11px]">
+                            Upon discovery of a significant theft or loss of controlled substances, the pharmacy MUST notify the local DEA Field Division in writing within **ONE BUSINESS DAY**. **DEA Form 106** must be formally completed and submitted online detailing exact quantities lost.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Interactive Scenario: Vault Audit -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-2">
+                            <i class="fa-solid fa-key text-pharmacy-600"></i>
+                            <span>Interactive Practice: Controlled Substance Security Audit</span>
+                        </h3>
+                        <span class="text-[11px] text-slate-500">Security Check</span>
+                    </div>
+                    <p class="text-xs text-slate-600">Evaluate each security scenario and choose the compliant action under DEA and California law:</p>
+
+                    <div id="vaultQuizContainer" class="space-y-3 text-xs">
+                        <!-- JS Rendered -->
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod3')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Back to Module 3</span>
+                    </button>
+                    <button onclick="completeModule(4); switchTab('mod5')" class="bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Module 5</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 5 -->
+            <div id="tab-mod5" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-pharmacy-600 uppercase tracking-wider">Module 5 of 6 • Estimated Reading Time: 20 Minutes</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-calculator mr-1"></i> Storage Math Lab</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Storage, Expiration & Temperature Math Lab</h2>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-xs text-slate-600 space-y-4 leading-relaxed">
+                    <p>
+                        Pharmacy technicians must master mathematical formulas related to temperature scale conversions, month-end expiration rules, and stock turnover metrics.
+                    </p>
+
+                    <h3 class="text-sm font-bold text-slate-800 pt-2 border-b border-slate-200 pb-1">5.1 Core Storage & Temperature Formulas</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-3">
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
+                            <span class="font-bold text-pharmacy-800 uppercase tracking-wider text-[11px]">Temperature Conversions</span>
+                            <div class="bg-white p-3 rounded-lg border border-slate-200 font-mono text-slate-800 text-xs space-y-1">
+                                <div>$$\text{Fahrenheit (°F)} = (°C \times 1.8) + 32$$</div>
+                                <div>$$\text{Celsius (°C)} = \frac{°F - 32}{1.8}$$</div>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
+                            <span class="font-bold text-pharmacy-800 uppercase tracking-wider text-[11px]">The Month-End Expiration Rule</span>
+                            <div class="bg-white p-3 rounded-lg border border-slate-200 text-slate-800 text-xs leading-relaxed">
+                                When a commercial bottle lists an expiration date with month/year only (e.g., <strong>08/2026</strong>), the medication is valid through 11:59 PM on the <strong>LAST DAY of August (August 31, 2026)</strong>.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Math Calculator & Practice -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-2">
+                        <i class="fa-solid fa-calculator text-pharmacy-600"></i>
+                        <span>Interactive Tool: Celsius &lt;&gt; Fahrenheit Converter</span>
+                    </h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white p-4 rounded-xl border border-slate-200">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Celsius (°C):</label>
+                            <input type="number" id="calcCelsius" value="5" oninput="convertCtoF()" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-mono font-bold focus:border-pharmacy-500 focus:outline-none">
+                        </div>
+                        <div class="flex items-center justify-center pt-4">
+                            <i class="fa-solid fa-right-left text-slate-400 text-lg"></i>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Fahrenheit (°F):</label>
+                            <input type="number" id="calcFahrenheit" value="41" oninput="convertFtoC()" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-mono font-bold focus:border-pharmacy-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider pt-2">Storage Math Word Problems</h4>
+                    <div id="mathQuizContainer" class="space-y-3 text-xs">
+                        <!-- JS Rendered -->
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod4')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Back to Module 4</span>
+                    </button>
+                    <button onclick="completeModule(5); switchTab('mod6')" class="bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm flex items-center space-x-2 transition text-xs">
+                        <span>Continue to Final Exam</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB: MODULE 6 -->
+            <div id="tab-mod6" class="tab-content hidden space-y-6">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-pharmacy-600 uppercase tracking-wider">Module 6 of 6 • Final Assessment</span>
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-graduation-cap mr-1"></i> Exam Engine</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Day 12 Examination & Professional Case Scenarios</h2>
+                    <p class="text-xs text-slate-600 mt-1">Complete this 15-question certification assessment to demonstrate mastery of medication storage, USP temperature standards, controlled substance security, and FDA recall classifications.</p>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-6">
+                    <form id="finalExamForm" class="space-y-6 text-xs">
+                        <div id="finalExamQuestionsContainer" class="space-y-6">
+                            <!-- Dynamically rendered exam questions -->
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <div id="examResultAlert" class="text-xs font-semibold text-slate-700 hidden"></div>
+                            <button type="button" onclick="submitFinalExam()" class="w-full sm:w-auto bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-bold text-xs px-8 py-3 rounded-xl shadow-md transition">
+                                Submit Final Examination
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                    <button onclick="switchTab('mod5')" class="text-slate-500 hover:text-slate-700 text-xs font-medium flex items-center space-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Back to Module 5</span>
+                    </button>
+                    <button onclick="window.print()" class="text-slate-600 hover:text-slate-800 text-xs font-semibold flex items-center space-x-1">
+                        <i class="fa-solid fa-print"></i>
+                        <span>Print Record</span>
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Study Notes Modal Dialog -->
+    <div id="notesModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-note-sticky text-yellow-500 text-lg"></i>
+                    <h3 class="font-bold text-slate-800 text-sm">Trainee Personal Study Notes</h3>
+                </div>
+                <button onclick="toggleNotesModal()" class="text-slate-400 hover:text-slate-600 text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <textarea id="notesTextarea" placeholder="Type key storage temperatures, USP chapter rules, or recall classes here..." class="w-full h-48 p-3 border border-slate-200 rounded-xl text-xs font-sans focus:outline-none focus:border-pharmacy-500 custom-scrollbar"></textarea>
+            <div class="flex justify-between items-center pt-2">
+                <span id="notesSavedIndicator" class="text-[10px] text-emerald-600 font-semibold opacity-0 transition-opacity">Saved to local session</span>
+                <button onclick="saveNotes()" class="bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-semibold text-xs px-4 py-2 rounded-lg transition">
+                    Save Notes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* SESSION & TAB CONTROLLER */
+        let sessionStartTime = Date.now();
+        let completedModules = new Set();
+
+        function startTimer() {
+            setInterval(() => {
+                let diff = Math.floor((Date.now() - sessionStartTime) / 1000);
+                let h = String(Math.floor(diff / 3600)).padStart(2, '0');
+                let m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+                let s = String(diff % 60).padStart(2, '0');
+                document.getElementById('sessionTimer').textContent = `${h}:${m}:${s}`;
+            }, 1000);
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-teal-50', 'text-teal-900', 'font-bold');
+                btn.classList.add('text-slate-600');
+            });
+
+            const activeBtn = document.getElementById('nav-' + tabId);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-teal-50', 'text-teal-900', 'font-bold');
+                activeBtn.classList.remove('text-slate-600');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function completeModule(modNum) {
+            completedModules.add(modNum);
+            document.getElementById('modulesCompletedCount').textContent = `${completedModules.size} / 6 Modules`;
+            let pct = Math.round((completedModules.size / 6) * 100);
+            document.getElementById('overallProgressBar').style.width = pct + '%';
+
+            const badge = document.getElementById('status-mod' + modNum);
+            if (badge) {
+                badge.className = 'text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold';
+                badge.textContent = '✓ Done';
+            }
+        }
+
+        function updateStudentName() {
+            let name = document.getElementById('studentNameInput').value;
+            localStorage.setItem('day12_student_name', name);
+        }
+
+        function toggleNotesModal() {
+            const modal = document.getElementById('notesModal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                document.getElementById('notesTextarea').value = localStorage.getItem('day12_notes') || '';
+            }
+        }
+
+        function saveNotes() {
+            let txt = document.getElementById('notesTextarea').value;
+            localStorage.setItem('day12_notes', txt);
+            let ind = document.getElementById('notesSavedIndicator');
+            ind.style.opacity = '1';
+            setTimeout(() => { ind.style.opacity = '0'; }, 2000);
+        }
+
+        /* TEMPERATURE SIMULATION LOGIC */
+        function evaluateSimTemp() {
+            let temp = parseFloat(document.getElementById('simTempInput').value);
+            let icon = document.getElementById('simTempIcon');
+            let title = document.getElementById('simTempStatusTitle');
+            let desc = document.getElementById('simTempStatusDesc');
+            let badge = document.getElementById('simTempBadge');
+            let box = document.getElementById('simTempResultBox');
+
+            icon.textContent = temp.toFixed(1) + '°';
+
+            if (temp >= 2.0 && temp <= 8.0) {
+                box.className = "p-4 rounded-xl border bg-teal-50 border-teal-200 flex items-center justify-between gap-4";
+                icon.className = "w-12 h-12 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-lg font-mono";
+                title.textContent = "Compliant Refrigerator Reading (2°C - 8°C)";
+                title.className = "font-bold text-teal-900 text-xs";
+                desc.textContent = "Insulins, vaccines, and biologics remain completely stable. No excursion logged.";
+                badge.textContent = "Compliant";
+                badge.className = "bg-teal-200 text-teal-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase";
+            } else if (temp < 2.0) {
+                box.className = "p-4 rounded-xl border bg-blue-50 border-blue-300 flex items-center justify-between gap-4";
+                icon.className = "w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg font-mono";
+                title.textContent = "FREEZING RISK EXCURSION (< 2.0°C)";
+                title.className = "font-bold text-blue-900 text-xs";
+                desc.textContent = "Liquid biologicals and insulins may freeze and denature! Quarantine unit immediately.";
+                badge.textContent = "Too Cold";
+                badge.className = "bg-blue-200 text-blue-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase";
+            } else {
+                box.className = "p-4 rounded-xl border bg-rose-50 border-rose-300 flex items-center justify-between gap-4";
+                icon.className = "w-12 h-12 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-lg font-mono";
+                title.textContent = "WARM EXCURSION ALARM (> 8.0°C)";
+                title.className = "font-bold text-rose-900 text-xs";
+                desc.textContent = "Excursion SOP triggered! Move stock to back-up unit, log duration, and notify drug manufacturers.";
+                badge.textContent = "Excursion!";
+                badge.className = "bg-rose-200 text-rose-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase";
+            }
+        }
+
+        /* MATH CONVERTER */
+        function convertCtoF() {
+            let c = parseFloat(document.getElementById('calcCelsius').value);
+            if (!isNaN(c)) {
+                let f = (c * 1.8) + 32;
+                document.getElementById('calcFahrenheit').value = f.toFixed(1);
+            }
+        }
+
+        function convertFtoC() {
+            let f = parseFloat(document.getElementById('calcFahrenheit').value);
+            if (!isNaN(f)) {
+                let c = (f - 32) / 1.8;
+                document.getElementById('calcCelsius').value = c.toFixed(1);
+            }
+        }
+
+        /* INTERACTIVE QUIZZES DATA & RENDERERS */
+        const regQuizData = [
+            { q: "Which agency sets USP <659> temperature definitions and USP <800> hazardous drug standards?", opts: ["FDA", "USP", "DEA", "OSHA"], ans: 1 },
+            { q: "Under CCR Title 16, how many years must California pharmacies retain temperature monitoring logs?", opts: ["1 Year", "2 Years", "3 Years", "5 Years"], ans: 2 },
+            { q: "Which agency regulates the physical security of Schedule II vaults and key controls?", opts: ["DEA", "FDA", "CDC", "EPA"], ans: 0 },
+            { q: "If a pharmacist leaves the premises during operating hours, what must occur?", opts: ["Technicians continue dispensing", "Prescription department must be locked", "Interns take full charge", "No action needed"], ans: 1 }
+        ];
+
+        function renderRegQuiz() {
+            const container = document.getElementById('regQuizContainer');
+            container.innerHTML = regQuizData.map((item, idx) => `
+                <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-2">
+                    <p class="font-bold text-slate-800 text-xs">${idx + 1}. ${item.q}</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        ${item.opts.map((opt, oIdx) => `
+                            <button onclick="checkRegAns(${idx}, ${oIdx})" id="reg-${idx}-${oIdx}" class="p-2 border border-slate-200 rounded text-left hover:bg-slate-50 transition text-[11px] font-medium text-slate-700">
+                                ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="reg-fb-${idx}" class="text-[11px] font-semibold hidden"></div>
+                </div>
+            `).join('');
+        }
+
+        function checkRegAns(qIdx, optIdx) {
+            const fb = document.getElementById(`reg-fb-${qIdx}`);
+            fb.classList.remove('hidden');
+            if (optIdx === regQuizData[qIdx].ans) {
+                fb.className = "text-[11px] font-bold text-emerald-700 mt-1";
+                fb.textContent = "✓ Correct!";
+            } else {
+                fb.className = "text-[11px] font-bold text-rose-700 mt-1";
+                fb.textContent = `✗ Incorrect. Correct answer: ${regQuizData[qIdx].opts[regQuizData[qIdx].ans]}`;
+            }
+        }
+
+        const sortingData = [
+            { name: "Morphine Sulfate 15mg Tablets", cat: "Schedule II Opioid", ans: "vault" },
+            { name: "Varivax (Varicella) Vaccine", cat: "Frozen Vaccine", ans: "freezer" },
+            { name: "Humalog (Insulin Lispro)", cat: "Biological Product", ans: "fridge" },
+            { name: "Methotrexate Tablets", cat: "Hazardous Antineoplastic", ans: "hd" }
+        ];
+
+        function renderSortingGame() {
+            const container = document.getElementById('sortingGameContainer');
+            container.innerHTML = sortingData.map((item, idx) => `
+                <div class="p-3 bg-white border border-slate-200 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div>
+                        <span class="text-[10px] font-bold text-pharmacy-700 uppercase tracking-wider block">${item.cat}</span>
+                        <h4 class="font-bold text-slate-800 text-xs">${item.name}</h4>
+                    </div>
+                    <div class="flex flex-wrap gap-1">
+                        <button onclick="checkSort(${idx}, 'vault')" class="px-2.5 py-1 bg-slate-100 hover:bg-teal-100 text-slate-700 text-[10px] font-bold rounded">Vault (C-II)</button>
+                        <button onclick="checkSort(${idx}, 'freezer')" class="px-2.5 py-1 bg-slate-100 hover:bg-teal-100 text-slate-700 text-[10px] font-bold rounded">Freezer</button>
+                        <button onclick="checkSort(${idx}, 'fridge')" class="px-2.5 py-1 bg-slate-100 hover:bg-teal-100 text-slate-700 text-[10px] font-bold rounded">Fridge (2-8°C)</button>
+                        <button onclick="checkSort(${idx}, 'hd')" class="px-2.5 py-1 bg-slate-100 hover:bg-teal-100 text-slate-700 text-[10px] font-bold rounded">USP <800> HD</button>
+                    </div>
+                </div>
+                <div id="sort-fb-${idx}" class="text-[11px] font-semibold hidden pl-2"></div>
+            `).join('');
+        }
+
+        function checkSort(idx, chosen) {
+            const fb = document.getElementById(`sort-fb-${idx}`);
+            fb.classList.remove('hidden');
+            if (chosen === sortingData[idx].ans) {
+                fb.className = "text-[11px] font-bold text-emerald-700";
+                fb.textContent = "✓ Correct Placement!";
+            } else {
+                fb.className = "text-[11px] font-bold text-rose-700";
+                fb.textContent = `✗ Incorrect. Correct area: ${sortingData[idx].ans.toUpperCase()}`;
+            }
+        }
+
+        const vaultData = [
+            { q: "Upon discovering a missing bottle of 100 Oxycodone 30mg tablets, when must the DEA be notified?", opts: ["Within 1 business day", "Within 30 days", "At biennial inventory", "No report needed"], ans: 0 },
+            { q: "Which form is required when sending expired controlled stock to a certified reverse distributor?", opts: ["DEA Form 222 / 41", "DEA Form 106", "FDA Form 3500", "OSHA 300"], ans: 0 }
+        ];
+
+        function renderVaultQuiz() {
+            const container = document.getElementById('vaultQuizContainer');
+            container.innerHTML = vaultData.map((item, idx) => `
+                <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-2">
+                    <p class="font-bold text-slate-800 text-xs">${idx + 1}. ${item.q}</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        ${item.opts.map((opt, oIdx) => `
+                            <button onclick="checkVaultAns(${idx}, ${oIdx})" class="p-2 border border-slate-200 rounded text-left hover:bg-slate-50 transition text-[11px] font-medium text-slate-700">
+                                ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="vault-fb-${idx}" class="text-[11px] font-semibold hidden"></div>
+                </div>
+            `).join('');
+        }
+
+        function checkVaultAns(qIdx, optIdx) {
+            const fb = document.getElementById(`vault-fb-${qIdx}`);
+            fb.classList.remove('hidden');
+            if (optIdx === vaultData[qIdx].ans) {
+                fb.className = "text-[11px] font-bold text-emerald-700 mt-1";
+                fb.textContent = "✓ Correct Compliance Action!";
+            } else {
+                fb.className = "text-[11px] font-bold text-rose-700 mt-1";
+                fb.textContent = `✗ Incorrect. Correct action: ${vaultData[qIdx].opts[vaultData[qIdx].ans]}`;
+            }
+        }
+
+        const mathData = [
+            { q: "A bottle of Amoxicillin has an expiration date of '11/2026'. On what date does it officially expire?", opts: ["November 1, 2026", "November 15, 2026", "November 30, 2026", "October 31, 2026"], ans: 2 },
+            { q: "Convert 5°C (refrigerator temperature) to Fahrenheit:", opts: ["32°F", "41°F", "50°F", "68°F"], ans: 1 }
+        ];
+
+        function renderMathQuiz() {
+            const container = document.getElementById('mathQuizContainer');
+            container.innerHTML = mathData.map((item, idx) => `
+                <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-2">
+                    <p class="font-bold text-slate-800 text-xs">${idx + 1}. ${item.q}</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        ${item.opts.map((opt, oIdx) => `
+                            <button onclick="checkMathAns(${idx}, ${oIdx})" class="p-2 border border-slate-200 rounded text-left hover:bg-slate-50 transition text-[11px] font-medium text-slate-700">
+                                ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="math-fb-${idx}" class="text-[11px] font-semibold hidden"></div>
+                </div>
+            `).join('');
+        }
+
+        function checkMathAns(qIdx, optIdx) {
+            const fb = document.getElementById(`math-fb-${qIdx}`);
+            fb.classList.remove('hidden');
+            if (optIdx === mathData[qIdx].ans) {
+                fb.className = "text-[11px] font-bold text-emerald-700 mt-1";
+                fb.textContent = "✓ Correct Calculation!";
+            } else {
+                fb.className = "text-[11px] font-bold text-rose-700 mt-1";
+                fb.textContent = `✗ Incorrect. Correct answer: ${mathData[qIdx].opts[mathData[qIdx].ans]}`;
+            }
+        }
+
+        /* MODULE 6 FINAL EXAM ENGINE */
+        const examQuestions = [
+            { q: "1. What is the USP <659> standard temperature range for a medical refrigerator?", opts: ["-25°C to -10°C", "2°C to 8°C", "8°C to 15°C", "20°C to 25°C"], ans: 1 },
+            { q: "2. Which FDA Recall class represents the most serious hazard, with reasonable probability of death?", opts: ["Class I Recall", "Class II Recall", "Class III Recall", "Class IV Recall"], ans: 0 },
+            { q: "3. When an expiration date specifies '05/2027', when does the drug officially expire?", opts: ["May 1, 2027", "May 15, 2027", "May 31, 2027", "April 30, 2027"], ans: 2 },
+            { q: "4. Which DEA Form is submitted to document certified destruction of controlled substances?", opts: ["DEA Form 222", "DEA Form 106", "DEA Form 41", "DEA Form 224"], ans: 2 },
+            { q: "5. What is the First Expired, First Out (FEFO) stock placement rule?", opts: ["Place longest dated stock in front", "Place shortest dated stock in front", "Mix stock randomly", "Discard all stock after 6 months"], ans: 1 },
+            { q: "6. Under USP <800>, hazardous antineoplastic drugs must be stored in:", opts: ["Standard open shelves", "Positive pressure room", "Negative pressure room with external ventilation", "Food refrigerator"], ans: 2 },
+            { q: "7. Significant loss or theft of controlled substances must be reported to the DEA within:", opts: ["1 Business Day", "10 Days", "30 Days", "At annual audit"], ans: 0 },
+            { q: "8. What is the Fahrenheit equivalent of 25°C (Controlled Room Temperature)?", opts: ["59°F", "68°F", "77°F", "86°F"], ans: 2 },
+            { q: "9. Which drug requires freezer storage (-25°C to -10°C)?", opts: ["Lisinopril", "Varicella vaccine (Varivax)", "Insulin Glargine", "Amoxicillin"], ans: 1 },
+            { q: "10. California Board of Pharmacy mandates retention of temperature logs for:", opts: ["1 Year", "2 Years", "3 Years", "7 Years"], ans: 2 },
+            { q: "11. A Class II FDA Recall involves:", opts: ["Probability of death", "Temporary or medically reversible health consequences", "Minor printing defects", "No health hazard"], ans: 1 },
+            { q: "12. What action should be taken immediately during a temperature excursion (>8°C)?", opts: ["Throw away all stock immediately", "Quarantine affected stock and document duration", "Ignore if under 12 hours", "Sell at discount"], ans: 1 },
+            { q: "13. Schedule II controlled substances must be stored in:", opts: ["Unlocked drawers", "Locked steel safe/vault or dispersed in retail", "Breakroom closet", "Front register"], ans: 1 },
+            { q: "14. Tall Man Lettering is primarily used to:", opts: ["Indicate controlled schedule", "Differentiate Look-Alike Sound-Alike (LASA) drugs", "Show expiration date", "Mark cheap drugs"], ans: 1 },
+            { q: "15. The Poison Prevention Packaging Act (PPPA) is enforced by which federal agency?", opts: ["FDA", "CPSC (Consumer Product Safety Commission)", "DEA", "EPA"], ans: 1 }
+        ];
+
+        function renderFinalExam() {
+            const container = document.getElementById('finalExamQuestionsContainer');
+            container.innerHTML = examQuestions.map((item, qIdx) => `
+                <div class="p-4 bg-white border border-slate-200 rounded-xl space-y-3">
+                    <p class="font-bold text-slate-800 text-xs">${item.q}</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        ${item.opts.map((opt, oIdx) => `
+                            <label class="flex items-center space-x-2 p-2 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition text-[11px]">
+                                <input type="radio" name="exam-q-${qIdx}" value="${oIdx}" class="text-pharmacy-600 focus:ring-pharmacy-500">
+                                <span>${opt}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function submitFinalExam() {
+            let score = 0;
+            examQuestions.forEach((item, qIdx) => {
+                const selected = document.querySelector(`input[name="exam-q-${qIdx}"]:checked`);
+                if (selected && parseInt(selected.value) === item.ans) {
+                    score++;
+                }
+            });
+
+            let pct = Math.round((score / examQuestions.length) * 100);
+            const alertBox = document.getElementById('examResultAlert');
+            alertBox.classList.remove('hidden');
+
+            document.getElementById('overallScoreDisplay').textContent = `${pct}% (${score}/${examQuestions.length})`;
+
+            if (pct >= 80) {
+                alertBox.className = "p-3 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-xs border border-emerald-200";
+                alertBox.textContent = `PASSED! Score: ${pct}% (${score}/${examQuestions.length}). Mastery demonstrated in Day 12 Storage Requirements!`;
+                completeModule(6);
+            } else {
+                alertBox.className = "p-3 rounded-lg bg-rose-100 text-rose-800 font-bold text-xs border border-rose-200";
+                alertBox.textContent = `SCORE: ${pct}% (${score}/${examQuestions.length}). Review the module content and re-try to reach 80% passing standard.`;
+            }
+        }
+
+        /* INITIALIZATION */
+        window.onload = function() {
+            startTimer();
+            renderRegQuiz();
+            renderSortingGame();
+            renderVaultQuiz();
+            renderMathQuiz();
+            renderFinalExam();
+
+            let savedName = localStorage.getItem('day12_student_name');
+            if (savedName) document.getElementById('studentNameInput').value = savedName;
+        };
+    </script>
+</body>
+</html>
