@@ -122,7 +122,7 @@
                         <!-- Firebase Cloud Status Badge -->
                         <span id="firebaseStatusBadge" class="text-[10px] bg-slate-800 text-amber-400 font-mono px-2 py-0.5 rounded-full border border-slate-700 flex items-center gap-1">
                             <i class="fa-solid fa-cloud text-amber-400"></i>
-                            <span id="firebaseStatusText">Firebase: techtraining-873e3</span>
+                            <span id="firebaseStatusText">Firebase: Initializing...</span>
                         </span>
                     </h1>
                     <p class="text-xs text-slate-400">South Coast Mission Pharmacy • 30-Day Practical & Theoretical Curriculum</p>
@@ -161,7 +161,7 @@
                     <span>Audit Vault</span>
                 </button>
 
-                <!-- Dedicated Logout Button for Shared Computers -->
+                <!-- Dedicated Logout Button -->
                 <button id="logoutBtn" onclick="logoutStudent()" class="hidden px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-2">
                     <i class="fa-solid fa-right-from-bracket"></i>
                     <span>Logout</span>
@@ -248,7 +248,7 @@
     <footer class="bg-white border-t border-slate-200 mt-auto py-6">
         <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 space-y-1">
             <p class="font-semibold text-slate-700">California Pharmacy Technician Training Program Compliance Standard</p>
-            <p>© 2026 South Coast Mission Pharmacy. All training records archived for state board inspection.</p>
+            <p>© 2026 South Coast Mission Pharmacy. All training records archived in Firebase Cloud for state board inspection.</p>
         </div>
     </footer>
 
@@ -288,7 +288,7 @@
                     <p class="text-[11px] text-slate-400 mt-1" id="fullNameHelp">Must match your official name for state board certificates.</p>
                 </div>
 
-                <!-- Admin & Teacher Role Sub-Selector (Visible in Admin/Staff Mode) -->
+                <!-- Admin & Teacher Role Sub-Selector -->
                 <div id="fieldStaffRoleContainer" class="hidden space-y-2">
                     <label class="block text-xs font-semibold text-slate-800">Staff Role & Verification Type *</label>
                     <div class="grid grid-cols-2 gap-2">
@@ -458,7 +458,7 @@
         </div>
     </div>
 
-    <!-- Admin Certificate Management Portal Modal (Strictly Restricted to Admins) -->
+    <!-- Admin Certificate Management Portal Modal -->
     <div id="adminPortalModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeAdminPortalModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-sm">
@@ -652,7 +652,7 @@
                         <p class="text-[10px] text-slate-400 font-semibold uppercase">Training Facility</p>
                         <p class="font-bold text-slate-900">South Coast Mission Pharmacy</p>
                         <p class="text-[11px] text-slate-600">California Pharmacy License</p>
-                        <p class="text-[10px] text-slate-400 italic">Audit Log Encrypted & Archived</p>
+                        <p class="text-[10px] text-slate-400 italic">Audit Log Encrypted & Cloud Archived</p>
                     </div>
                 </div>
             </div>
@@ -683,7 +683,7 @@
                 </div>
                 <div>
                     <h3 class="text-base font-bold text-slate-900">State Board Audit Vault</h3>
-                    <p class="text-xs text-slate-500">Comprehensive training transcript & pharmacist/teacher sign-off audit log</p>
+                    <p class="text-xs text-slate-500">Comprehensive training transcript & pharmacist/teacher sign-off cloud audit log</p>
                 </div>
             </div>
 
@@ -724,7 +724,7 @@
         </div>
     </div>
 
-    <!-- Module Detail Modal with Integrated Placeholder Links -->
+    <!-- Module Detail Modal -->
     <div id="detailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 relative max-h-[90vh] overflow-y-auto space-y-4">
             <button onclick="closeDetailModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-sm">
@@ -750,7 +750,7 @@
                     </ul>
                 </div>
 
-                <!-- GitHub Pages & Local Curriculum Placeholder Links Section -->
+                <!-- GitHub Pages & Curriculum Materials Section -->
                 <div class="border-t border-slate-100 pt-3">
                     <div class="flex items-center justify-between mb-2">
                         <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
@@ -776,7 +776,7 @@
         </div>
     </div>
 
-    <!-- Custom Confirm Modal (Replaces browser confirm) -->
+    <!-- Custom Confirm Modal -->
     <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 relative text-center space-y-4">
             <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto text-xl font-bold">
@@ -800,7 +800,7 @@
 
     <script>
         /* ----------------------------------------------------
-           FIREBASE CLOUD INTEGRATION SETUP
+           FIREBASE CLOUD INTEGRATION SETUP (NO LOCALSTORAGE)
         ---------------------------------------------------- */
         const firebaseConfig = {
             apiKey: "AIzaSyD29MWrO4sQtAKj8pDWiAC1dV9GEnCumxw",
@@ -817,15 +817,15 @@
         let isFirebaseActive = false;
 
         try {
-            if (typeof firebase !== 'undefined' && firebaseConfig.apiKey !== "YOUR_FIREBASE_API_KEY") {
+            if (typeof firebase !== 'undefined') {
                 firebase.initializeApp(firebaseConfig);
                 db = firebase.firestore();
                 auth = firebase.auth();
                 isFirebaseActive = true;
-                console.log("Firebase initialized for project: techtraining-873e3");
+                console.log("Firebase initialized successfully for techtraining-873e3");
             }
         } catch (err) {
-            console.warn("Firebase config incomplete, running in LocalStorage mode:", err);
+            console.error("Firebase initialization failed:", err);
         }
 
         /* ----------------------------------------------------
@@ -874,26 +874,19 @@
         ];
 
         /* ----------------------------------------------------
-           APPLICATION STATE & ROLE MANAGEMENT
+           APPLICATION STATE & ROLE MANAGEMENT (PURE FIREBASE)
         ---------------------------------------------------- */
-        let currentUser = JSON.parse(localStorage.getItem('cttp_current_user')) || null;
-        let isAdminLoggedIn = JSON.parse(localStorage.getItem('cttp_is_admin')) || false;
-        let isTeacherLoggedIn = JSON.parse(localStorage.getItem('cttp_is_teacher')) || false;
+        let currentUser = null; // { fullName, email, uid }
+        let currentStudentRecords = {}; // Day records loaded live from Firestore
+        let isAdminLoggedIn = false;
+        let isTeacherLoggedIn = false;
         let activeFilter = 'all';
         let searchQuery = '';
-        let authMode = 'signin'; // 'signin', 'register', 'forgot', or 'admin'
-        let selectedStaffRole = 'teacher'; // 'teacher' or 'admin'
+        let authMode = 'signin';
+        let selectedStaffRole = 'teacher';
 
         const DEFAULT_ADMIN_PIN = "4515";
         const DEFAULT_TEACHER_PIN = "9999";
-
-        function getUsersDatabase() {
-            return JSON.parse(localStorage.getItem('cttp_users_db')) || {};
-        }
-
-        function saveUsersDatabase(users) {
-            localStorage.setItem('cttp_users_db', JSON.stringify(users));
-        }
 
         /* Custom Notification Toast Helper */
         function showToast(message, type = 'info') {
@@ -987,24 +980,61 @@
         }
 
         window.onload = function() {
-            updateUserUI();
-            renderGrid();
-            updateStats();
-            
-            // Update Firebase Connection Status Badge UI
             const statusText = document.getElementById('firebaseStatusText');
-            if (statusText) {
-                if (isFirebaseActive) {
-                    statusText.innerHTML = `<span class="text-emerald-400 font-bold">Cloud Synced</span> (techtraining-873e3)`;
-                } else {
-                    statusText.innerHTML = `Project: <strong class="text-slate-200">techtraining-873e3</strong> (Local Mode)`;
-                }
+            if (isFirebaseActive && auth) {
+                if (statusText) statusText.innerHTML = `<span class="text-emerald-400 font-bold">Cloud Synced</span> (techtraining-873e3)`;
+
+                // Pure Firebase Auth state change listener
+                auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        try {
+                            // Fetch user profile from Firestore users collection
+                            const userDoc = await db.collection('users').doc(user.email.toLowerCase()).get();
+                            if (userDoc.exists) {
+                                currentUser = userDoc.data();
+                            } else {
+                                currentUser = {
+                                    fullName: user.displayName || user.email.split('@')[0],
+                                    email: user.email.toLowerCase(),
+                                    uid: user.uid
+                                };
+                            }
+                            await loadStudentRecordsFromFirebase(currentUser.email);
+                        } catch (e) {
+                            console.error("Error loading user profile from Firestore:", e);
+                        }
+                    } else {
+                        currentUser = null;
+                        currentStudentRecords = {};
+                    }
+                    updateUserUI();
+                    renderGrid();
+                    updateStats();
+                });
+            } else {
+                if (statusText) statusText.innerHTML = `<span class="text-red-400 font-bold">Firebase Offline</span>`;
+                updateUserUI();
+                renderGrid();
+                updateStats();
             }
         };
 
-        /* ----------------------------------------------------
-           AUTH & USER SYSTEM WITH UNEXPOSED SECURE STAFF PINS
-        ---------------------------------------------------- */
+        async function loadStudentRecordsFromFirebase(email) {
+            if (!isFirebaseActive || !db || !email) return;
+
+            try {
+                const docRef = await db.collection('student_records').doc(email.toLowerCase()).get();
+                if (docRef.exists) {
+                    currentStudentRecords = docRef.data().records || {};
+                } else {
+                    currentStudentRecords = {};
+                }
+            } catch (err) {
+                console.error("Error reading Firestore records:", err);
+                currentStudentRecords = {};
+            }
+        }
+
         function openAuthModal() {
             document.getElementById('authModal').classList.remove('hidden');
             switchAuthTab('signin');
@@ -1072,7 +1102,6 @@
             tabForgot.className = mode === 'forgot' ? activeTabClass : inactiveTabClass;
             tabAdmin.className = mode === 'admin' ? activeAdminTabClass : "flex-1 py-2 px-2 rounded-lg text-amber-700 hover:text-amber-900 transition whitespace-nowrap flex items-center justify-center gap-1 text-center font-semibold";
 
-            // Reset field visibilities
             fieldFullName.classList.add('hidden');
             fieldEmail.classList.remove('hidden');
             fieldPassword.classList.remove('hidden');
@@ -1097,11 +1126,10 @@
                 iconBox.className = "w-12 h-12 bg-brand-50 rounded-2xl text-brand-600 flex items-center justify-center mx-auto mb-3 text-xl font-bold";
             } else if (mode === 'forgot') {
                 fieldPassword.classList.add('hidden');
-                fieldNewPassword.classList.remove('hidden');
                 if (forgotLink) forgotLink.classList.add('hidden');
                 title.innerText = "Reset Account Password";
-                subTitle.innerText = "Enter your email address and new password to recover access.";
-                btn.innerText = "Reset Password";
+                subTitle.innerText = "Enter your registered email address to receive a password reset link.";
+                btn.innerText = "Send Password Reset Email";
                 btn.className = "w-full py-3 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs rounded-xl shadow-md transition";
                 iconBox.className = "w-12 h-12 bg-slate-100 rounded-2xl text-slate-700 flex items-center justify-center mx-auto mb-3 text-xl font-bold";
             } else if (mode === 'admin') {
@@ -1118,25 +1146,25 @@
             }
         }
 
-        function handleAuthSubmit(e) {
+        async function handleAuthSubmit(e) {
             e.preventDefault();
             hideAuthAlerts();
+
+            if (!isFirebaseActive || !auth || !db) {
+                showAuthError("Firebase services are not available.");
+                return;
+            }
 
             const fullName = document.getElementById('authFullName').value.trim();
             const email = document.getElementById('authEmail').value.trim().toLowerCase();
             const password = document.getElementById('authPassword').value;
-            const newPassword = document.getElementById('authNewPassword').value;
             const adminPin = document.getElementById('authAdminPin').value.trim();
-
-            const usersDb = getUsersDatabase();
 
             if (authMode === 'admin') {
                 if (selectedStaffRole === 'teacher') {
                     if (adminPin === DEFAULT_TEACHER_PIN) {
                         isTeacherLoggedIn = true;
                         isAdminLoggedIn = false;
-                        localStorage.setItem('cttp_is_teacher', 'true');
-                        localStorage.setItem('cttp_is_admin', 'false');
                         showToast("Teacher Access Authenticated (Issue Sign-Offs)", "success");
                         closeAuthModal();
                         updateUserUI();
@@ -1148,8 +1176,6 @@
                     if (adminPin === DEFAULT_ADMIN_PIN) {
                         isAdminLoggedIn = true;
                         isTeacherLoggedIn = true;
-                        localStorage.setItem('cttp_is_admin', 'true');
-                        localStorage.setItem('cttp_is_teacher', 'true');
                         showToast("Administrator Access Authenticated (Certificate Editing Enabled)", "success");
                         closeAuthModal();
                         updateUserUI();
@@ -1166,21 +1192,34 @@
                     showAuthError("Please complete all required registration fields.");
                     return;
                 }
-                if (usersDb[email]) {
-                    showAuthError("An account with this email address already exists. Please sign in.");
+                if (password.length < 6) {
+                    showAuthError("Password must be at least 6 characters long.");
                     return;
                 }
 
-                usersDb[email] = { fullName, email, password, records: {} };
-                saveUsersDatabase(usersDb);
+                try {
+                    const userCred = await auth.createUserWithEmailAndPassword(email, password);
+                    await userCred.user.updateProfile({ displayName: fullName });
 
-                currentUser = { fullName, email };
-                localStorage.setItem('cttp_current_user', JSON.stringify(currentUser));
-                showToast(`Welcome, ${fullName}! Student account registered successfully.`, "success");
-                closeAuthModal();
-                updateUserUI();
-                renderGrid();
-                updateStats();
+                    const userObj = {
+                        fullName: fullName,
+                        email: email,
+                        uid: userCred.user.uid,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    await db.collection('users').doc(email).set(userObj, { merge: true });
+                    currentUser = userObj;
+
+                    showToast(`Welcome, ${fullName}! Account created in Firebase.`, "success");
+                    closeAuthModal();
+                    await loadStudentRecordsFromFirebase(email);
+                    updateUserUI();
+                    renderGrid();
+                    updateStats();
+                } catch (err) {
+                    showAuthError(err.message || "Failed to register account.");
+                }
                 return;
             }
 
@@ -1189,49 +1228,59 @@
                     showAuthError("Please enter your email address and password.");
                     return;
                 }
-                if (!usersDb[email] || usersDb[email].password !== password) {
-                    showAuthError("Invalid student credentials. Please verify your email and password.");
-                    return;
-                }
 
-                currentUser = { fullName: usersDb[email].fullName, email };
-                localStorage.setItem('cttp_current_user', JSON.stringify(currentUser));
-                showToast(`Signed in as ${usersDb[email].fullName}`, "success");
-                closeAuthModal();
-                updateUserUI();
-                renderGrid();
-                updateStats();
+                try {
+                    const userCred = await auth.signInWithEmailAndPassword(email, password);
+                    const userDoc = await db.collection('users').doc(email).get();
+                    if (userDoc.exists) {
+                        currentUser = userDoc.data();
+                    } else {
+                        currentUser = {
+                            fullName: userCred.user.displayName || email.split('@')[0],
+                            email: email,
+                            uid: userCred.user.uid
+                        };
+                    }
+
+                    showToast(`Signed in as ${currentUser.fullName}`, "success");
+                    closeAuthModal();
+                    await loadStudentRecordsFromFirebase(email);
+                    updateUserUI();
+                    renderGrid();
+                    updateStats();
+                } catch (err) {
+                    showAuthError(err.message || "Invalid credentials. Please verify your email and password.");
+                }
                 return;
             }
 
             if (authMode === 'forgot') {
-                if (!email || !newPassword) {
-                    showAuthError("Please provide your email address and a new password.");
-                    return;
-                }
-                if (!usersDb[email]) {
-                    showAuthError("No student account found with this email address.");
+                if (!email) {
+                    showAuthError("Please provide your email address.");
                     return;
                 }
 
-                usersDb[email].password = newPassword;
-                saveUsersDatabase(usersDb);
-                showAuthSuccess("Password successfully updated. You may now sign in.");
-                setTimeout(() => switchAuthTab('signin'), 1500);
+                try {
+                    await auth.sendPasswordResetEmail(email);
+                    showAuthSuccess("Password reset email sent via Firebase. Check your inbox.");
+                } catch (err) {
+                    showAuthError(err.message || "Failed to send reset email.");
+                }
             }
         }
 
         function logoutStudent() {
             showConfirmModal(
                 "Sign Out / Logout Confirmation",
-                "Are you sure you want to log out of all active student and staff sessions on this computer?",
-                () => {
+                "Are you sure you want to log out of all active student and staff sessions?",
+                async () => {
+                    if (isFirebaseActive && auth) {
+                        await auth.signOut();
+                    }
                     currentUser = null;
+                    currentStudentRecords = {};
                     isAdminLoggedIn = false;
                     isTeacherLoggedIn = false;
-                    localStorage.removeItem('cttp_current_user');
-                    localStorage.removeItem('cttp_is_admin');
-                    localStorage.removeItem('cttp_is_teacher');
                     showToast("Logged out successfully.", "info");
                     updateUserUI();
                     renderGrid();
@@ -1270,7 +1319,6 @@
                 loginBtn.classList.add('hidden');
                 userNameDisplay.innerText = currentUser.fullName;
                 
-                // Get initials
                 const parts = currentUser.fullName.split(' ');
                 const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].slice(0, 2).toUpperCase();
                 userAvatar.innerText = initials;
@@ -1312,11 +1360,7 @@
             const grid = document.getElementById('modulesGrid');
             const noResults = document.getElementById('noResults');
 
-            const usersDb = getUsersDatabase();
-            const userRecords = (currentUser && usersDb[currentUser.email] && usersDb[currentUser.email].records) ? usersDb[currentUser.email].records : {};
-
             let filtered = modules.filter(m => {
-                // Week filter
                 let passWeek = true;
                 if (activeFilter === 'week1') passWeek = m.week === 1;
                 else if (activeFilter === 'week2') passWeek = m.week === 2;
@@ -1324,7 +1368,6 @@
                 else if (activeFilter === 'week4') passWeek = m.week === 4;
                 else if (activeFilter === 'week5') passWeek = m.week === 5;
 
-                // Search query filter
                 let passSearch = true;
                 if (searchQuery) {
                     passSearch = m.title.toLowerCase().includes(searchQuery) ||
@@ -1345,7 +1388,7 @@
             noResults.classList.add('hidden');
 
             grid.innerHTML = filtered.map(m => {
-                const rec = userRecords[m.day];
+                const rec = currentStudentRecords[m.day];
                 const isDone = !!rec;
 
                 return `
@@ -1398,13 +1441,10 @@
         }
 
         function updateStats() {
-            const usersDb = getUsersDatabase();
-            const userRecords = (currentUser && usersDb[currentUser.email] && usersDb[currentUser.email].records) ? usersDb[currentUser.email].records : {};
-
-            const completed = Object.keys(userRecords).length;
+            const completed = Object.keys(currentStudentRecords).length;
             let totalHours = 0;
 
-            Object.values(userRecords).forEach(r => {
+            Object.values(currentStudentRecords).forEach(r => {
                 totalHours += parseFloat(r.teachingHours || 4.0) + parseFloat(r.practicalHours || 4.0);
             });
 
@@ -1417,7 +1457,7 @@
         }
 
         /* ----------------------------------------------------
-           DETAILS POPUP & PLACEHOLDER LINKS GENERATION LOGIC
+           DETAILS POPUP & CURRICULUM RESOURCE LINKS
         ---------------------------------------------------- */
         function openDetailModal(dayNum) {
             const mod = modules.find(m => m.day === dayNum);
@@ -1428,22 +1468,15 @@
             document.getElementById('detailCategory').innerText = mod.category;
             document.getElementById('detailDescription').innerText = mod.description;
 
-            // Agenda items
             const agendaUl = document.getElementById('detailAgenda');
             agendaUl.innerHTML = mod.agenda.map(a => `<li>${a}</li>`).join('');
 
-            // Format Day Number for GitHub Pages / relative links (e.g., Day 1 -> day-01)
             const paddedDay = mod.day < 10 ? '0' + mod.day : mod.day;
-            
-            // GitHub Pages & Local Compatible Placeholder Links
             const studentMaterialUrl = `./materials/day-${paddedDay}-reading.html`;
             const teacherPlanUrl = `./lesson-plans/day-${paddedDay}-plan.html`;
 
             const resourcesContainer = document.getElementById('detailResourcesContainer');
-            let linksHtml = '';
-
-            // 1. Student Reading Material Link
-            linksHtml += `
+            let linksHtml = `
                 <a href="${studentMaterialUrl}" target="_blank" title="Open Student Reading Guide" class="flex items-center gap-3 p-3 rounded-xl border border-brand-200 bg-brand-50/60 hover:bg-brand-100/80 text-brand-700 transition group relative">
                     <div class="w-9 h-9 rounded-lg bg-brand-500 text-white flex items-center justify-center text-sm shrink-0 shadow-xs group-hover:scale-105 transition">
                         <i class="fa-solid fa-book-open"></i>
@@ -1456,7 +1489,6 @@
                 </a>
             `;
 
-            // 2. Teacher Lesson Plan Link
             if (isTeacherLoggedIn || isAdminLoggedIn) {
                 linksHtml += `
                     <a href="${teacherPlanUrl}" target="_blank" title="Open Teacher Lesson Plan" class="flex items-center gap-3 p-3 rounded-xl border border-teacher-200 bg-teacher-50/60 hover:bg-teacher-100/80 text-teacher-700 transition group relative">
@@ -1474,7 +1506,6 @@
                     </a>
                 `;
             } else {
-                // Public / Student View Placeholder for Teacher Plan
                 linksHtml += `
                     <a href="${teacherPlanUrl}" target="_blank" title="Open Teacher Lesson Plan" class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 transition group relative">
                         <div class="w-9 h-9 rounded-lg bg-slate-200 text-slate-500 flex items-center justify-center text-sm shrink-0 shadow-xs group-hover:scale-105 transition">
@@ -1491,11 +1522,8 @@
 
             resourcesContainer.innerHTML = linksHtml;
 
-            // Action box inside detail modal
             const actionBox = document.getElementById('detailModalActionBox');
-            const usersDb = getUsersDatabase();
-            const userRecords = (currentUser && usersDb[currentUser.email] && usersDb[currentUser.email].records) ? usersDb[currentUser.email].records : {};
-            const isDone = !!userRecords[mod.day];
+            const isDone = !!currentStudentRecords[mod.day];
 
             if (isDone) {
                 actionBox.innerHTML = `
@@ -1521,7 +1549,7 @@
         }
 
         /* ----------------------------------------------------
-           END-OF-DAY SIGN-OFF WORKFLOWS
+           END-OF-DAY SIGN-OFF WORKFLOWS (FIRESTORE)
         ---------------------------------------------------- */
         function openSignOffModal(dayNum) {
             if (!currentUser) {
@@ -1562,8 +1590,13 @@
             }
         }
 
-        function handleSignOffSubmit(e) {
+        async function handleSignOffSubmit(e) {
             e.preventDefault();
+
+            if (!currentUser) {
+                showToast("Active student session required.", "error");
+                return;
+            }
 
             const dayId = parseInt(document.getElementById('signOffDayId').value);
             const rphName = document.getElementById('rphName').value.trim();
@@ -1578,12 +1611,6 @@
                     showToast("Please provide an explanation for the hours variance.", "error");
                     return;
                 }
-            }
-
-            const usersDb = getUsersDatabase();
-            if (!currentUser || !usersDb[currentUser.email]) {
-                showToast("Active student session required.", "error");
-                return;
             }
 
             const todayStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -1602,31 +1629,36 @@
                 timestamp: Date.now()
             };
 
-            usersDb[currentUser.email].records[dayId] = newRecord;
-            saveUsersDatabase(usersDb);
+            currentStudentRecords[dayId] = newRecord;
 
-            // Cloud sync if Firebase active
+            // Direct save to Firestore
             if (isFirebaseActive && db) {
-                db.collection('student_records').doc(currentUser.email).set({
-                    email: currentUser.email,
-                    records: usersDb[currentUser.email].records,
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true }).catch(err => console.error("Firebase sync error:", err));
+                try {
+                    await db.collection('student_records').doc(currentUser.email.toLowerCase()).set({
+                        email: currentUser.email.toLowerCase(),
+                        records: currentStudentRecords,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+
+                    showToast(`Day ${dayId} signed off successfully in Firebase Cloud!`, "success");
+                } catch (err) {
+                    console.error("Firestore sign-off write error:", err);
+                    showToast("Failed to save sign-off to Firebase.", "error");
+                    return;
+                }
             }
 
-            showToast(`Day ${dayId} signed off successfully! Certificate issued.`, "success");
             closeSignOffModal();
             renderGrid();
             updateStats();
         }
 
         /* ----------------------------------------------------
-           ADMIN-ONLY CERTIFICATE PORTAL LOGIC
+           ADMIN-ONLY CERTIFICATE PORTAL LOGIC (FIRESTORE)
         ---------------------------------------------------- */
-        function openAdminPortalModal() {
-            // ONLY ALLOW ADMINS TO ACCESS ADMIN PORTAL TO EDIT CERTIFICATES
+        async function openAdminPortalModal() {
             if (!isAdminLoggedIn) {
-                showToast("Access Restricted: Contact Nick for Admin Access.", "error");
+                showToast("Access Restricted: Administrator authentication required.", "error");
                 if (!isTeacherLoggedIn) {
                     openAuthModal();
                     switchAuthTab('admin');
@@ -1634,26 +1666,40 @@
                 return;
             }
 
-            populateAdminDropdowns();
+            await populateAdminDropdowns();
             document.getElementById('adminPortalModal').classList.remove('hidden');
-            onAdminStudentOrDayChange();
+            await onAdminStudentOrDayChange();
         }
 
         function closeAdminPortalModal() {
             document.getElementById('adminPortalModal').classList.add('hidden');
         }
 
-        function populateAdminDropdowns() {
-            const usersDb = getUsersDatabase();
+        async function populateAdminDropdowns() {
             const studentSelect = document.getElementById('adminStudentSelect');
             const daySelect = document.getElementById('adminDaySelect');
 
-            const users = Object.values(usersDb);
-            if (users.length === 0) {
-                studentSelect.innerHTML = `<option value="">No registered students found</option>`;
+            let usersList = [];
+            if (isFirebaseActive && db) {
+                try {
+                    const snap = await db.collection('users').get();
+                    snap.forEach(doc => {
+                        usersList.push(doc.data());
+                    });
+                } catch (e) {
+                    console.error("Error fetching users from Firestore:", e);
+                }
+            }
+
+            if (usersList.length === 0) {
+                if (currentUser) {
+                    studentSelect.innerHTML = `<option value="${currentUser.email}">${currentUser.fullName} (${currentUser.email})</option>`;
+                } else {
+                    studentSelect.innerHTML = `<option value="">No registered students found in Firebase</option>`;
+                }
             } else {
-                studentSelect.innerHTML = users.map(u => `<option value="${u.email}">${u.fullName} (${u.email})</option>`).join('');
-                if (currentUser && usersDb[currentUser.email]) {
+                studentSelect.innerHTML = usersList.map(u => `<option value="${u.email}">${u.fullName} (${u.email})</option>`).join('');
+                if (currentUser) {
                     studentSelect.value = currentUser.email;
                 }
             }
@@ -1661,20 +1707,31 @@
             daySelect.innerHTML = modules.map(m => `<option value="${m.day}">Day ${m.day}: ${m.title}</option>`).join('');
         }
 
-        function onAdminStudentOrDayChange() {
+        async function onAdminStudentOrDayChange() {
             const studentEmail = document.getElementById('adminStudentSelect').value;
             const dayId = parseInt(document.getElementById('adminDaySelect').value);
 
-            const usersDb = getUsersDatabase();
-            const student = usersDb[studentEmail];
-            const record = (student && student.records) ? student.records[dayId] : null;
+            if (!studentEmail) return;
 
+            let recordsForTarget = {};
+            if (isFirebaseActive && db) {
+                try {
+                    const doc = await db.collection('student_records').doc(studentEmail.toLowerCase()).get();
+                    if (doc.exists) {
+                        recordsForTarget = doc.data().records || {};
+                    }
+                } catch (e) {
+                    console.error("Firestore lookup error:", e);
+                }
+            }
+
+            const record = recordsForTarget[dayId];
             const statusText = document.getElementById('adminStatusText');
             const statusBadge = document.getElementById('adminStatusBadge');
             const deleteBtn = document.getElementById('adminDeleteBtn');
 
             if (record) {
-                statusText.innerHTML = `<i class="fa-solid fa-circle-check mr-1.5 text-emerald-500"></i> Issued Certificate Record Found for ${student.fullName}.`;
+                statusText.innerHTML = `<i class="fa-solid fa-circle-check mr-1.5 text-emerald-500"></i> Issued Certificate Record Found.`;
                 statusBadge.innerText = "ISSUED";
                 statusBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded uppercase bg-emerald-100 text-emerald-800 border border-emerald-300";
                 
@@ -1726,10 +1783,9 @@
             }
         }
 
-        function handleAdminCertSave(e) {
+        async function handleAdminCertSave(e) {
             e.preventDefault();
 
-            // Enforce admin permission check
             if (!isAdminLoggedIn) {
                 showToast("Unauthorized: Only Administrators can save certificate edits.", "error");
                 return;
@@ -1738,9 +1794,8 @@
             const studentEmail = document.getElementById('adminStudentSelect').value;
             const dayId = parseInt(document.getElementById('adminDaySelect').value);
 
-            const usersDb = getUsersDatabase();
-            if (!usersDb[studentEmail]) {
-                showToast("Target student account not found.", "error");
+            if (!studentEmail) {
+                showToast("Target student email missing.", "error");
                 return;
             }
 
@@ -1756,8 +1811,8 @@
             const rphLicense = document.getElementById('adminRphLicense').value.trim().toUpperCase();
             const teachingHours = parseFloat(document.getElementById('adminTeachingHours').value) || 4.0;
             const practicalHours = parseFloat(document.getElementById('adminPracticalHours').value) || 4.0;
-            const isVariance = document.getElementById('adminFlagVariance').checked;
-            const explanation = isVariance ? document.getElementById('adminExplanation').value.trim() : '';
+            const flagVariance = document.getElementById('adminFlagVariance').checked;
+            const explanation = flagVariance ? document.getElementById('adminExplanation').value.trim() : "";
 
             const updatedRecord = {
                 day: dayId,
@@ -1768,30 +1823,40 @@
                 practicalHours,
                 totalHours: teachingHours + practicalHours,
                 explanation,
-                completionDate: formattedDate || rawDate,
+                completionDate: formattedDate,
                 timestamp: Date.now()
             };
 
-            usersDb[studentEmail].records[dayId] = updatedRecord;
-            saveUsersDatabase(usersDb);
-
             if (isFirebaseActive && db) {
-                db.collection('student_records').doc(studentEmail).set({
-                    email: studentEmail,
-                    records: usersDb[studentEmail].records,
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true }).catch(err => console.error("Firebase sync error:", err));
-            }
+                try {
+                    const doc = await db.collection('student_records').doc(studentEmail.toLowerCase()).get();
+                    let recs = doc.exists ? (doc.data().records || {}) : {};
+                    recs[dayId] = updatedRecord;
 
-            showToast(`Admin Certificate update applied for Day ${dayId}.`, "success");
-            closeAdminPortalModal();
-            renderGrid();
-            updateStats();
+                    await db.collection('student_records').doc(studentEmail.toLowerCase()).set({
+                        email: studentEmail.toLowerCase(),
+                        records: recs,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+
+                    if (currentUser && currentUser.email.toLowerCase() === studentEmail.toLowerCase()) {
+                        currentStudentRecords = recs;
+                    }
+
+                    showToast(`Certificate Day ${dayId} saved in Firebase for ${studentEmail}`, "success");
+                    closeAdminPortalModal();
+                    renderGrid();
+                    updateStats();
+                } catch (err) {
+                    console.error("Firebase admin save error:", err);
+                    showToast("Failed to save changes to Firebase.", "error");
+                }
+            }
         }
 
-        function handleAdminCertRevoke() {
+        async function handleAdminCertRevoke() {
             if (!isAdminLoggedIn) {
-                showToast("Unauthorized: Only Administrators can revoke certificates.", "error");
+                showToast("Unauthorized: Admin privileges required.", "error");
                 return;
             }
 
@@ -1800,68 +1865,69 @@
 
             showConfirmModal(
                 "Revoke Certificate Confirmation",
-                `Are you sure you want to permanently revoke the Day ${dayId} certificate for student ${studentEmail}?`,
-                () => {
-                    const usersDb = getUsersDatabase();
-                    if (usersDb[studentEmail] && usersDb[studentEmail].records[dayId]) {
-                        delete usersDb[studentEmail].records[dayId];
-                        saveUsersDatabase(usersDb);
+                `Are you sure you want to permanently revoke the Day ${dayId} certificate for ${studentEmail}?`,
+                async () => {
+                    if (isFirebaseActive && db) {
+                        try {
+                            const doc = await db.collection('student_records').doc(studentEmail.toLowerCase()).get();
+                            if (doc.exists) {
+                                let recs = doc.data().records || {};
+                                delete recs[dayId];
 
-                        if (isFirebaseActive && db) {
-                            db.collection('student_records').doc(studentEmail).set({
-                                email: studentEmail,
-                                records: usersDb[studentEmail].records,
-                                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                            }, { merge: true });
+                                await db.collection('student_records').doc(studentEmail.toLowerCase()).set({
+                                    records: recs,
+                                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                                }, { merge: true });
+
+                                if (currentUser && currentUser.email.toLowerCase() === studentEmail.toLowerCase()) {
+                                    currentStudentRecords = recs;
+                                }
+
+                                showToast(`Day ${dayId} certificate revoked successfully.`, "info");
+                                closeAdminPortalModal();
+                                renderGrid();
+                                updateStats();
+                            }
+                        } catch (err) {
+                            console.error("Firebase revoke error:", err);
+                            showToast("Failed to revoke certificate in Firebase.", "error");
                         }
-
-                        showToast(`Certificate for Day ${dayId} successfully revoked.`, "info");
-                        closeAdminPortalModal();
-                        renderGrid();
-                        updateStats();
                     }
                 }
             );
         }
 
         /* ----------------------------------------------------
-           CERTIFICATE DISPLAY & AUDIT VAULT
+           CERTIFICATE PREVIEW & AUDIT VAULT FUNCTIONS
         ---------------------------------------------------- */
         function viewCertificate(dayNum) {
-            const usersDb = getUsersDatabase();
-            const records = (currentUser && usersDb[currentUser.email]) ? usersDb[currentUser.email].records : {};
-            const rec = records[dayNum];
+            const rec = currentStudentRecords[dayNum];
             const mod = modules.find(m => m.day === dayNum);
 
             if (!rec || !mod) {
-                showToast("No active certificate found for this module.", "error");
+                showToast("No certificate record found for this day module.", "error");
                 return;
             }
 
-            document.getElementById('certStudentName').innerText = currentUser.fullName;
+            document.getElementById('certRefNum').innerText = `CTTP-2026-${(1000 + dayNum)}`;
+            document.getElementById('certStudentName').innerText = currentUser ? currentUser.fullName : "Student Name";
             document.getElementById('certModuleTitle').innerText = `Day ${mod.day}: ${mod.title}`;
-            document.getElementById('certRefNum').innerText = `CTTP-2026-${String(mod.day).padStart(4, '0')}`;
             document.getElementById('certCompletionDate').innerText = `Date: ${rec.completionDate}`;
+            
+            document.getElementById('certTeachingHours').innerText = `${parseFloat(rec.teachingHours || 4.0).toFixed(1)} Hrs`;
+            document.getElementById('certPracticalHours').innerText = `${parseFloat(rec.practicalHours || 4.0).toFixed(1)} Hrs`;
+            document.getElementById('certTotalHours').innerText = `${(parseFloat(rec.teachingHours || 4.0) + parseFloat(rec.practicalHours || 4.0)).toFixed(1)} Hrs`;
 
-            const teach = parseFloat(rec.teachingHours || 4.0);
-            const prac = parseFloat(rec.practicalHours || 4.0);
-            const tot = rec.totalHours || (teach + prac);
-
-            document.getElementById('certTeachingHours').innerText = `${teach.toFixed(1)} Hrs`;
-            document.getElementById('certPracticalHours').innerText = `${prac.toFixed(1)} Hrs`;
-            document.getElementById('certTotalHours').innerText = `${tot.toFixed(1)} Hrs`;
+            if (rec.explanation) {
+                document.getElementById('certVarianceText').innerText = rec.explanation;
+                document.getElementById('certVarianceNote').classList.remove('hidden');
+            } else {
+                document.getElementById('certVarianceNote').classList.add('hidden');
+            }
 
             document.getElementById('certRphName').innerText = rec.rphName;
             document.getElementById('certRphLicense').innerText = rec.rphLicense;
             document.getElementById('certRphInitials').innerText = rec.rphInitials;
-
-            const varNote = document.getElementById('certVarianceNote');
-            if (rec.explanation) {
-                varNote.classList.remove('hidden');
-                document.getElementById('certVarianceText').innerText = rec.explanation;
-            } else {
-                varNote.classList.add('hidden');
-            }
 
             document.getElementById('certificateModal').classList.remove('hidden');
         }
@@ -1871,7 +1937,42 @@
         }
 
         function openVaultModal() {
-            renderVaultTable();
+            const tbody = document.getElementById('vaultTableBody');
+            const countText = document.getElementById('vaultRecordCount');
+
+            const keys = Object.keys(currentStudentRecords);
+
+            if (keys.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No verifiable training records found in Cloud Vault.</td></tr>`;
+                countText.innerText = `0 audit logs found`;
+            } else {
+                tbody.innerHTML = keys.map(k => {
+                    const r = currentStudentRecords[k];
+                    const mod = modules.find(m => m.day === parseInt(k));
+
+                    return `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 font-semibold">Day ${r.day}: ${mod ? mod.title : 'Module'}</td>
+                            <td class="p-3 font-mono text-slate-600">${r.completionDate}</td>
+                            <td class="p-3 font-medium">${r.rphName} (${r.rphLicense})</td>
+                            <td class="p-3 text-center font-bold">${r.teachingHours} / ${r.practicalHours}</td>
+                            <td class="p-3 text-center">
+                                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-300">
+                                    VERIFIED
+                                </span>
+                            </td>
+                            <td class="p-3 text-right">
+                                <button onclick="closeVaultModal(); viewCertificate(${r.day});" class="text-brand-600 hover:text-brand-800 font-bold underline text-xs">
+                                    View Certificate
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                countText.innerText = `${keys.length} cloud audit logs archived`;
+            }
+
             document.getElementById('vaultModal').classList.remove('hidden');
         }
 
@@ -1879,67 +1980,14 @@
             document.getElementById('vaultModal').classList.add('hidden');
         }
 
-        function renderVaultTable() {
-            const tbody = document.getElementById('vaultTableBody');
-            const countEl = document.getElementById('vaultRecordCount');
-
-            const usersDb = getUsersDatabase();
-            const records = (currentUser && usersDb[currentUser.email]) ? usersDb[currentUser.email].records : {};
-            const recordKeys = Object.keys(records);
-
-            countEl.innerText = `${recordKeys.length} signed-off audit logs found`;
-
-            if (recordKeys.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="p-6 text-center text-slate-400 italic">
-                            No training module sign-offs recorded for the current student.
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            tbody.innerHTML = recordKeys.map(k => {
-                const r = records[k];
-                const mod = modules.find(m => m.day === parseInt(k));
-                const teach = parseFloat(r.teachingHours || 4.0);
-                const prac = parseFloat(r.practicalHours || 4.0);
-
-                return `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="p-3 font-bold text-slate-900">
-                            Day ${r.day}: ${mod ? mod.title : 'Module'}
-                        </td>
-                        <td class="p-3 text-slate-600 font-mono">${r.completionDate}</td>
-                        <td class="p-3 font-semibold text-slate-800">${r.rphName} (${r.rphInitials})</td>
-                        <td class="p-3 text-center font-mono font-bold">${teach.toFixed(1)} / ${prac.toFixed(1)}</td>
-                        <td class="p-3 text-center">
-                            <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full">
-                                VERIFIED
-                            </span>
-                        </td>
-                        <td class="p-3 text-right">
-                            <button onclick="closeVaultModal(); viewCertificate(${r.day});" class="px-2.5 py-1 bg-brand-500 hover:bg-brand-600 text-white text-[11px] font-bold rounded-lg transition shadow-xs">
-                                View Cert
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
         function exportAuditJSON() {
-            const usersDb = getUsersDatabase();
-            const records = (currentUser && usersDb[currentUser.email]) ? usersDb[currentUser.email].records : {};
-
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(records, null, 2));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", `CTTP_Audit_Transcript_${currentUser ? currentUser.fullName.replace(/\s+/g, '_') : 'Student'}.json`);
-            document.body.appendChild(dlAnchorElem);
-            dlAnchorElem.click();
-            dlAnchorElem.remove();
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentStudentRecords, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `cttp_audit_records_${currentUser ? currentUser.email : 'export'}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
         }
     </script>
 </body>
