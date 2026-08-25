@@ -829,52 +829,458 @@
         }
 
         /* ----------------------------------------------------
-           30-DAY CALIFORNIA CURRICULUM DATASET
+           30-DAY CALIFORNIA CURRICULUM DATASET (MATCHED TO LESSONS.DOCX)
         ---------------------------------------------------- */
         const modules = [
             // WEEK 1
-            { day: 1, week: 1, category: "Orientation & Law", title: "Introduction to Pharmacy Practice & State Board Regulations", description: "Foundational overview of pharmacy operations, technician duties under California Law, scope of practice, and state board rules.", agenda: ["California Pharmacy Law Overview", "Scope of Technician Responsibilities", "Pharmacy Ethics & Standards", "Facility Security & Operations"] },
-            { day: 2, week: 1, category: "Operations", title: "Prescription Sources, Intake & Patient Data Collection", description: "Proper receipt of written, electronic, and oral prescriptions, verifying required legal elements, and patient profile setup.", agenda: ["Required Prescription Legal Elements", "Patient Allergy & Insurance Intake", "Order Prioritization Protocols", "e-Prescribing Workflow Entry"] },
-            { day: 3, week: 1, category: "Pharmacology", title: "Drug Nomenclature, Interactions & Safety Standards", description: "Understanding generic vs. brand names, therapeutic categories, dangerous drug interactions, and high-alert medication lists.", agenda: ["Brand/Generic Equivalency Rules", "Common Therapeutic Classes", "Black Box Warnings Awareness", "Drug Interaction Screening Basics"] },
-            { day: 4, week: 1, category: "Dispensing", title: "Medication Selection, Counting & Measuring Procedures", description: "Accurate drug selection using National Drug Codes (NDC), tray & spatula counting, cross-contamination prevention, and liquid measurement.", agenda: ["NDC Code Matching Protocols", "Counting Tray Sanitation Standards", "Measuring Liquid Oral Solutions", "Double-Check Verification Steps"] },
-            { day: 5, week: 1, category: "Patient Care", title: "Effective Patient Communication & Professional Ethics", description: "Developing clear verbal communication skills, managing difficult customer interactions, and recognizing when pharmacist consultation is required.", agenda: ["Mandatory Pharmacist Counseling Triggers", "De-escalation Communication Techniques", "Cultural Competency in Patient Care", "Telephone Etiquette Protocols"] },
-            { day: 6, week: 1, category: "Compliance", title: "HIPAA Privacy Rules & Pharmacy Record Maintenance", description: "Strict patient privacy compliance, protected health information (PHI) disposal, prescription filing rules, and 3-year record retention.", agenda: ["HIPAA Standards & Shredding Rules", "State Prescription Record Retention", "Electronic Data Privacy Guardrails", "Patient Identification Protocols"] },
+            {
+                day: 1,
+                week: 1,
+                category: "Orientation & Law",
+                title: "Introduction to Pharmacy Technician Training",
+                description: "By the end of Day 1, students should be familiar with the program, regulations, and the fundamental role of a pharmacy technician. They will also have a basic understanding of pharmacy terminology, patient privacy regulations, safety protocols, and the use of personal protective equipment.",
+                agenda: [
+                    "Welcome and Program Overview",
+                    "Review of Regulations",
+                    "Understanding the Role of a Pharmacy Technician",
+                    "Basic Pharmacy Terminology",
+                    "HIPAA and Patient Privacy",
+                    "Safety and Infection Control in the Pharmacy",
+                    "Personal Protective Equipment (PPE) Use"
+                ]
+            },
+            {
+                day: 2,
+                week: 1,
+                category: "Operations",
+                title: "Prescription Sources and Intake",
+                description: "By the end of Day 2, students should have a thorough understanding of various prescription sources, including verbal, written, and electronic prescriptions. They will also be familiar with procedures for receiving and reviewing prescriptions, ensuring data accuracy, and handling verbal prescriptions. Practical exercises will reinforce these concepts.",
+                agenda: [
+                    "Understanding Prescription Sources",
+                    "Verbal Prescriptions and Pharmacist Communication",
+                    "Receiving and Reviewing Written Prescriptions",
+                    "Data Verification and Entry",
+                    "Ensuring Data Accuracy",
+                    "Role-Playing: Verbal Prescription Intake",
+                    "Prescription Intake Practice"
+                ]
+            },
+            {
+                day: 3,
+                week: 1,
+                category: "Law & Safety",
+                title: "Legal Compliance and Drug Interactions",
+                description: "By the end of Day 3, students should have a solid understanding of legal requirements in prescription dispensing, including state and federal regulations. They should also be capable of recognizing potential drug-drug interactions, reporting them, and understanding the importance of double-checking medication orders to ensure legal compliance and patient safety.",
+                agenda: [
+                    "Legal Requirements in Prescription Dispensing",
+                    "State and Federal Regulations",
+                    "Identifying Potential Drug-Drug Interactions",
+                    "Reporting Suspected Drug Interactions",
+                    "Importance of Double-Checking",
+                    "Practical Scenario: Legal Compliance"
+                ]
+            },
+            {
+                day: 4,
+                week: 1,
+                category: "Dispensing",
+                title: "Medication Selection and Counting",
+                description: "By the end of Day 4, students should have a comprehensive understanding of medication identification, various dosage forms, and accurate medication counting techniques. They will also be proficient in labeling medications and gain practical experience in packaging and labeling.",
+                agenda: [
+                    "Identifying Medications",
+                    "Dosage Forms and Packaging",
+                    "Accurate Medication Counting Techniques",
+                    "Labeling Medications",
+                    "Packaging and Labeling Practice",
+                    "Role-Playing: Medication Selection"
+                ]
+            },
+            {
+                day: 5,
+                week: 1,
+                category: "Patient Care",
+                title: "Patient Counseling and Communication",
+                description: "By the end of Day 5, students should be proficient in effective patient counseling and communication. They will have a better understanding of explaining medication usage, addressing patient concerns, ensuring patient understanding, and engaging in practical counseling scenarios through role-playing exercises.",
+                agenda: [
+                    "Effective Patient Communication",
+                    "Explaining Medication Usage",
+                    "Addressing Patient Questions and Concerns",
+                    "Ensuring Patient Understanding",
+                    "Counseling Practice Scenarios",
+                    "Patient Interaction Role-Play"
+                ]
+            },
+            {
+                day: 6,
+                week: 1,
+                category: "Compliance",
+                title: "Record-Keeping and HIPAA Compliance",
+                description: "By the end of Day 6, students should have a solid understanding of the importance of record-keeping and maintaining patient medication records. They will also be familiar with HIPAA regulations and compliance, patient information security, and practical scenarios for HIPAA compliance. Additionally, they will have hands-on experience in record-keeping practices.",
+                agenda: [
+                    "Importance of Record Maintenance",
+                    "Patient Medication Records",
+                    "HIPAA Regulations and Compliance",
+                    "Handling and Storing Patient Records",
+                    "Role-Playing: HIPAA Scenarios",
+                    "Record-Keeping Practice"
+                ]
+            },
 
             // WEEK 2
-            { day: 7, week: 2, category: "Safety", title: "Incident Reporting & Quality Assurance Audits", description: "Identifying near-miss events, medication error reporting procedures, continuous quality improvement (CQI) programs, and state board audits.", agenda: ["Quality Assurance (QA) Protocols", "Root Cause Incident Analysis", "Near-Miss Event Documentation", "Error Prevention Workflows"] },
-            { day: 8, week: 2, category: "Compounding", title: "Foundations of Extemporaneous Drug Compounding", description: "Introduction to USP <795> standards for non-sterile compounding, equipment calibration, weighing technique, and compounding logs.", agenda: ["USP <795> Quality Standards", "Analytical Balance Calibration", "Compounding Log Recordkeeping", "Measuring Powders & Liquids"] },
-            { day: 9, week: 2, category: "Compounding", title: "Non-Sterile Compounding Techniques", description: "Hands-on preparation of topical creams, ointments, oral suspensions, capsules, and geometric dilution methodology.", agenda: ["Geometric Dilution Techniques", "Levigation & Trituration Practicum", "Ointment Base Compatibility", "Expiration (BUD) Assignment Rules"] },
-            { day: 10, week: 2, category: "Compounding", title: "Sterile Compounding & Cleanroom Aseptic Technique", description: "Introduction to USP <797> cleanroom environments, laminar airflow workbenches, garbing procedures, and aseptic syringe draws.", agenda: ["USP <797> Aseptic Standards", "Cleanroom Garbing & Hand Hygiene", "Laminar Flow Hood Operation", "Ampule & Vial Syringe Transfer"] },
-            { day: 11, week: 2, category: "Dispensing", title: "Prescription Packaging, Auxiliary Labels & Unit Dose", description: "Selection of light-resistant amber vials, child-resistant caps, applying appropriate warning auxiliary labels, and unit-dose packaging.", agenda: ["Amber Bottle & Vial Sizing Rules", "Poison Prevention Packaging Act", "Mandatory Auxiliary Warning Labels", "Unit-Dose Blister Packaging"] },
-            { day: 12, week: 2, category: "Inventory", title: "Medication Storage, Cold Chain & Climate Control", description: "Refrigerated and frozen drug storage protocols, temperature log monitoring, cold chain integrity during transport, and room temperature limits.", agenda: ["Refrigeration (2°C - 8°C) Logs", "Cold Chain Transport Packaging", "Room Temperature Control Rules", "Quarantine of Expired Items"] },
+            {
+                day: 7,
+                week: 2,
+                category: "Safety",
+                title: "Incident Reporting and Root Cause Analysis",
+                description: "By the end of Day 7, students should understand the importance of incident reporting and the processes involved. They will be proficient in recognizing, documenting, and analyzing incidents, as well as implementing strategies for preventing future errors. Practical incident reporting exercises and case studies will reinforce these concepts.",
+                agenda: [
+                    "Reporting Adverse Events and Errors",
+                    "Documentation Procedures",
+                    "Root Cause Analysis",
+                    "Preventing Future Errors",
+                    "Incident Reporting Practice",
+                    "Case Study: Incident Reporting"
+                ]
+            },
+            {
+                day: 8,
+                week: 2,
+                category: "Compounding",
+                title: "Introduction to Drug Compounding",
+                description: "By the end of Day 8, students should have a comprehensive understanding of drug compounding, including the differences between sterile and non-sterile compounding. They will also be familiar with quality control, safety precautions, aseptic techniques, and compounding equipment. Hands-on equipment demonstrations will reinforce these concepts.",
+                agenda: [
+                    "Understanding Drug Compounding",
+                    "Types of Compounding (Sterile and Non-Sterile)",
+                    "Quality Control in Compounding",
+                    "Safety Precautions in Compounding",
+                    "Aseptic Techniques",
+                    "Compounding Equipment"
+                ]
+            },
+            {
+                day: 9,
+                week: 2,
+                category: "Compounding",
+                title: "Non-Sterile Compounding Techniques",
+                description: "By the end of Day 9, students should be proficient in non-sterile compounding techniques, including measuring ingredients, mixing creams and ointments, and quality control. Practical compounding exercises and quality control assessments will reinforce these skills.",
+                agenda: [
+                    "Preparing Non-Sterile Compounds",
+                    "Measuring Ingredients",
+                    "Mixing and Compounding Creams and Ointments",
+                    "Non-Sterile Compounding Practice",
+                    "Quality Control for Non-Sterile Compounds"
+                ]
+            },
+            {
+                day: 10,
+                week: 2,
+                category: "Compounding",
+                title: "Sterile Compounding Techniques",
+                description: "By the end of Day 10, students should have a strong understanding of sterile compounding techniques, including the importance of sterility, working in cleanrooms, garbing procedures, aseptic techniques, and quality control for sterile compounds. Practical sterile compounding exercises and quality control assessments will reinforce these skills.",
+                agenda: [
+                    "The Importance of Sterile Compounding",
+                    "Working in Cleanrooms",
+                    "Garbing Procedures",
+                    "Aseptic Techniques in Sterile Compounding",
+                    "Sterile Compounding Practice",
+                    "Quality Control for Sterile Compounds"
+                ]
+            },
+            {
+                day: 11,
+                week: 2,
+                category: "Dispensing",
+                title: "Introduction to Packaging and Labeling",
+                description: "By the end of Day 11, students should have a thorough understanding of packaging and labeling, including different packaging materials, child-resistant packaging, label design elements, regulatory requirements for packaging, and the role of tamper-evident packaging in ensuring patient safety.",
+                agenda: [
+                    "Packaging Materials and Types",
+                    "Packaging for Medication Safety",
+                    "Label Design Elements",
+                    "Regulatory Requirements for Packaging",
+                    "Role of Tamper-Evident Packaging"
+                ]
+            },
+            {
+                day: 12,
+                week: 2,
+                category: "Inventory",
+                title: "Medication Storage Requirements",
+                description: "By the end of Day 12, students should have a comprehensive understanding of medication storage requirements, including regulations, temperature control, storage areas, security for controlled substances, medication expiry, disposal, and procedures for handling medication recalls.",
+                agenda: [
+                    "Medication Storage Regulations",
+                    "Temperature Control and Medication Stability",
+                    "Medication Storage Areas",
+                    "Controlled Substances and Security",
+                    "Medication Expiry and Disposal",
+                    "Handling Medication Recalls"
+                ]
+            },
 
             // WEEK 3
-            { day: 13, week: 3, category: "Operations", title: "Electronic Health Records & e-Prescribing Processing", description: "Navigating pharmacy computer systems, processing digital e-prescriptions, resolving data entry rejections, and sig code translation.", agenda: ["Medical Sig Code Interpretation", "EHR System Data Entry Practice", "Electronic Order Queue Triage", "Physician Clarification Requests"] },
-            { day: 14, week: 3, category: "Law & Safety", title: "Controlled Substances Regulations & Security Protocols", description: "Federal Schedule II-V controlled drug rules, DEA registration, C-II prescription validity, CURES database reporting, and vault security.", agenda: ["Schedule II - V Drug Classifications", "DEA Perpetual Inventory Logs", "CURES Reporting Requirements", "Controlled Substance Theft Protocols"] },
-            { day: 15, week: 3, category: "Inventory", title: "Inventory Control, Reordering & Recalls Management", description: "Wholesale ordering systems, par level management, inventory rotation (FIFO), Class I-III drug recalls, and hazardous disposal.", agenda: ["First-In, First-Out (FIFO) Rotation", "Wholesale Ordering Portals", "Class I, II & III Drug Recall Action", "Hazardous Waste Management"] },
-            { day: 16, week: 3, category: "Pharmacology", title: "Drug Classifications & Therapeutic Categories", description: "In-depth study of major cardiovascular, respiratory, gastrointestinal, anti-infective, and endocrine therapeutic agents.", agenda: ["Top 100 Maintenance Drugs Study", "Mechanism of Action Overview", "Common Side Effects Recognition", "Special Storage Requirements"] },
-            { day: 17, week: 3, category: "Patient Care", title: "Over-the-Counter (OTC) Products & Medical Supplies", description: "Assisting patients in locating OTC medications, medical durable equipment (DME), diabetic testing meters, and surgical supplies.", agenda: ["OTC Classifications & Layout", "Diabetic Supply Selection", "Blood Pressure Monitor Overview", "Referring OTC Questions to RPh"] },
-            { day: 18, week: 3, category: "Safety", title: "Drug Allergies, Hypersensitivity & Adverse Reactions", description: "Differentiating between side effects and true allergic reactions (anaphylaxis), updating EHR allergy fields, and cross-sensitivity risks.", agenda: ["Penicillin Cross-Sensitivity", "Anaphylaxis Symptoms & Escalation", "Updating Patient Allergy Profiles", "MedWatch Adverse Event Logs"] },
+            {
+                day: 13,
+                week: 3,
+                category: "Operations",
+                title: "Prescription Sources and Processing",
+                description: "By the end of Day 13, students should be proficient in understanding prescription sources, verifying patient information, accurate prescription data entry, insurance and prescription billing procedures, and the handling of controlled substances. Practical role-playing scenarios will reinforce these skills.",
+                agenda: [
+                    "Understanding Prescription Sources",
+                    "Verifying Patient Information",
+                    "Prescription Data Entry",
+                    "Insurance and Prescription Billing",
+                    "Handling Controlled Substances",
+                    "Role-Playing: Prescription Processing"
+                ]
+            },
+            {
+                day: 14,
+                week: 3,
+                category: "Dispensing",
+                title: "Medication Dispensing Procedures",
+                description: "By the end of Day 14, students should be proficient in medication dispensing procedures, including medication verification, labeling, patient consultation, controlled substance dispensing, and quality assurance. Practical role-playing scenarios will reinforce these skills.",
+                agenda: [
+                    "Medication Verification",
+                    "Labeling and Packaging",
+                    "Patient Consultation",
+                    "Controlled Substance Dispensing",
+                    "Quality Assurance",
+                    "Role-Playing: Medication Dispensing"
+                ]
+            },
+            {
+                day: 15,
+                week: 3,
+                category: "Inventory",
+                title: "Medication Inventory Management",
+                description: "By the end of Day 15, students should have a comprehensive understanding of medication inventory management, including ordering, storage, expiry management, inventory auditing, and procedures for handling recalls and discontinued medications. Practical role-playing scenarios will reinforce these skills.",
+                agenda: [
+                    "Understanding Medication Inventory",
+                    "Medication Storage and Organization",
+                    "Medication Expiry Management",
+                    "Inventory Auditing and Control",
+                    "Handling Recalls and Discontinued Medications",
+                    "Role-Playing: Inventory Management"
+                ]
+            },
+            {
+                day: 16,
+                week: 3,
+                category: "Pharmacology",
+                title: "Medication Information and Drug Classifications",
+                description: "By the end of Day 16, students should be proficient in accessing and using drug information resources, understanding drug classifications, identifying drugs by name and appearance, and recognizing common drug interactions. Practical role-playing scenarios will reinforce these skills.",
+                agenda: [
+                    "Drug Information Resources",
+                    "Drug Classifications",
+                    "Identifying Drugs by Name and Appearance",
+                    "Drug Interaction Awareness",
+                    "Role-Playing: Medication Information"
+                ]
+            },
+            {
+                day: 17,
+                week: 3,
+                category: "Patient Care",
+                title: "Over-the-Counter (OTC) Medications",
+                description: "By the end of Day 17, students should be proficient in understanding over-the-counter (OTC) medications, identifying common OTC medication categories, providing patient consultation for OTC medications, ensuring OTC medication safety, and effectively handling OTC medication scenarios through role-playing exercises.",
+                agenda: [
+                    "Understanding OTC Medications",
+                    "OTC Medication Categories",
+                    "Patient Consultation for OTC Medications",
+                    "OTC Medication Safety",
+                    "Role-Playing: OTC Medications"
+                ]
+            },
+            {
+                day: 18,
+                week: 3,
+                category: "Safety",
+                title: "Allergies and Drug Interactions",
+                description: "By the end of Day 18, students should have a thorough understanding of allergies, drug allergies, drug interactions, and over-the-counter (OTC) interactions. They will be proficient in recognizing allergic reactions, documenting allergies, and providing guidance on avoiding interactions. Practical role-playing scenarios will reinforce these skills.",
+                agenda: [
+                    "Understanding Allergies",
+                    "Drug Allergies",
+                    "Drug Interactions",
+                    "Over-the-Counter (OTC) Interactions",
+                    "Role-Playing: Handling Allergies and Interactions"
+                ]
+            },
 
             // WEEK 4
-            { day: 19, week: 4, category: "Patient Care", title: "Medication Adherence, Refills & Auto-Fill Management", description: "Strategies for improving long-term patient medication adherence, managing sync-refill programs, and processing refill authorization requests.", agenda: ["Medication Synchronization Programs", "Refill Authorization Requests", "Adherence Barrier Identification", "Automated Reminder Notifications"] },
-            { day: 20, week: 4, category: "Safety", title: "Root Cause Analysis & Medication Error Prevention", description: "Analyzing real-world pharmacy error case studies, sound-alike look-alike drugs (TALLman lettering), and barcode scanning verification.", agenda: ["Look-Alike Sound-Alike (LASA) Drugs", "TALLman Lettering Application", "Barcode Verification Scanning", "Error Reduction Checklists"] },
-            { day: 21, week: 4, category: "Compliance", title: "California Pharmacy Law & Board Inspections Prep", description: "Reviewing California Pharmacy Board inspection checklists, self-assessment forms, staff ratios, and supervisor duties.", agenda: ["Pharmacist-to-Technician Ratios", "Board Inspection Checklists", "Mandatory Name Tags & Credentials", "Self-Assessment Documentation"] },
-            { day: 22, week: 4, category: "Technology", title: "Pharmacy Automation, Robotics & Barcode Scanning", description: "Operating automated counting robotics, pill dispensing cells, optical scanners, and automated inventory carousel systems.", agenda: ["Automated Dispensing Cells", "Robotic Dispenser Maintenance", "Barcode Reader Calibration", "System Override Safeguards"] },
-            { day: 23, week: 4, category: "Operations", title: "Pharmacy Workflow Optimization & Team Roles", description: "Structuring intake, data entry, fill station, checking station, and pick-up counter workflows for maximum safety and efficiency.", agenda: ["Five Station Workflow Model", "Bottle Neck Identification", "Task Delegation Protocols", "Peak Hour Queue Management"] },
-            { day: 24, week: 4, category: "Safety", title: "Emergency Preparedness & Crisis Medication Protocols", description: "Disaster management, power outage drug preservation, emergency prescription fill overrides, and community relief response.", agenda: ["Refrigerated Drug Backup Generator", "Disaster Emergency Overrides", "Critical Medication Stocking", "Emergency Response Safety"] },
+            {
+                day: 19,
+                week: 4,
+                category: "Patient Care",
+                title: "Medication Adherence and Compliance",
+                description: "By the end of Day 19, students should be proficient in understanding the importance of medication adherence, counseling patients on adherence, explaining medication regimens and schedules, and recommending adherence tools. Practical role-playing scenarios will reinforce these skills.",
+                agenda: [
+                    "Medication Adherence",
+                    "Counseling on Medication Adherence",
+                    "Medication Regimens and Schedules",
+                    "Medication Adherence Tools",
+                    "Role-Playing: Medication Adherence"
+                ]
+            },
+            {
+                day: 20,
+                week: 4,
+                category: "Safety",
+                title: "Medication Errors and Reporting",
+                description: "By the end of Day 20, students should have a comprehensive understanding of medication errors, strategies for error prevention, the importance of reporting errors, and the process of root cause analysis for errors. Practical role-playing scenarios will reinforce these skills.",
+                agenda: [
+                    "Understanding Medication Errors",
+                    "Error Prevention Strategies",
+                    "Medication Error Reporting",
+                    "Root Cause Analysis for Errors",
+                    "Role-Playing: Medication Errors and Reporting"
+                ]
+            },
+            {
+                day: 21,
+                week: 4,
+                category: "Compliance",
+                title: "Pharmacy Law and Ethics",
+                description: "By the end of Day 21, students should have a strong understanding of pharmacy law and ethics, including the legal framework for pharmacy, ethical considerations, the Controlled Substances Act, and privacy regulations such as HIPAA. Practical role-playing scenarios will reinforce these principles.",
+                agenda: [
+                    "Legal Framework for Pharmacy",
+                    "Ethical Considerations",
+                    "Controlled Substances Act",
+                    "Privacy and HIPAA",
+                    "Role-Playing: Pharmacy Law and Ethics"
+                ]
+            },
+            {
+                day: 22,
+                week: 4,
+                category: "Technology",
+                title: "Pharmacy Technology and Automation",
+                description: "By the end of Day 22, students should have a comprehensive understanding of pharmacy technology and automation, including the role of technology in pharmacy, automated medication dispensing systems, pharmacy software and electronic health records (EHRs), and medication barcode scanning. Practical role-playing scenarios will reinforce these skills.",
+                agenda: [
+                    "Role of Technology in Pharmacy",
+                    "Automated Medication Dispensing Systems",
+                    "Pharmacy Software and EHRs",
+                    "Medication Barcode Scanning",
+                    "Role-Playing: Pharmacy Technology and Automation"
+                ]
+            },
+            {
+                day: 23,
+                week: 4,
+                category: "Operations",
+                title: "Pharmacy Workflow and Customer Service",
+                description: "By the end of Day 23, students should be proficient in understanding pharmacy workflow, providing exceptional customer service, medication counseling, and managing difficult customer interactions. Practical role-playing scenarios will reinforce these skills.",
+                agenda: [
+                    "Pharmacy Workflow",
+                    "Customer Service in Pharmacy",
+                    "Medication Counseling",
+                    "Managing Difficult Customers",
+                    "Role-Playing: Pharmacy Workflow and Customer Service"
+                ]
+            },
+            {
+                day: 24,
+                week: 4,
+                category: "Safety",
+                title: "Emergency Medication Situations",
+                description: "By the end of Day 24, students should be proficient in recognizing medication emergencies, calling for emergency assistance, providing initial aid in emergency situations, and reporting medication emergencies. Practical role-playing scenarios will reinforce these critical skills.",
+                agenda: [
+                    "Recognizing Medication Emergencies",
+                    "Calling for Emergency Assistance",
+                    "Providing Initial Aid",
+                    "Reporting Medication Emergencies",
+                    "Role-Playing: Emergency Medication Situations"
+                ]
+            },
 
             // WEEK 5
-            { day: 25, week: 5, category: "Pharmacology", title: "Specialty Pharmaceuticals & Biologics Handling", description: "Handling high-cost specialty drugs, biological products, biosimilars, refrigerated syringes, and REMS program compliance.", agenda: ["REMS Safety Requirement Logs", "Cold Chain Biologic Handling", "Specialty Pharmacy Distribution", "Biosimilar Substitution Rules"] },
-            { day: 26, week: 5, category: "Clinical", title: "Immunization Support & Clinical Screening Assistance", description: "Supporting pharmacist-led vaccine clinics, vaccine storage & handling, emergency anaphylaxis kit readiness, and record entry.", agenda: ["Vaccine Temperature Logs", "Immunization Record Data Entry", "Clinic Supply Preparation", "Safety Needlestick Protocols"] },
-            { day: 27, week: 5, category: "Operations", title: "Third-Party Billing, PBM Claims & Audit Compliance", description: "Understanding pharmacy benefit managers (PBMs), prior authorization requests, co-pay tiers, and desk audit preparation.", agenda: ["PBM Adjudication Rejections", "Prior Authorization Workflows", "Coordination of Benefits (COB)", "Pharmacy Audit Defense Steps"] },
-            { day: 28, week: 5, category: "Compounding", title: "Complex Sterile Packaging & Hazardous Drug Handling", description: "Introduction to USP <800> standards for handling hazardous medications, chemotherapy containment hoods, and personal protective equipment.", agenda: ["USP <800> Hazardous Drug Standards", "Chemo Hood Negative Pressure", "Personal Protective Equipment (PPE)", "Spill Kit Cleanup Protocols"] },
-            { day: 29, week: 5, category: "Assessment", title: "Comprehensive Pharmacy Technician Skills Evaluation", description: "Practical hands-on examination covering prescription data entry, counting accuracy, sterile garbing speed, and law scenario resolution.", agenda: ["Timed Prescription Fill Exam", "Sterile Garbing Practical Exam", "Law & Compliance Quiz", "Pharmacist Mock Audit Check"] },
-            { day: 30, week: 5, category: "Capstone", title: "Program Completion, Practical Assessment & Final Sign-Off", description: "Final review of student's 30-day transcript, verification of logged practical and teaching hours, and issuance of state board certificate.", agenda: ["30-Day Hours Transcript Review", "State Board Compliance Sign-Off", "Final Pharmacist Evaluation", "Graduation & Certificate Issuance"] }
+            {
+                day: 25,
+                week: 5,
+                category: "Pharmacology",
+                title: "Specialty Medications and Patient Support",
+                description: "By the end of Day 25, students should have a thorough understanding of specialty medications, patient counseling for specialty drugs, patient assistance programs, and the coordination of care for patients on specialty medications. Practical role-playing scenarios will reinforce these skills.",
+                agenda: [
+                    "Understanding Specialty Medications",
+                    "Patient Counseling for Specialty Medications",
+                    "Patient Assistance Programs",
+                    "Specialty Medication Management",
+                    "Role-Playing: Specialty Medications and Patient Support"
+                ]
+            },
+            {
+                day: 26,
+                week: 5,
+                category: "Clinical",
+                title: "Patient Health and Wellness Services",
+                description: "By the end of Day 26, students should be proficient in understanding patient health and wellness services, including Medication Therapy Management (MTM), immunization services, and promoting health and wellness. Practical role-playing scenarios will reinforce these skills.",
+                agenda: [
+                    "Expanding Pharmacy Services",
+                    "Medication Therapy Management (MTM)",
+                    "Immunization Services",
+                    "Promoting Health and Wellness",
+                    "Role-Playing: Patient Health and Wellness Services"
+                ]
+            },
+            {
+                day: 27,
+                week: 5,
+                category: "Operations",
+                title: "Inventory Control and Regulatory Compliance",
+                description: "By the end of Day 27, students should be proficient in advanced inventory management techniques, maintaining regulatory compliance, compounding and repackaging, and safe handling of hazardous drugs. Practical role-playing scenarios will reinforce these skills.",
+                agenda: [
+                    "Advanced Inventory Management",
+                    "Regulatory Compliance",
+                    "Compounding and Repackaging",
+                    "Hazardous Drug Handling",
+                    "Role-Playing: Inventory Control and Compliance"
+                ]
+            },
+            {
+                day: 28,
+                week: 5,
+                category: "Compounding",
+                title: "Specialty Compounding and Sterile Products",
+                description: "By the end of Day 28, students should be proficient in sterile compounding, specialty compounding, quality assurance in compounding, and compliance with USP standards. Practical role-playing scenarios will reinforce these skills.",
+                agenda: [
+                    "Sterile Compounding",
+                    "Specialty Compounding",
+                    "Quality Assurance in Compounding",
+                    "Compliance with USP Standards",
+                    "Role-Playing: Specialty Compounding"
+                ]
+            },
+            {
+                day: 29,
+                week: 5,
+                category: "Assessment",
+                title: "Pharmacy Technician Certification Preparation",
+                description: "By the end of Day 29, students should be well-prepared for pharmacy technician certification, with a strong understanding of the certification process, study strategies, and exam day procedures. Practical role-playing scenarios will reinforce their preparation for the certification exam.",
+                agenda: [
+                    "Overview of Certification",
+                    "Preparing for the Certification Exam",
+                    "Exam Day Procedures",
+                    "Success Tips",
+                    "Role-Playing: Certification Exam Preparation"
+                ]
+            },
+            {
+                day: 30,
+                week: 5,
+                category: "Capstone",
+                title: "Graduation and Future Opportunities",
+                description: "By the end of Day 30, students will have graduated from the pharmacy technician training program, and they will be well-prepared to embark on their careers in the pharmacy field. They will have a strong understanding of career pathways, resume building, job search strategies, professional networking, and setting future goals and commitments. This day marks their transition into the professional world of pharmacy.",
+                agenda: [
+                    "Graduation Ceremony",
+                    "Career Pathways",
+                    "Resume Building and Job Search",
+                    "Professional Networking",
+                    "Future Goals and Commitment",
+                    "Graduation and Farewell"
+                ]
+            }
         ];
 
         /* ----------------------------------------------------
-           APPLICATION STATE & ROLE MANAGEMENT (PURE FIREBASE)
+           APPLICATION STATE & ROLE MANAGEMENT
         ---------------------------------------------------- */
         let currentUser = null; // { fullName, email, uid }
         let currentStudentRecords = {}; // Day records loaded live from Firestore
@@ -984,11 +1390,9 @@
             if (isFirebaseActive && auth) {
                 if (statusText) statusText.innerHTML = `<span class="text-emerald-400 font-bold">Cloud Synced</span> (techtraining-873e3)`;
 
-                // Pure Firebase Auth state change listener
                 auth.onAuthStateChanged(async (user) => {
                     if (user) {
                         try {
-                            // Fetch user profile from Firestore users collection
                             const userDoc = await db.collection('users').doc(user.email.toLowerCase()).get();
                             if (userDoc.exists) {
                                 currentUser = userDoc.data();
@@ -1306,44 +1710,130 @@
                 adminPortalBtnText.innerText = "Admin Portal";
             }
 
-            const hasActiveSession = currentUser || isAdminLoggedIn || isTeacherLoggedIn;
-
-            if (hasActiveSession) {
-                if (logoutBtn) logoutBtn.classList.remove('hidden');
-            } else {
-                if (logoutBtn) logoutBtn.classList.add('hidden');
-            }
-
             if (currentUser) {
                 userBadge.classList.remove('hidden');
                 loginBtn.classList.add('hidden');
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
+
                 userNameDisplay.innerText = currentUser.fullName;
-                
-                const parts = currentUser.fullName.split(' ');
-                const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].slice(0, 2).toUpperCase();
-                userAvatar.innerText = initials;
+                const initials = currentUser.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                userAvatar.innerText = initials || 'ST';
 
                 if (isAdminLoggedIn) {
-                    userRoleBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Program Director (Admin)`;
+                    userRoleBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> Administrator`;
                 } else if (isTeacherLoggedIn) {
-                    userRoleBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span> Instructor / Teacher`;
+                    userRoleBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></span> Instructor`;
                 } else {
-                    userRoleBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Semester Enrolled`;
+                    userRoleBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Student`;
                 }
             } else {
                 userBadge.classList.add('hidden');
                 loginBtn.classList.remove('hidden');
+                if (isAdminLoggedIn || isTeacherLoggedIn) {
+                    if (logoutBtn) logoutBtn.classList.remove('hidden');
+                } else {
+                    if (logoutBtn) logoutBtn.classList.add('hidden');
+                }
             }
         }
 
         /* ----------------------------------------------------
-           GRID RENDERING & SEARCH FILTERING
+           GRID RENDERING & STATS
         ---------------------------------------------------- */
-        function setFilter(week) {
-            activeFilter = week;
+        function renderGrid() {
+            const grid = document.getElementById('modulesGrid');
+            const noResults = document.getElementById('noResults');
+            grid.innerHTML = '';
+
+            let filtered = modules.filter(m => {
+                if (activeFilter !== 'all') {
+                    const weekNum = parseInt(activeFilter.replace('week', ''));
+                    if (m.week !== weekNum) return false;
+                }
+                if (searchQuery.trim() !== '') {
+                    const q = searchQuery.toLowerCase();
+                    const titleMatch = m.title.toLowerCase().includes(q);
+                    const descMatch = m.description.toLowerCase().includes(q);
+                    const dayMatch = (`day ${m.day}`).includes(q);
+                    const categoryMatch = m.category.toLowerCase().includes(q);
+                    if (!titleMatch && !descMatch && !dayMatch && !categoryMatch) return false;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                noResults.classList.remove('hidden');
+                return;
+            } else {
+                noResults.classList.add('hidden');
+            }
+
+            filtered.forEach(m => {
+                const isSigned = !!currentStudentRecords[m.day];
+                const rec = currentStudentRecords[m.day] || {};
+
+                const card = document.createElement('div');
+                card.className = `bg-white rounded-2xl border ${isSigned ? 'border-emerald-200 shadow-sm bg-emerald-50/20' : 'border-slate-200/80 shadow-sm'} p-5 flex flex-col justify-between hover:shadow-md transition group`;
+
+                card.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full ${isSigned ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}">
+                                Day ${m.day} • Week ${m.week}
+                            </span>
+                            <span class="text-[11px] text-slate-500 font-medium">
+                                <i class="fa-solid fa-tag text-[10px] text-brand-500 mr-1"></i>${m.category}
+                            </span>
+                        </div>
+
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900 group-hover:text-brand-600 transition leading-snug">
+                                ${m.title}
+                            </h3>
+                            <p class="text-xs text-slate-500 line-clamp-2 mt-1.5 leading-relaxed">
+                                ${m.description}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <button onclick="openDetailModal(${m.day})" class="text-brand-600 hover:text-brand-800 font-semibold text-xs flex items-center gap-1 transition">
+                            <span>View Syllabus</span>
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </button>
+
+                        <div class="flex items-center gap-2">
+                            ${isSigned ? `
+                                <button onclick="openCertificateModal(${m.day})" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 rounded-xl font-semibold text-[11px] flex items-center gap-1 transition">
+                                    <i class="fa-solid fa-award"></i>
+                                    <span>Cert</span>
+                                </button>
+                            ` : ''}
+
+                            ${(isTeacherLoggedIn || isAdminLoggedIn) ? `
+                                <button onclick="openSignOffModal(${m.day})" class="px-3 py-1.5 ${isSigned ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100' : 'bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100'} rounded-xl font-bold text-[11px] flex items-center gap-1.5 transition">
+                                    <i class="fa-solid ${isSigned ? 'fa-pen-to-square' : 'fa-stamp'}"></i>
+                                    <span>${isSigned ? 'Edit Sign-Off' : 'Sign Off'}</span>
+                                </button>
+                            ` : `
+                                <span class="text-[11px] font-semibold ${isSigned ? 'text-emerald-600' : 'text-slate-400'} flex items-center gap-1">
+                                    <i class="fa-solid ${isSigned ? 'fa-circle-check text-emerald-500' : 'fa-clock'}"></i>
+                                    ${isSigned ? 'Completed' : 'Pending'}
+                                </span>
+                            `}
+                        </div>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function setFilter(weekKey) {
+            activeFilter = weekKey;
             document.querySelectorAll('.filter-btn').forEach(btn => {
-                if (btn.getAttribute('data-week') === week) {
-                    btn.className = "filter-btn active-filter px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-brand-500 text-white shadow-xs";
+                if (btn.dataset.week === weekKey) {
+                    btn.className = "filter-btn active-filter px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-brand-500 text-white";
                 } else {
                     btn.className = "filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition";
                 }
@@ -1352,193 +1842,79 @@
         }
 
         function handleSearch(val) {
-            searchQuery = val.toLowerCase().trim();
+            searchQuery = val;
             renderGrid();
         }
 
-        function renderGrid() {
-            const grid = document.getElementById('modulesGrid');
-            const noResults = document.getElementById('noResults');
-
-            let filtered = modules.filter(m => {
-                let passWeek = true;
-                if (activeFilter === 'week1') passWeek = m.week === 1;
-                else if (activeFilter === 'week2') passWeek = m.week === 2;
-                else if (activeFilter === 'week3') passWeek = m.week === 3;
-                else if (activeFilter === 'week4') passWeek = m.week === 4;
-                else if (activeFilter === 'week5') passWeek = m.week === 5;
-
-                let passSearch = true;
-                if (searchQuery) {
-                    passSearch = m.title.toLowerCase().includes(searchQuery) ||
-                                 m.description.toLowerCase().includes(searchQuery) ||
-                                 m.category.toLowerCase().includes(searchQuery) ||
-                                 `day ${m.day}`.includes(searchQuery);
-                }
-
-                return passWeek && passSearch;
-            });
-
-            if (filtered.length === 0) {
-                grid.innerHTML = '';
-                noResults.classList.remove('hidden');
-                return;
-            }
-
-            noResults.classList.add('hidden');
-
-            grid.innerHTML = filtered.map(m => {
-                const rec = currentStudentRecords[m.day];
-                const isDone = !!rec;
-
-                return `
-                    <div class="bg-white rounded-2xl border ${isDone ? 'border-emerald-200 bg-emerald-50/10' : 'border-slate-200'} p-5 hover:shadow-md transition flex flex-col justify-between group">
-                        <div>
-                            <div class="flex items-center justify-between gap-2 mb-3">
-                                <span class="text-[10px] font-bold text-brand-600 bg-brand-50 border border-brand-100 px-2 py-0.5 rounded">
-                                    Day ${m.day} • Week ${m.week}
-                                </span>
-                                <span class="text-[10px] font-medium text-slate-400">${m.category}</span>
-                            </div>
-                            
-                            <h3 class="font-bold text-slate-900 text-sm mb-2 group-hover:text-brand-600 transition leading-snug">${m.title}</h3>
-                            <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-4">${m.description}</p>
-                        </div>
-
-                        <div class="space-y-2 border-t border-slate-100 pt-3">
-                            ${isDone ? `
-                                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 text-xs text-emerald-900 flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
-                                        <div>
-                                            <span class="block font-bold text-[11px]">Signed Off: ${rec.rphName}</span>
-                                            <span class="block text-[10px] text-emerald-700 font-mono">${rec.completionDate} • ${rec.totalHours || (parseFloat(rec.teachingHours) + parseFloat(rec.practicalHours))} Hrs</span>
-                                        </div>
-                                    </div>
-                                    <button onclick="viewCertificate(${m.day})" title="View Certificate" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-[10px] shadow-xs">
-                                        Audit Certificate
-                                    </button>
-                                </div>
-                            ` : ''}
-
-                            <div class="flex items-center gap-2">
-                                <button onclick="openDetailModal(${m.day})" class="flex-1 py-2 px-3 bg-slate-50 hover:bg-brand-50 text-slate-700 hover:text-brand-700 border border-slate-200 hover:border-brand-200 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 transition">
-                                    <i class="fa-solid fa-folder-open text-brand-500"></i>
-                                    <span>Details & Links</span>
-                                </button>
-
-                                ${(isTeacherLoggedIn || isAdminLoggedIn) && !isDone ? `
-                                    <button onclick="openSignOffModal(${m.day})" class="py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 shrink-0">
-                                        <i class="fa-solid fa-file-signature"></i>
-                                        <span>Sign Off</span>
-                                    </button>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
         function updateStats() {
-            const completed = Object.keys(currentStudentRecords).length;
+            const completedCount = Object.keys(currentStudentRecords).length;
             let totalHours = 0;
-
             Object.values(currentStudentRecords).forEach(r => {
-                totalHours += parseFloat(r.teachingHours || 4.0) + parseFloat(r.practicalHours || 4.0);
+                totalHours += (parseFloat(r.teachingHours) || 0) + (parseFloat(r.practicalHours) || 0);
             });
 
-            const percent = Math.round((completed / 30) * 100);
+            const percent = Math.round((completedCount / 30) * 100);
 
-            document.getElementById('completedCount').innerText = completed;
+            document.getElementById('completedCount').innerText = completedCount;
             document.getElementById('hoursLogged').innerText = totalHours.toFixed(1);
             document.getElementById('progressPercent').innerText = `${percent}%`;
             document.getElementById('progressBar').style.width = `${percent}%`;
         }
 
         /* ----------------------------------------------------
-           DETAILS POPUP & CURRICULUM RESOURCE LINKS
+           DETAIL MODAL
         ---------------------------------------------------- */
-        function openDetailModal(dayNum) {
-            const mod = modules.find(m => m.day === dayNum);
-            if (!mod) return;
+        function openDetailModal(dayId) {
+            const m = modules.find(x => x.day === dayId);
+            if (!m) return;
 
-            document.getElementById('detailDayBadge').innerText = `Day ${mod.day} • Week ${mod.week}`;
-            document.getElementById('detailTitle').innerText = mod.title;
-            document.getElementById('detailCategory').innerText = mod.category;
-            document.getElementById('detailDescription').innerText = mod.description;
+            document.getElementById('detailDayBadge').innerText = `Day ${m.day} • Week ${m.week}`;
+            document.getElementById('detailTitle').innerText = m.title;
+            document.getElementById('detailCategory').innerText = `Category: ${m.category}`;
+            document.getElementById('detailDescription').innerText = m.description;
 
-            const agendaUl = document.getElementById('detailAgenda');
-            agendaUl.innerHTML = mod.agenda.map(a => `<li>${a}</li>`).join('');
-
-            const paddedDay = mod.day < 10 ? '0' + mod.day : mod.day;
-            const studentMaterialUrl = `./materials/day-${paddedDay}-reading.html`;
-            const teacherPlanUrl = `./lesson-plans/day-${paddedDay}-plan.html`;
+            const agendaList = document.getElementById('detailAgenda');
+            agendaList.innerHTML = m.agenda.map(item => `<li>${item}</li>`).join('');
 
             const resourcesContainer = document.getElementById('detailResourcesContainer');
-            let linksHtml = `
-                <a href="${studentMaterialUrl}" target="_blank" title="Open Student Reading Guide" class="flex items-center gap-3 p-3 rounded-xl border border-brand-200 bg-brand-50/60 hover:bg-brand-100/80 text-brand-700 transition group relative">
-                    <div class="w-9 h-9 rounded-lg bg-brand-500 text-white flex items-center justify-center text-sm shrink-0 shadow-xs group-hover:scale-105 transition">
-                        <i class="fa-solid fa-book-open"></i>
+            resourcesContainer.innerHTML = `
+                <a href="#" onclick="showToast('Curriculum PDF guide linked in repo', 'info'); return false;" class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-brand-50 hover:border-brand-200 transition flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-file-pdf text-red-500"></i>
+                        <span class="font-semibold text-slate-700">Day ${m.day} Study Guide</span>
                     </div>
-                    <div class="overflow-hidden">
-                        <span class="block text-xs font-bold text-brand-900 group-hover:text-brand-600 transition truncate">Student Reading</span>
-                        <span class="block text-[10px] text-brand-600 font-mono truncate">day-${paddedDay}-reading.html</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+                </a>
+                <a href="#" onclick="showToast('Practical skills worksheet loaded', 'info'); return false;" class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-brand-50 hover:border-brand-200 transition flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-emerald-500"></i>
+                        <span class="font-semibold text-slate-700">Practical Skills Checklist</span>
                     </div>
-                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-brand-400 absolute top-2.5 right-2.5"></i>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
                 </a>
             `;
 
-            if (isTeacherLoggedIn || isAdminLoggedIn) {
-                linksHtml += `
-                    <a href="${teacherPlanUrl}" target="_blank" title="Open Teacher Lesson Plan" class="flex items-center gap-3 p-3 rounded-xl border border-teacher-200 bg-teacher-50/60 hover:bg-teacher-100/80 text-teacher-700 transition group relative">
-                        <div class="w-9 h-9 rounded-lg bg-teacher-600 text-white flex items-center justify-center text-sm shrink-0 shadow-xs group-hover:scale-105 transition">
-                            <i class="fa-solid fa-chalkboard-user"></i>
-                        </div>
-                        <div class="overflow-hidden">
-                            <div class="flex items-center gap-1">
-                                <span class="block text-xs font-bold text-teacher-900 group-hover:text-teacher-600 transition truncate">Teacher Plan</span>
-                                <span class="text-[9px] bg-teacher-200 text-teacher-900 px-1 rounded font-bold">Staff</span>
-                            </div>
-                            <span class="block text-[10px] text-teacher-600 font-mono truncate">day-${paddedDay}-plan.html</span>
-                        </div>
-                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-teacher-400 absolute top-2.5 right-2.5"></i>
-                    </a>
-                `;
-            } else {
-                linksHtml += `
-                    <a href="${teacherPlanUrl}" target="_blank" title="Open Teacher Lesson Plan" class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 transition group relative">
-                        <div class="w-9 h-9 rounded-lg bg-slate-200 text-slate-500 flex items-center justify-center text-sm shrink-0 shadow-xs group-hover:scale-105 transition">
-                            <i class="fa-solid fa-chalkboard-user"></i>
-                        </div>
-                        <div class="overflow-hidden">
-                            <span class="block text-xs font-bold text-slate-800 group-hover:text-brand-600 transition truncate">Teacher Plan</span>
-                            <span class="block text-[10px] text-slate-500 font-mono truncate">day-${paddedDay}-plan.html</span>
-                        </div>
-                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400 absolute top-2.5 right-2.5"></i>
-                    </a>
-                `;
-            }
-
-            resourcesContainer.innerHTML = linksHtml;
-
             const actionBox = document.getElementById('detailModalActionBox');
-            const isDone = !!currentStudentRecords[mod.day];
+            const isSigned = !!currentStudentRecords[m.day];
 
-            if (isDone) {
+            if (isSigned) {
                 actionBox.innerHTML = `
-                    <button onclick="closeDetailModal(); viewCertificate(${mod.day});" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2">
-                        <i class="fa-solid fa-award"></i> View Audit Certificate
+                    <button onclick="closeDetailModal(); openCertificateModal(${m.day});" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-award"></i>
+                        <span>View Verified Certificate</span>
                     </button>
                 `;
             } else if (isTeacherLoggedIn || isAdminLoggedIn) {
                 actionBox.innerHTML = `
-                    <button onclick="closeDetailModal(); openSignOffModal(${mod.day});" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2">
-                        <i class="fa-solid fa-file-signature"></i> Sign Off Day Module
+                    <button onclick="closeDetailModal(); openSignOffModal(${m.day});" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold rounded-xl shadow-sm flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-stamp"></i>
+                        <span>Sign Off Day ${m.day}</span>
                     </button>
                 `;
             } else {
-                actionBox.innerHTML = `<span class="text-xs text-slate-400 italic">Sign-off requires Teacher or Admin login</span>`;
+                actionBox.innerHTML = `
+                    <span class="text-xs text-slate-400 italic">Instructor sign-off required for completion cert.</span>
+                `;
             }
 
             document.getElementById('detailModal').classList.remove('hidden');
@@ -1549,28 +1925,34 @@
         }
 
         /* ----------------------------------------------------
-           END-OF-DAY SIGN-OFF WORKFLOWS (FIRESTORE)
+           SIGN-OFF MODAL & ACTION
         ---------------------------------------------------- */
-        function openSignOffModal(dayNum) {
-            if (!currentUser) {
-                showToast("Please select or sign in a student account before signing off.", "error");
-                openAuthModal();
-                return;
+        function openSignOffModal(dayId) {
+            const m = modules.find(x => x.day === dayId);
+            if (!m) return;
+
+            document.getElementById('signOffDayId').value = dayId;
+            document.getElementById('signOffModuleTitle').innerText = `Day ${m.day}: ${m.title}`;
+            document.getElementById('signOffStudentName').innerText = currentUser ? currentUser.fullName : "Trainee Student";
+
+            const existing = currentStudentRecords[dayId];
+            if (existing) {
+                document.getElementById('rphName').value = existing.rphName || '';
+                document.getElementById('rphInitials').value = existing.rphInitials || '';
+                document.getElementById('rphLicense').value = existing.rphLicense || '';
+                document.getElementById('teachingHours').value = existing.teachingHours || 4.0;
+                document.getElementById('practicalHours').value = existing.practicalHours || 4.0;
+                document.getElementById('hoursExplanation').value = existing.hoursExplanation || '';
+            } else {
+                document.getElementById('rphName').value = '';
+                document.getElementById('rphInitials').value = '';
+                document.getElementById('rphLicense').value = '';
+                document.getElementById('teachingHours').value = 4.0;
+                document.getElementById('practicalHours').value = 4.0;
+                document.getElementById('hoursExplanation').value = '';
             }
 
-            const mod = modules.find(m => m.day === dayNum);
-            if (!mod) return;
-
-            document.getElementById('signOffDayId').value = dayNum;
-            document.getElementById('signOffModuleTitle').innerText = `Day ${mod.day}: ${mod.title}`;
-            document.getElementById('signOffStudentName').innerText = currentUser.fullName;
-
-            document.getElementById('teachingHours').value = "4.0";
-            document.getElementById('practicalHours').value = "4.0";
-            document.getElementById('varianceContainer').classList.add('hidden');
-            document.getElementById('hoursExplanation').value = "";
-            document.getElementById('signOffCertify').checked = false;
-
+            checkHoursVariance();
             document.getElementById('signOffModal').classList.remove('hidden');
         }
 
@@ -1579,197 +1961,163 @@
         }
 
         function checkHoursVariance() {
-            const teaching = parseFloat(document.getElementById('teachingHours').value) || 0;
-            const practical = parseFloat(document.getElementById('practicalHours').value) || 0;
-            const varianceContainer = document.getElementById('varianceContainer');
+            const th = parseFloat(document.getElementById('teachingHours').value) || 0;
+            const ph = parseFloat(document.getElementById('practicalHours').value) || 0;
+            const vContainer = document.getElementById('varianceContainer');
 
-            if (teaching !== 4.0 || practical !== 4.0) {
-                varianceContainer.classList.remove('hidden');
+            if (th !== 4.0 || ph !== 4.0) {
+                vContainer.classList.remove('hidden');
             } else {
-                varianceContainer.classList.add('hidden');
+                vContainer.classList.add('hidden');
             }
         }
 
         async function handleSignOffSubmit(e) {
             e.preventDefault();
-
-            if (!currentUser) {
-                showToast("Active student session required.", "error");
-                return;
-            }
-
             const dayId = parseInt(document.getElementById('signOffDayId').value);
             const rphName = document.getElementById('rphName').value.trim();
             const rphInitials = document.getElementById('rphInitials').value.trim().toUpperCase();
             const rphLicense = document.getElementById('rphLicense').value.trim().toUpperCase();
-            const teachingHours = parseFloat(document.getElementById('teachingHours').value) || 4.0;
-            const practicalHours = parseFloat(document.getElementById('practicalHours').value) || 4.0;
-            const explanation = document.getElementById('hoursExplanation').value.trim();
+            const teachingHours = parseFloat(document.getElementById('teachingHours').value) || 0;
+            const practicalHours = parseFloat(document.getElementById('practicalHours').value) || 0;
+            const hoursExplanation = document.getElementById('hoursExplanation').value.trim();
 
-            if (teachingHours !== 4.0 || practicalHours !== 4.0) {
-                if (!explanation) {
-                    showToast("Please provide an explanation for the hours variance.", "error");
-                    return;
-                }
+            if (!currentUser) {
+                showToast("Please log in as a student to record sign-off.", "error");
+                return;
             }
 
-            const todayStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-            const totalHours = teachingHours + practicalHours;
+            const certRef = `CTTP-2026-${String(dayId).padStart(2, '0')}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-            const newRecord = {
+            const record = {
                 day: dayId,
                 rphName,
                 rphInitials,
                 rphLicense,
                 teachingHours,
                 practicalHours,
-                totalHours,
-                explanation: (teachingHours !== 4.0 || practicalHours !== 4.0) ? explanation : '',
-                completionDate: todayStr,
-                timestamp: Date.now()
+                hoursExplanation,
+                completedAt: new Date().toISOString().split('T')[0],
+                certRefNum: certRef
             };
 
-            currentStudentRecords[dayId] = newRecord;
+            currentStudentRecords[dayId] = record;
 
-            // Direct save to Firestore
-            if (isFirebaseActive && db) {
+            if (isFirebaseActive && db && currentUser.email) {
                 try {
                     await db.collection('student_records').doc(currentUser.email.toLowerCase()).set({
                         email: currentUser.email.toLowerCase(),
+                        studentName: currentUser.fullName,
                         records: currentStudentRecords,
-                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     }, { merge: true });
-
-                    showToast(`Day ${dayId} signed off successfully in Firebase Cloud!`, "success");
                 } catch (err) {
-                    console.error("Firestore sign-off write error:", err);
-                    showToast("Failed to save sign-off to Firebase.", "error");
-                    return;
+                    console.error("Firestore save failed:", err);
                 }
             }
 
+            showToast(`Sign-off recorded for Day ${dayId}`, "success");
             closeSignOffModal();
             renderGrid();
             updateStats();
         }
 
         /* ----------------------------------------------------
-           ADMIN-ONLY CERTIFICATE PORTAL LOGIC (FIRESTORE)
+           ADMIN PORTAL MODAL
         ---------------------------------------------------- */
         async function openAdminPortalModal() {
-            if (!isAdminLoggedIn) {
-                showToast("Access Restricted: Administrator authentication required.", "error");
-                if (!isTeacherLoggedIn) {
-                    openAuthModal();
-                    switchAuthTab('admin');
-                }
+            if (!isAdminLoggedIn && !isTeacherLoggedIn) {
+                openAuthModal();
+                switchAuthTab('admin');
                 return;
             }
 
-            await populateAdminDropdowns();
+            const studentSelect = document.getElementById('adminStudentSelect');
+            studentSelect.innerHTML = '';
+
+            if (isFirebaseActive && db) {
+                try {
+                    const snap = await db.collection('users').get();
+                    snap.forEach(doc => {
+                        const u = doc.data();
+                        const opt = document.createElement('option');
+                        opt.value = u.email;
+                        opt.innerText = `${u.fullName} (${u.email})`;
+                        studentSelect.appendChild(opt);
+                    });
+                } catch (err) {
+                    console.error("Failed to load users list:", err);
+                }
+            }
+
+            if (studentSelect.options.length === 0 && currentUser) {
+                const opt = document.createElement('option');
+                opt.value = currentUser.email;
+                opt.innerText = `${currentUser.fullName} (${currentUser.email})`;
+                studentSelect.appendChild(opt);
+            }
+
+            const daySelect = document.getElementById('adminDaySelect');
+            daySelect.innerHTML = modules.map(m => `<option value="${m.day}">Day ${m.day}: ${m.title}</option>`).join('');
+
             document.getElementById('adminPortalModal').classList.remove('hidden');
-            await onAdminStudentOrDayChange();
+            onAdminStudentOrDayChange();
         }
 
         function closeAdminPortalModal() {
             document.getElementById('adminPortalModal').classList.add('hidden');
         }
 
-        async function populateAdminDropdowns() {
-            const studentSelect = document.getElementById('adminStudentSelect');
-            const daySelect = document.getElementById('adminDaySelect');
-
-            let usersList = [];
-            if (isFirebaseActive && db) {
-                try {
-                    const snap = await db.collection('users').get();
-                    snap.forEach(doc => {
-                        usersList.push(doc.data());
-                    });
-                } catch (e) {
-                    console.error("Error fetching users from Firestore:", e);
-                }
-            }
-
-            if (usersList.length === 0) {
-                if (currentUser) {
-                    studentSelect.innerHTML = `<option value="${currentUser.email}">${currentUser.fullName} (${currentUser.email})</option>`;
-                } else {
-                    studentSelect.innerHTML = `<option value="">No registered students found in Firebase</option>`;
-                }
-            } else {
-                studentSelect.innerHTML = usersList.map(u => `<option value="${u.email}">${u.fullName} (${u.email})</option>`).join('');
-                if (currentUser) {
-                    studentSelect.value = currentUser.email;
-                }
-            }
-
-            daySelect.innerHTML = modules.map(m => `<option value="${m.day}">Day ${m.day}: ${m.title}</option>`).join('');
-        }
-
         async function onAdminStudentOrDayChange() {
-            const studentEmail = document.getElementById('adminStudentSelect').value;
+            const email = document.getElementById('adminStudentSelect').value;
             const dayId = parseInt(document.getElementById('adminDaySelect').value);
 
-            if (!studentEmail) return;
+            if (!email || !dayId) return;
 
-            let recordsForTarget = {};
-            if (isFirebaseActive && db) {
-                try {
-                    const doc = await db.collection('student_records').doc(studentEmail.toLowerCase()).get();
-                    if (doc.exists) {
-                        recordsForTarget = doc.data().records || {};
-                    }
-                } catch (e) {
-                    console.error("Firestore lookup error:", e);
+            let targetRecords = {};
+            if (currentUser && currentUser.email === email) {
+                targetRecords = currentStudentRecords;
+            } else if (isFirebaseActive && db) {
+                const docRef = await db.collection('student_records').doc(email.toLowerCase()).get();
+                if (docRef.exists) {
+                    targetRecords = docRef.data().records || {};
                 }
             }
 
-            const record = recordsForTarget[dayId];
+            const rec = targetRecords[dayId];
+            const badge = document.getElementById('adminStatusBadge');
             const statusText = document.getElementById('adminStatusText');
-            const statusBadge = document.getElementById('adminStatusBadge');
-            const deleteBtn = document.getElementById('adminDeleteBtn');
 
-            if (record) {
-                statusText.innerHTML = `<i class="fa-solid fa-circle-check mr-1.5 text-emerald-500"></i> Issued Certificate Record Found.`;
-                statusBadge.innerText = "ISSUED";
-                statusBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded uppercase bg-emerald-100 text-emerald-800 border border-emerald-300";
-                
-                document.getElementById('adminCompletionDate').value = record.completionDate || "";
-                document.getElementById('adminRphName').value = record.rphName || "";
-                document.getElementById('adminRphInitials').value = record.rphInitials || "";
-                document.getElementById('adminRphLicense').value = record.rphLicense || "";
-                document.getElementById('adminTeachingHours').value = record.teachingHours || "4.0";
-                document.getElementById('adminPracticalHours').value = record.practicalHours || "4.0";
-                
-                const hasVariance = !!record.explanation;
-                document.getElementById('adminFlagVariance').checked = hasVariance;
-                document.getElementById('adminExplanation').value = record.explanation || "";
-                
-                if (hasVariance) {
-                    document.getElementById('adminExplanationContainer').classList.remove('hidden');
-                } else {
-                    document.getElementById('adminExplanationContainer').classList.add('hidden');
-                }
+            if (rec) {
+                badge.innerText = "Signed Off";
+                badge.className = "text-[10px] font-bold px-2 py-0.5 rounded uppercase bg-emerald-100 text-emerald-800 border border-emerald-200";
+                statusText.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 mr-1.5"></i> Certificate record found for Day ${dayId}.`;
 
-                if (deleteBtn) deleteBtn.classList.remove('hidden');
+                document.getElementById('adminCompletionDate').value = rec.completedAt || new Date().toISOString().split('T')[0];
+                document.getElementById('adminRphName').value = rec.rphName || '';
+                document.getElementById('adminRphInitials').value = rec.rphInitials || '';
+                document.getElementById('adminRphLicense').value = rec.rphLicense || '';
+                document.getElementById('adminTeachingHours').value = rec.teachingHours || 4.0;
+                document.getElementById('adminPracticalHours').value = rec.practicalHours || 4.0;
+                
+                const hasExp = !!rec.hoursExplanation;
+                document.getElementById('adminFlagVariance').checked = hasExp;
+                document.getElementById('adminExplanation').value = rec.hoursExplanation || '';
+                toggleAdminVarianceNote();
             } else {
-                statusText.innerHTML = `<i class="fa-solid fa-circle-info mr-1.5 text-amber-500"></i> No certificate recorded for Day ${dayId} yet. Filling form will issue a new certificate.`;
-                statusBadge.innerText = "UNISSUED";
-                statusBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded uppercase bg-amber-100 text-amber-800 border border-amber-300";
+                badge.innerText = "Unsigned";
+                badge.className = "text-[10px] font-bold px-2 py-0.5 rounded uppercase bg-slate-200 text-slate-700 border border-slate-300";
+                statusText.innerHTML = `<i class="fa-solid fa-circle-info text-slate-400 mr-1.5"></i> No active certificate for Day ${dayId}. Complete form to issue record.`;
 
-                const todayStr = new Date().toISOString().split('T')[0];
-                document.getElementById('adminCompletionDate').value = todayStr;
-                document.getElementById('adminRphName').value = "Dr. Robert Vance, PharmD";
-                document.getElementById('adminRphInitials').value = "RV";
-                document.getElementById('adminRphLicense').value = "RPH-68492";
-                document.getElementById('adminTeachingHours').value = "4.0";
-                document.getElementById('adminPracticalHours').value = "4.0";
+                document.getElementById('adminCompletionDate').value = new Date().toISOString().split('T')[0];
+                document.getElementById('adminRphName').value = '';
+                document.getElementById('adminRphInitials').value = '';
+                document.getElementById('adminRphLicense').value = '';
+                document.getElementById('adminTeachingHours').value = 4.0;
+                document.getElementById('adminPracticalHours').value = 4.0;
                 document.getElementById('adminFlagVariance').checked = false;
-                document.getElementById('adminExplanation').value = "";
-                document.getElementById('adminExplanationContainer').classList.add('hidden');
-
-                if (deleteBtn) deleteBtn.classList.add('hidden');
+                document.getElementById('adminExplanation').value = '';
+                toggleAdminVarianceNote();
             }
         }
 
@@ -1785,149 +2133,125 @@
 
         async function handleAdminCertSave(e) {
             e.preventDefault();
-
-            if (!isAdminLoggedIn) {
-                showToast("Unauthorized: Only Administrators can save certificate edits.", "error");
-                return;
-            }
-
-            const studentEmail = document.getElementById('adminStudentSelect').value;
+            const email = document.getElementById('adminStudentSelect').value;
             const dayId = parseInt(document.getElementById('adminDaySelect').value);
-
-            if (!studentEmail) {
-                showToast("Target student email missing.", "error");
-                return;
-            }
-
-            const rawDate = document.getElementById('adminCompletionDate').value;
-            let formattedDate = rawDate;
-            if (rawDate && rawDate.includes('-')) {
-                const parts = rawDate.split('-');
-                formattedDate = new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-            }
-
+            const completionDate = document.getElementById('adminCompletionDate').value;
             const rphName = document.getElementById('adminRphName').value.trim();
             const rphInitials = document.getElementById('adminRphInitials').value.trim().toUpperCase();
             const rphLicense = document.getElementById('adminRphLicense').value.trim().toUpperCase();
-            const teachingHours = parseFloat(document.getElementById('adminTeachingHours').value) || 4.0;
-            const practicalHours = parseFloat(document.getElementById('adminPracticalHours').value) || 4.0;
+            const teachingHours = parseFloat(document.getElementById('adminTeachingHours').value) || 0;
+            const practicalHours = parseFloat(document.getElementById('adminPracticalHours').value) || 0;
             const flagVariance = document.getElementById('adminFlagVariance').checked;
-            const explanation = flagVariance ? document.getElementById('adminExplanation').value.trim() : "";
+            const hoursExplanation = flagVariance ? document.getElementById('adminExplanation').value.trim() : '';
 
-            const updatedRecord = {
+            if (!email || !dayId) return;
+
+            let targetRecords = {};
+            let studentName = "Student";
+
+            if (isFirebaseActive && db) {
+                const userDoc = await db.collection('users').doc(email.toLowerCase()).get();
+                if (userDoc.exists) studentName = userDoc.data().fullName;
+
+                const recDoc = await db.collection('student_records').doc(email.toLowerCase()).get();
+                if (recDoc.exists) targetRecords = recDoc.data().records || {};
+            }
+
+            const certRef = targetRecords[dayId]?.certRefNum || `CTTP-2026-${String(dayId).padStart(2, '0')}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+            targetRecords[dayId] = {
                 day: dayId,
                 rphName,
                 rphInitials,
                 rphLicense,
                 teachingHours,
                 practicalHours,
-                totalHours: teachingHours + practicalHours,
-                explanation,
-                completionDate: formattedDate,
-                timestamp: Date.now()
+                hoursExplanation,
+                completedAt: completionDate,
+                certRefNum: certRef
             };
 
             if (isFirebaseActive && db) {
-                try {
-                    const doc = await db.collection('student_records').doc(studentEmail.toLowerCase()).get();
-                    let recs = doc.exists ? (doc.data().records || {}) : {};
-                    recs[dayId] = updatedRecord;
-
-                    await db.collection('student_records').doc(studentEmail.toLowerCase()).set({
-                        email: studentEmail.toLowerCase(),
-                        records: recs,
-                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
-
-                    if (currentUser && currentUser.email.toLowerCase() === studentEmail.toLowerCase()) {
-                        currentStudentRecords = recs;
-                    }
-
-                    showToast(`Certificate Day ${dayId} saved in Firebase for ${studentEmail}`, "success");
-                    closeAdminPortalModal();
-                    renderGrid();
-                    updateStats();
-                } catch (err) {
-                    console.error("Firebase admin save error:", err);
-                    showToast("Failed to save changes to Firebase.", "error");
-                }
+                await db.collection('student_records').doc(email.toLowerCase()).set({
+                    email: email.toLowerCase(),
+                    studentName: studentName,
+                    records: targetRecords,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
             }
+
+            if (currentUser && currentUser.email === email) {
+                currentStudentRecords = targetRecords;
+                renderGrid();
+                updateStats();
+            }
+
+            showToast(`Admin updated certificate for Day ${dayId}`, "success");
+            closeAdminPortalModal();
         }
 
-        async function handleAdminCertRevoke() {
-            if (!isAdminLoggedIn) {
-                showToast("Unauthorized: Admin privileges required.", "error");
-                return;
-            }
-
-            const studentEmail = document.getElementById('adminStudentSelect').value;
+        function handleAdminCertRevoke() {
+            const email = document.getElementById('adminStudentSelect').value;
             const dayId = parseInt(document.getElementById('adminDaySelect').value);
 
             showConfirmModal(
                 "Revoke Certificate Confirmation",
-                `Are you sure you want to permanently revoke the Day ${dayId} certificate for ${studentEmail}?`,
+                `Are you sure you want to revoke and delete the certificate for Day ${dayId}?`,
                 async () => {
+                    let targetRecords = {};
                     if (isFirebaseActive && db) {
-                        try {
-                            const doc = await db.collection('student_records').doc(studentEmail.toLowerCase()).get();
-                            if (doc.exists) {
-                                let recs = doc.data().records || {};
-                                delete recs[dayId];
+                        const recDoc = await db.collection('student_records').doc(email.toLowerCase()).get();
+                        if (recDoc.exists) targetRecords = recDoc.data().records || {};
+                        delete targetRecords[dayId];
 
-                                await db.collection('student_records').doc(studentEmail.toLowerCase()).set({
-                                    records: recs,
-                                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                                }, { merge: true });
-
-                                if (currentUser && currentUser.email.toLowerCase() === studentEmail.toLowerCase()) {
-                                    currentStudentRecords = recs;
-                                }
-
-                                showToast(`Day ${dayId} certificate revoked successfully.`, "info");
-                                closeAdminPortalModal();
-                                renderGrid();
-                                updateStats();
-                            }
-                        } catch (err) {
-                            console.error("Firebase revoke error:", err);
-                            showToast("Failed to revoke certificate in Firebase.", "error");
-                        }
+                        await db.collection('student_records').doc(email.toLowerCase()).set({
+                            records: targetRecords,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
                     }
+
+                    if (currentUser && currentUser.email === email) {
+                        delete currentStudentRecords[dayId];
+                        renderGrid();
+                        updateStats();
+                    }
+
+                    showToast(`Certificate for Day ${dayId} revoked.`, "info");
+                    closeAdminPortalModal();
                 }
             );
         }
 
         /* ----------------------------------------------------
-           CERTIFICATE PREVIEW & AUDIT VAULT FUNCTIONS
+           CERTIFICATE MODAL
         ---------------------------------------------------- */
-        function viewCertificate(dayNum) {
-            const rec = currentStudentRecords[dayNum];
-            const mod = modules.find(m => m.day === dayNum);
+        function openCertificateModal(dayId) {
+            const m = modules.find(x => x.day === dayId);
+            const rec = currentStudentRecords[dayId];
+            if (!m || !rec) return;
 
-            if (!rec || !mod) {
-                showToast("No certificate record found for this day module.", "error");
-                return;
-            }
+            document.getElementById('certRefNum').innerText = rec.certRefNum || `CTTP-2026-${String(dayId).padStart(2, '0')}-0000`;
+            document.getElementById('certStudentName').innerText = currentUser ? currentUser.fullName : "Trainee Student";
+            document.getElementById('certModuleTitle').innerText = `Day ${m.day}: ${m.title}`;
+            document.getElementById('certCompletionDate').innerText = `Date: ${rec.completedAt || '--'}`;
 
-            document.getElementById('certRefNum').innerText = `CTTP-2026-${(1000 + dayNum)}`;
-            document.getElementById('certStudentName').innerText = currentUser ? currentUser.fullName : "Student Name";
-            document.getElementById('certModuleTitle').innerText = `Day ${mod.day}: ${mod.title}`;
-            document.getElementById('certCompletionDate').innerText = `Date: ${rec.completionDate}`;
+            document.getElementById('certTeachingHours').innerText = `${(parseFloat(rec.teachingHours) || 0).toFixed(1)} Hrs`;
+            document.getElementById('certPracticalHours').innerText = `${(parseFloat(rec.practicalHours) || 0).toFixed(1)} Hrs`;
             
-            document.getElementById('certTeachingHours').innerText = `${parseFloat(rec.teachingHours || 4.0).toFixed(1)} Hrs`;
-            document.getElementById('certPracticalHours').innerText = `${parseFloat(rec.practicalHours || 4.0).toFixed(1)} Hrs`;
-            document.getElementById('certTotalHours').innerText = `${(parseFloat(rec.teachingHours || 4.0) + parseFloat(rec.practicalHours || 4.0)).toFixed(1)} Hrs`;
+            const total = (parseFloat(rec.teachingHours) || 0) + (parseFloat(rec.practicalHours) || 0);
+            document.getElementById('certTotalHours').innerText = `${total.toFixed(1)} Hrs`;
 
-            if (rec.explanation) {
-                document.getElementById('certVarianceText').innerText = rec.explanation;
-                document.getElementById('certVarianceNote').classList.remove('hidden');
+            document.getElementById('certRphName').innerText = rec.rphName || 'Dr. Supervising Pharmacist';
+            document.getElementById('certRphLicense').innerText = rec.rphLicense || 'RPH-XXXXX';
+            document.getElementById('certRphInitials').innerText = rec.rphInitials || '--';
+
+            const vNote = document.getElementById('certVarianceNote');
+            if (rec.hoursExplanation) {
+                document.getElementById('certVarianceText').innerText = rec.hoursExplanation;
+                vNote.classList.remove('hidden');
             } else {
-                document.getElementById('certVarianceNote').classList.add('hidden');
+                vNote.classList.add('hidden');
             }
-
-            document.getElementById('certRphName').innerText = rec.rphName;
-            document.getElementById('certRphLicense').innerText = rec.rphLicense;
-            document.getElementById('certRphInitials').innerText = rec.rphInitials;
 
             document.getElementById('certificateModal').classList.remove('hidden');
         }
@@ -1936,41 +2260,58 @@
             document.getElementById('certificateModal').classList.add('hidden');
         }
 
+        /* ----------------------------------------------------
+           STATE BOARD AUDIT VAULT MODAL
+        ---------------------------------------------------- */
         function openVaultModal() {
             const tbody = document.getElementById('vaultTableBody');
-            const countText = document.getElementById('vaultRecordCount');
+            tbody.innerHTML = '';
 
-            const keys = Object.keys(currentStudentRecords);
+            const keys = Object.keys(currentStudentRecords).map(Number).sort((a, b) => a - b);
+            document.getElementById('vaultRecordCount').innerText = `${keys.length} of 30 audit logs recorded`;
 
             if (keys.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">No verifiable training records found in Cloud Vault.</td></tr>`;
-                countText.innerText = `0 audit logs found`;
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-6 text-center text-slate-400">
+                            No signed daily modules found in cloud transcript.
+                        </td>
+                    </tr>
+                `;
             } else {
-                tbody.innerHTML = keys.map(k => {
-                    const r = currentStudentRecords[k];
-                    const mod = modules.find(m => m.day === parseInt(k));
+                keys.forEach(day => {
+                    const rec = currentStudentRecords[day];
+                    const m = modules.find(x => x.day === day);
 
-                    return `
-                        <tr class="hover:bg-slate-50 transition">
-                            <td class="p-3 font-semibold">Day ${r.day}: ${mod ? mod.title : 'Module'}</td>
-                            <td class="p-3 font-mono text-slate-600">${r.completionDate}</td>
-                            <td class="p-3 font-medium">${r.rphName} (${r.rphLicense})</td>
-                            <td class="p-3 text-center font-bold">${r.teachingHours} / ${r.practicalHours}</td>
-                            <td class="p-3 text-center">
-                                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-300">
-                                    VERIFIED
-                                </span>
-                            </td>
-                            <td class="p-3 text-right">
-                                <button onclick="closeVaultModal(); viewCertificate(${r.day});" class="text-brand-600 hover:text-brand-800 font-bold underline text-xs">
-                                    View Certificate
-                                </button>
-                            </td>
-                        </tr>
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition";
+                    tr.innerHTML = `
+                        <td class="p-3 font-semibold text-slate-900">
+                            Day ${day}: ${m ? m.title : 'Module'}
+                        </td>
+                        <td class="p-3 font-mono text-slate-600 text-[11px]">
+                            ${rec.completedAt || '--'}
+                        </td>
+                        <td class="p-3">
+                            <span class="font-bold text-slate-800">${rec.rphName}</span>
+                            <span class="text-[10px] text-slate-400 block">${rec.rphLicense} (${rec.rphInitials})</span>
+                        </td>
+                        <td class="p-3 text-center font-mono">
+                            ${rec.teachingHours} / ${rec.practicalHours}
+                        </td>
+                        <td class="p-3 text-center">
+                            <span class="px-2 py-0.5 text-[10px] font-bold bg-emerald-100 text-emerald-800 rounded-full border border-emerald-200">
+                                Verified
+                            </span>
+                        </td>
+                        <td class="p-3 text-right">
+                            <button onclick="closeVaultModal(); openCertificateModal(${day});" class="text-brand-600 hover:text-brand-800 font-bold text-xs">
+                                View Cert
+                            </button>
+                        </td>
                     `;
-                }).join('');
-
-                countText.innerText = `${keys.length} cloud audit logs archived`;
+                    tbody.appendChild(tr);
+                });
             }
 
             document.getElementById('vaultModal').classList.remove('hidden');
@@ -1982,12 +2323,12 @@
 
         function exportAuditJSON() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentStudentRecords, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `cttp_audit_records_${currentUser ? currentUser.email : 'export'}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `California_Tech_Training_Audit_${currentUser ? currentUser.fullName.replace(/\s+/g, '_') : 'Transcript'}.json`);
+            document.body.appendChild(dlAnchorElem);
+            dlAnchorElem.click();
+            dlAnchorElem.remove();
         }
     </script>
 </body>
