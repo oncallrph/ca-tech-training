@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 14: Medication Dispensing Procedures</title>
+    
+    <!-- External Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- MathJax for rendering equations -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        pharmacy: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            main { border: none !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-800 flex flex-col bg-slate-100 antialiased">
+
+    <!-- Top Header & Global Status Bar -->
+    <header class="bg-slate-900 text-white shrink-0 border-b border-slate-800 no-print sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-teal-500 to-emerald-400 p-2 rounded-lg text-slate-900 font-bold text-lg leading-none shadow-md">
+                    <i class="fa-solid fa-pills"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-teal-400 font-semibold uppercase tracking-wider">CA Pharmacy Tech Program</div>
+                    <div class="text-base font-bold text-white tracking-tight">Day 14: Medication Dispensing Procedures</div>
+                </div>
+            </div>
+
+            <!-- Timer & Session Stats -->
+            <div class="hidden md:flex items-center space-x-6">
+                <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                    <i class="fa-regular fa-clock text-teal-400"></i>
+                    <span class="text-xs text-slate-300">Time Spent:</span>
+                    <span id="sessionTimer" class="font-mono text-sm font-semibold text-emerald-400">00:00:00</span>
+                </div>
+
+                <div class="text-xs text-slate-400 flex items-center space-x-1">
+                    <i class="fa-solid fa-hourglass-half text-teal-400"></i>
+                    <span>Target: 120 Minutes</span>
+                </div>
+
+                <button onclick="toggleNotesModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-note-sticky text-yellow-400"></i>
+                    <span>Study Notes</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Global Progress Bar -->
+        <div class="w-full bg-slate-800 h-1.5 relative">
+            <div id="overallProgressBar" class="bg-gradient-to-r from-teal-500 to-emerald-400 h-1.5 transition-all duration-500" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <div class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6 overflow-hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full lg:w-80 shrink-0 space-y-4 no-print">
+            <!-- Student Profile Card -->
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center font-bold border border-teal-200 text-lg">
+                        <i class="fa-solid fa-user-nurse"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Trainee Session</div>
+                        <input type="text" id="studentNameInput" value="Pharmacy Student" onchange="updateStudentName()" class="font-semibold text-slate-800 text-sm bg-transparent border-b border-dashed border-slate-300 focus:outline-none focus:border-pharmacy-500 w-full" title="Click to edit name">
+                    </div>
+                </div>
+                <div class="space-y-2 text-xs text-slate-600">
+                    <div class="flex justify-between border-b border-slate-100 pb-1">
+                        <span>Modules Completed:</span>
+                        <span id="modulesCompletedCount" class="font-semibold text-slate-800">0 / 6 Modules</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Final Exam Score:</span>
+                        <span id="overallScoreDisplay" class="font-semibold text-pharmacy-600">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="bg-white rounded-xl shadow-sm border border-slate-200 p-2 space-y-1">
+                <div class="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Day 14 Curriculum</div>
+
+                <button onclick="switchTab('overview')" id="nav-overview" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between transition bg-teal-50 text-teal-900 border border-teal-200">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-compass w-4 text-center text-teal-600"></i>
+                        <span>Course Overview</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-teal-500"></i>
+                </button>
+
+                <button onclick="switchTab('mod1')" id="nav-mod1" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-box-archive w-4 text-center text-slate-400"></i>
+                        <span class="truncate">1. Medication Verification</span>
+                    </div>
+                    <span id="status-mod1" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod2')" id="nav-mod2" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-tags w-4 text-center text-slate-400"></i>
+                        <span class="truncate">2. Labeling & Packaging</span>
+                    </div>
+                    <span id="status-mod2" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">25m</span>
+                </button>
+
+                <button onclick="switchTab('mod3')" id="nav-mod3" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-comments w-4 text-center text-slate-400"></i>
+                        <span class="truncate">3. Patient Consultation Scope</span>
+                    </div>
+                    <span id="status-mod3" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod4')" id="nav-mod4" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-id-card w-4 text-center text-slate-400"></i>
+                        <span class="truncate">4. Controlled Dispensing & ID</span>
+                    </div>
+                    <span id="status-mod4" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod5')" id="nav-mod5" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-shield-cat w-4 text-center text-slate-400"></i>
+                        <span class="truncate">5. QA & Safety Math Lab</span>
+                    </div>
+                    <span id="status-mod5" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod6')" id="nav-mod6" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-clipboard-check w-4 text-center text-slate-400"></i>
+                        <span class="truncate">6. Certification Practice Exam</span>
+                    </div>
+                    <span id="status-mod6" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">15m</span>
+                </button>
+            </nav>
+
+            <!-- Quick Reference Drawer Box -->
+            <div class="bg-slate-900 text-slate-200 rounded-xl p-4 shadow-sm text-xs space-y-2.5 border border-slate-800">
+                <div class="font-bold text-teal-400 uppercase tracking-wider flex items-center justify-between">
+                    <span><i class="fa-solid fa-lightbulb text-yellow-400 mr-1.5"></i> Key Dispensing Rules</span>
+                </div>
+                <ul class="space-y-2 text-slate-300">
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">5 Rights:</strong> Right Patient, Right Drug, Right Dose, Right Route, Right Time.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">PPPA 1970:</strong> Child-resistant caps standard; SL Nitroglycerin is ALWAYS exempt.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">CA Duty to Consult:</strong> Pharmacist MUST offer consultation on all NEW prescriptions (CCR § 1707.2).</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">NDC Code:</strong> 11 digits ($5-4-2$ format) representing Manufacturer-Drug-Package.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">C-II Partial Fills:</strong> Valid up to 30 days under CARA Act / CA Law upon request.</span>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Workspace -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto custom-scrollbar min-h-[650px]">
+
+            <!-- ================= TAB: OVERVIEW ================= -->
+            <div id="tab-overview" class="tab-content space-y-6">
+                <div>
+                    <div class="inline-flex items-center space-x-2 bg-teal-100 text-teal-900 text-xs font-semibold px-3 py-1 rounded-full mb-3 border border-teal-200">
+                        <i class="fa-solid fa-graduation-cap text-teal-700"></i>
+                        <span>California Pharmacy Technician Curriculum</span>
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Day 14: Medication Dispensing Procedures</h1>
+                    <p class="mt-2 text-slate-600 text-sm leading-relaxed">
+                        Welcome to Day 14 of your training program. Precision in dispensing is the final operational safeguard before a medication reaches the patient. Today's curriculum focuses on medication verification protocols, accurate container labeling, child-resistant packaging standards under federal and California law, patient consultation scope parameters, controlled substance pickup verification, and quality assurance workflows.
+                    </p>
+                </div>
+
+                <!-- Detailed Syllabus Breakdown -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-pharmacy-600"></i>
+                        <span>2-Hour Training Schedule & Core Modules</span>
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 1 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Medication Verification Workflows</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">The 5 Rights of Dispensing, NDC barcode scanning verification, stock bottle matching, lot numbers, and expiration auditing.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 2 (25 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Labeling & Packaging Standards</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">California CCR § 1707.5 label requirements, auxiliary warning stickers, Poison Prevention Packaging Act (PPPA), and cap waivers.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 3 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Patient Consultation Scope</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">California Duty to Consult (CCR § 1707.2), technician communication scope limits, facilitating RPh consultation, and language access.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 4 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Controlled Substance Dispensing & ID</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Government ID verification, electronic signature logging, CURES 2.0 reporting, and Schedule II partial filling rules under CARA.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 5 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">QA & Safety Math Lab</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">ISMP high-alert medications, Tall Man lettering, near-miss reporting, and oral suspension reconstitution calculations.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 6 (15 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Certification Practice Exam</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">15-question comprehensive assessment testing real-world dispensing scenarios, legal compliance, and safety math.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Objectives -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Core Learning Competencies</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Verification & Barcoding:</strong> Perform 3-point visual and barcode checks matching stock bottle NDC to printed prescription labels.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Labeling & PPPA Compliance:</strong> Apply proper auxiliary warnings and enforce child-resistant packaging rules including statutory exemptions.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Consultation Protocol:</strong> Strictly follow CCR § 1707.2 consultation offer requirements without stepping outside technician legal scope.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Controlled Product Pick-up:</strong> Enforce government ID verification and signature logs for Schedule II–V medication releases.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Start Action Callout -->
+                <div class="p-4 bg-slate-900 rounded-xl text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <div class="font-bold text-sm">Ready to begin Module 1?</div>
+                        <div class="text-xs text-slate-300">Start with Medication Verification Workflows & Barcode Validation.</div>
+                    </div>
+                    <button onclick="switchTab('mod1')" class="px-5 py-2.5 bg-pharmacy-500 hover:bg-pharmacy-600 text-white rounded-lg font-bold text-xs transition flex items-center space-x-2 shrink-0">
+                        <span>Start Module 1</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 1 ================= -->
+            <div id="tab-mod1" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 1</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Medication Verification & Final Check Workflows</h2>
+                    <p class="text-slate-600 text-sm mt-1">Mastering the 5 Rights of Dispensing, National Drug Code (NDC) matching, and barcode verification.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. The 5 Rights of Medication Dispensing</h3>
+                    <p>Before any medication is prepared or handed to a patient, pharmacy personnel must verify the "5 Rights" to prevent adverse drug events:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 my-4 text-xs">
+                        <div class="p-3 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">1. Right Patient</div>
+                            <div class="text-slate-600 mt-0.5">Verify full legal name and date of birth (DOB) using 2 unique identifiers.</div>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-blue-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">2. Right Medication</div>
+                            <div class="text-slate-600 mt-0.5">Match generic/brand name and NDC number exactly against stock container.</div>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-emerald-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">3. Right Dose & Strength</div>
+                            <div class="text-slate-600 mt-0.5">Confirm correct numerical dosage (e.g., $10\text{ mg}$ vs $20\text{ mg}$) and dosage form.</div>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-amber-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">4. Right Route</div>
+                            <div class="text-slate-600 mt-0.5">Ensure administration route (Oral, Topical, Ophthalmic, Otic) matches prescription order.</div>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-purple-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">5. Right Time & Quantity</div>
+                            <div class="text-slate-600 mt-0.5">Verify daily administration schedule and accurate total unit count dispensed.</div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. National Drug Code (NDC) Structure</h3>
+                    <p>The FDA assigns every drug product a unique 10-digit or 11-digit 3-segment number formatted as $5-4-2$ (Labeler - Product Code - Package Code):</p>
+
+                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-lg text-xs space-y-3 my-4">
+                        <div class="flex flex-col sm:flex-row items-center justify-around gap-2 bg-white p-3 rounded border border-slate-200 font-mono text-center">
+                            <div class="p-2 bg-teal-50 rounded border border-teal-200">
+                                <span class="text-teal-800 font-bold text-sm block">00093</span>
+                                <span class="text-[10px] text-slate-500 font-sans">Labeler / Manufacturer</span>
+                            </div>
+                            <span class="text-lg text-slate-400 font-bold">-</span>
+                            <div class="p-2 bg-blue-50 rounded border border-blue-200">
+                                <span class="text-blue-800 font-bold text-sm block">0154</span>
+                                <span class="text-[10px] text-slate-500 font-sans">Product / Strength / Form</span>
+                            </div>
+                            <span class="text-lg text-slate-400 font-bold">-</span>
+                            <div class="p-2 bg-amber-50 rounded border border-amber-200">
+                                <span class="text-amber-800 font-bold text-sm block">01</span>
+                                <span class="text-[10px] text-slate-500 font-sans">Package Size</span>
+                            </div>
+                        </div>
+                        <p class="text-slate-600"><strong>Critical Verification Rule:</strong> The middle 4 digits identify the specific drug entity and strength. Matching middle digits is mandatory during product selection!</p>
+                    </div>
+
+                    <!-- Interactive Verification Checkpoint -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-barcode text-yellow-400"></i>
+                            <span>Interactive Case Checkpoint: NDC Verification</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-2"><strong>Prescription Order:</strong> Lisinopril $10\text{ mg}$ Tablets #30 (NDC on label: <code class="font-mono text-teal-300">00093-0154-01</code>)</p>
+                        <p class="text-xs text-slate-300 mb-4">You pull a bottle from the shelf with NDC <code class="font-mono text-amber-300">00093-0155-01</code>. What does the mismatch in the middle segment signify?</p>
+                        
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkM1Case(1)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                A. The bottle contains the same medication, but in a different bottle size (e.g., 1000 count instead of 100 count).
+                            </button>
+                            <button onclick="checkM1Case(2)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                B. The bottle contains a different strength or formulation (e.g., Lisinopril $20\text{ mg}$ instead of $10\text{ mg}$) and MUST NOT be dispensed.
+                            </button>
+                            <button onclick="checkM1Case(3)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                C. The manufacturer updated its corporate street address.
+                            </button>
+                        </div>
+
+                        <div id="m1-case-feedback" class="mt-4 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('overview')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Overview</button>
+                    <button onclick="markModuleComplete('mod1'); switchTab('mod2')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Labeling & Packaging</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 2 ================= -->
+            <div id="tab-mod2" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 2</span>
+                        <span>•</span>
+                        <span>25 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Prescription Labeling & Container Packaging Specifications</h2>
+                    <p class="text-slate-600 text-sm mt-1">California CCR § 1707.5 label requirements, auxiliary warnings, and Poison Prevention Packaging Act (PPPA) rules.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Mandatory Container Label Elements (CA CCR § 1707.5)</h3>
+                    <p>California law mandates patient-centered prescription container labels printed in at least 12-point sans-serif font highlighting 4 core elements:</p>
+
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg text-xs space-y-2 text-amber-950">
+                        <div class="font-bold text-sm text-amber-900">California Patient-Centered Label Elements:</div>
+                        <ul class="list-disc list-inside space-y-1 text-slate-800">
+                            <li><strong>Patient Legal Name:</strong> First and last name.</li>
+                            <li><strong>Drug Name & Strength:</strong> Generic name + manufacturer, or trade name.</li>
+                            <li><strong>Directions for Use (SIG):</strong> Phrase in plain, clear language.</li>
+                            <li><strong>Condition or Purpose:</strong> Included if requested by patient or indicated on script.</li>
+                            <li><strong>Mandatory Legal Additions:</strong> Prescription number (Rx #), quantity, issuance date, expiration date, prescriber name, and pharmacy name/address.</li>
+                        </ul>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Poison Prevention Packaging Act (PPPA) of 1970</h3>
+                    <p>Enforced by the Consumer Product Safety Commission (CPSC), the PPPA mandates child-resistant (CR) packaging for all oral prescription medications:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4 text-xs">
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
+                            <div class="font-bold text-slate-900 flex items-center space-x-2">
+                                <i class="fa-solid fa-child text-pharmacy-600 text-sm"></i>
+                                <span class="text-sm">CR Standard Performance</span>
+                            </div>
+                            <p class="text-slate-600 leading-relaxed">Packaging must prevent at least 80% of children under 5 years from opening it within 10 minutes, while allowing at least 90% of adults to open it easily.</p>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
+                            <div class="font-bold text-slate-900 flex items-center space-x-2">
+                                <i class="fa-solid fa-heart-pulse text-pharmacy-600 text-sm"></i>
+                                <span class="text-sm">Statutory Exemptions</span>
+                            </div>
+                            <p class="text-slate-600 leading-relaxed"><strong class="text-red-700">Sublingual Nitroglycerin (SL NTG)</strong> is ALWAYS exempt (requires rapid emergency access). Oral contraceptives in dial-packs, cholestyramine powder, and potassium unit-dose are also exempt.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-teal-50 border border-teal-200 p-4 rounded-lg text-xs text-teal-900 my-4">
+                        <div class="font-bold text-sm text-pharmacy-800 mb-1">Easy-Open Cap Waiver Rules:</div>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><strong>Patient Request:</strong> May request a signed <em>blanket waiver</em> covering all future prescriptions.</li>
+                            <li><strong>Prescriber Request:</strong> May request easy-open caps for a <em>single individual prescription only</em> (cannot issue a blanket waiver for all patient scripts).</li>
+                        </ul>
+                    </div>
+
+                    <!-- Interactive Packaging Quiz -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-box text-yellow-400"></i>
+                            <span>Interactive Packaging Challenge</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Scenario:</strong> An elderly patient presents a new prescription for Nitroglycerin $0.4\text{ mg}$ Sublingual Tablets for acute angina chest pain. Which container cap requirement applies?</p>
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkPackagingQuiz(1)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">A. Must be dispensed in a safety child-resistant container unless patient signs a waiver.</button>
+                            <button onclick="checkPackagingQuiz(2)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">B. Statutorily exempt from child-resistant packaging under federal PPPA law; dispense in original non-CR glass container.</button>
+                            <button onclick="checkPackagingQuiz(3)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">C. Must be transferred into a standard plastic amber vial with an easy-open cap.</button>
+                        </div>
+                        <div id="packaging-feedback" class="mt-3 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod1')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Verification</button>
+                    <button onclick="markModuleComplete('mod2'); switchTab('mod3')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Patient Consultation</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 3 ================= -->
+            <div id="tab-mod3" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 3</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Patient Consultation Scope & Communication Protocols</h2>
+                    <p class="text-slate-600 text-sm mt-1">California Duty to Consult (CCR § 1707.2), technician scope limits, and facilitating pharmacist consultation.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. California Mandatory Consultation Rule (16 CCR § 1707.2)</h3>
+                    <p>Under California Board of Pharmacy regulations, a pharmacist MUST provide consultation to the patient or patient's agent in the following circumstances:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 my-4 text-xs">
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">1. All New Prescriptions</div>
+                            <div class="text-slate-600 mt-1">Mandatory consultation whenever a prescription is filled for the first time.</div>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">2. Refills with Changes</div>
+                            <div class="text-slate-600 mt-1">Whenever a prescription is refilled in a different dosage form, strength, or written direction.</div>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">3. Patient Request</div>
+                            <div class="text-slate-600 mt-1">Whenever the patient or agent explicitly requests consultation with the pharmacist.</div>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">4. Pharmacist Clinical Judgment</div>
+                            <div class="text-slate-600 mt-1">Whenever the pharmacist determines consultation is necessary for patient safety.</div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Technician Legal Scope & Pickup Counter Rules</h3>
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg text-xs space-y-2 text-red-950">
+                        <div class="font-bold text-sm text-red-900">STRICT SCOPE RESTRICTION FOR TECHNICIANS:</div>
+                        <p class="text-slate-800">A Pharmacy Technician <strong>CANNOT</strong> answer clinical questions, advise on drug side effects, explain usage directions, or recommend OTC medications. Technicians may only facilitate the offer to consult!</p>
+                        <ul class="list-disc list-inside space-y-1 text-slate-700">
+                            <li><strong>Correct Pickup Phrase:</strong> "The pharmacist is required to go over this new prescription with you. Let me call them over."</li>
+                            <li><strong>Prohibited Action:</strong> Asking "Do you have any questions, or are you good?" in a manner that discourages consultation.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Interactive Consultation Simulator -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-comments text-yellow-400"></i>
+                            <span>Interactive Pick-up Counter Simulator</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Scenario:</strong> At the pickup counter, a patient picking up a NEW prescription for Metformin $500\text{ mg}$ asks you: "Should I take this pill with food, and what happens if I miss a dose?" What is your proper legal response?</p>
+
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkConsultationScenario(1)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">1. Answer: "Yes, take it with food to avoid stomach upset. If you miss a dose, take it as soon as you remember."</button>
+                            <button onclick="checkConsultationScenario(2)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">2. State: "That is an excellent question for the pharmacist. Let me bring the pharmacist right over to counsel you on how to take this medication."</button>
+                            <button onclick="checkConsultationScenario(3)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">3. Hand the patient the printed bag insert and tell them to read page 2.</button>
+                        </div>
+
+                        <div id="consultation-feedback" class="mt-3 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod2')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Labeling</button>
+                    <button onclick="markModuleComplete('mod3'); switchTab('mod4')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Controlled Dispensing</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 4 ================= -->
+            <div id="tab-mod4" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 4</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Controlled Substance Dispensing & Identification Rules</h2>
+                    <p class="text-slate-600 text-sm mt-1">Government ID verification, electronic signature logs, CURES 2.0 reporting, and Schedule II partial fills.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Pickup Verification & Government Photo ID</h3>
+                    <p>To prevent diversion and fraudulent pick-ups of controlled substances (Schedules II–V), California pharmacies enforce strict identification protocols:</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4 text-xs">
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                            <div class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-id-card text-pharmacy-600"></i>
+                                <span>Valid Photo ID Requirements</span>
+                            </div>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600">
+                                <li>Unexpired US State Driver's License or State ID.</li>
+                                <li>US Passport or Foreign Government Passport.</li>
+                                <li>US Military Identification Card.</li>
+                                <li>Must record ID type, state, and ID number in dispensing log.</li>
+                            </ul>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                            <div class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-file-signature text-pharmacy-600"></i>
+                                <span>Electronic Signature Logs & CURES</span>
+                            </div>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600">
+                                <li>Patient or representative must sign physical or electronic capture pad upon receipt.</li>
+                                <li>Dispensings reported to <strong>CURES 2.0</strong> (Controlled Substance Utilization Review and Evaluation System) within 1 business day.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Schedule II Partial Filling Rules (CARA Act & CA Law)</h3>
+                    <p>Under the Comprehensive Addiction and Recovery Act (CARA) and California pharmacy law, partial fills of Schedule II prescriptions are governed by explicit timeframes:</p>
+
+                    <div class="overflow-x-auto my-4 border border-slate-200 rounded-lg">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">Partial Fill Scenario</th>
+                                    <th class="p-2.5">Legal Time Limit for Remaining Balance</th>
+                                    <th class="p-2.5">Special Stipulations</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-pharmacy-700">Requested by Patient or Prescriber</td>
+                                    <td class="p-2.5 font-mono">Within 30 Days of Issue Date</td>
+                                    <td class="p-2.5">Total quantity dispensed across partial fills cannot exceed total written.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-pharmacy-700">Pharmacy Out-of-Stock Emergency</td>
+                                    <td class="p-2.5 font-mono">Within 72 Hours</td>
+                                    <td class="p-2.5">If remainder cannot be supplied in 72 hours, prescriber must be notified; balance is forfeited.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-pharmacy-700">Terminally Ill / LTCF Patients</td>
+                                    <td class="p-2.5 font-mono">Within 60 Days of Issue Date</td>
+                                    <td class="p-2.5">Rx must be annotated "Terminally Ill" or "LTCF Patient".</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Interactive Controlled Dispensing Tool -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-shield-halved text-yellow-400"></i>
+                            <span>Interactive Controlled Dispensing Check</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Case Study:</strong> A patient presents a valid written C-II Oxycodone prescription for #60 tablets dated June 1st. On June 1st, the patient requests a partial fill of #20 tablets due to co-pay cost. How long does the patient have to pick up the remaining #40 tablets?</p>
+
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkControlledDispensing(1)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">A. Exactly 72 hours from the time of initial partial fill.</button>
+                            <button onclick="checkControlledDispensing(2)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">B. Up to 30 days from the original prescription issuance date (June 1st).</button>
+                            <button onclick="checkControlledDispensing(3)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">C. 6 months, same as C-III through C-V refills.</button>
+                        </div>
+
+                        <div id="controlled-dispensing-feedback" class="mt-4 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod3')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Consultation</button>
+                    <button onclick="markModuleComplete('mod4'); switchTab('mod5')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Quality Assurance & Math</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 5 ================= -->
+            <div id="tab-mod5" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 5</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Quality Assurance, High-Alert Safety & Dispensing Math</h2>
+                    <p class="text-slate-600 text-sm mt-1">ISMP high-alert drug safety, Tall Man lettering, near-miss reporting, and oral liquid reconstitution calculations.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. High-Alert Medications & ISMP Safety Standards</h3>
+                    <p>High-alert medications bear a heightened risk of causing significant patient harm when dispensed in error. Key ISMP categories include:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 my-4 text-xs">
+                        <div class="p-3 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                            <div class="font-bold text-red-900">Insulins & Antidiabetic Agents</div>
+                            <div class="text-slate-700 mt-1">High risk for severe hypoglycemia. Always double-check concentration (<span class="font-mono font-semibold bg-red-100 text-red-800 px-1.5 py-0.5 rounded">U-100</span> vs <span class="font-mono font-semibold bg-red-100 text-red-800 px-1.5 py-0.5 rounded">U-500</span>).</div>
+                        </div>
+                        <div class="p-3 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                            <div class="font-bold text-red-900">Anticoagulants & Antithrombotics</div>
+                            <div class="text-slate-700 mt-1">Warfarin, Heparin, Enoxaparin. High risk for internal hemorrhage or clotting.</div>
+                        </div>
+                        <div class="p-3 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                            <div class="font-bold text-red-900">Opioids & Narcotics</div>
+                            <div class="text-slate-700 mt-1">Fentanyl patches, Morphine, Oxycodone. High risk for fatal respiratory depression.</div>
+                        </div>
+                        <div class="p-3 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                            <div class="font-bold text-red-900">Chemotherapeutic Agents</div>
+                            <div class="text-slate-700 mt-1">Methotrexate, Cyclophosphamide. Cytotoxic hazard; requires dedicated counting trays.</div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. ISMP Tall Man Lettering Strategy</h3>
+                    <p>FDA and ISMP promote capitalization of unique letter combinations to distinguish look-ahead/sound-alike (LASA) drug pairs:</p>
+
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono space-y-1">
+                        <div>hydr<strong class="text-teal-700">OXY</strong>zine vs hydr<strong class="text-red-600">ALAZINE</strong></div>
+                        <div>predni<strong class="text-teal-700">SONE</strong> vs predni<strong class="text-red-600">SOLONE</strong></div>
+                        <div>dopa<strong class="text-teal-700">MINE</strong> vs dobu<strong class="text-red-600">TAMINE</strong></div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">3. Dispensing Math Lab: Oral Liquid Reconstitution</h3>
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg text-xs space-y-2 text-amber-950">
+                        <div class="font-bold text-sm text-amber-900">Reconstitution Math Principles:</div>
+                        <p>When reconstituting antibiotic powders (e.g., Amoxicillin oral suspension), purified water is added in two portions to achieve final volume.</p>
+                        <div class="bg-white p-3 rounded border border-amber-200 text-slate-800 font-mono space-y-2">
+                            <div><strong class="text-amber-900 font-sans">Prescription Order:</strong> Amoxicillin <span class="font-semibold text-teal-700">250 mg / 5 mL</span> Suspension. <span class="text-slate-600 font-sans">SIG:</span> 5 mL PO TID &times; 10 days.</div>
+                            <div><strong class="text-amber-900 font-sans">Total Volume Needed:</strong> <span class="font-semibold text-slate-900">5 mL/dose &times; 3 doses/day &times; 10 days = 150 mL</span> total.</div>
+                            <div class="text-teal-800 font-semibold border-t border-amber-100 pt-1.5 mt-1.5 font-sans">Reconstitution Powder + 112 mL Purified Water = 150 mL Total Reconstituted Volume.</div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Math Practice Lab -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-calculator text-yellow-400"></i>
+                            <span>Interactive Math Lab Practice</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Practice Case:</strong> Augmentin (Amoxicillin/Clavulanate) <span class="text-teal-300 font-semibold">400 mg / 5 mL</span> oral suspension. <span class="text-slate-300">SIG: 7.5 mL PO BID for 10 days.</span> What is the total volume in mL required to complete the full 10-day course?</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs my-3">
+                            <button onclick="checkMathLab(1)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition">A. 100 mL</button>
+                            <button onclick="checkMathLab(2)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition">B. 150 mL</button>
+                            <button onclick="checkMathLab(3)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition">C. 200 mL</button>
+                        </div>
+
+                        <div id="math-lab-feedback" class="p-3.5 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod4')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Controlled</button>
+                    <button onclick="markModuleComplete('mod5'); switchTab('mod6')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Certification Exam</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 6 (FINAL EXAM) ================= -->
+            <div id="tab-mod6" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 6</span>
+                        <span>•</span>
+                        <span>15 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Day 14 Certification Practice Exam</h2>
+                    <p class="text-slate-600 text-sm mt-1">Evaluate your understanding of dispensing verification, labeling, consultation laws, controlled substance release, and dispensing math.</p>
+                </div>
+
+                <!-- Exam Start Intro -->
+                <div id="exam-start-box" class="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center space-y-4">
+                    <div class="w-16 h-16 bg-pharmacy-100 text-pharmacy-700 rounded-full flex items-center justify-center mx-auto text-2xl font-bold border border-pharmacy-200">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">15-Question Comprehensive Certification Exam</h3>
+                    <p class="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">Passing threshold is 80% (12/15 correct). Detailed rationale provided for every question upon completion.</p>
+                    <button onclick="startFinalExam()" class="px-6 py-3 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg font-bold text-xs transition shadow-md inline-flex items-center space-x-2">
+                        <span>Begin Assessment Exam</span>
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                </div>
+
+                <!-- Exam Container -->
+                <div id="exam-container" class="hidden space-y-6">
+                    <div id="quiz-questions-list" class="space-y-6"></div>
+
+                    <div class="pt-4 border-t border-slate-200 flex justify-end">
+                        <button onclick="submitFinalExam()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-lg transition flex items-center space-x-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Submit Assessment Exam</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Exam Results Box -->
+                <div id="exam-results-box" class="hidden p-6 rounded-xl border text-center space-y-4"></div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod5')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: QA Math</button>
+                    <button onclick="switchTab('overview')" class="px-4 py-2 bg-slate-800 text-white hover:bg-slate-900 rounded-lg text-xs font-semibold">Return to Overview</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Study Notes Modal Window -->
+    <div id="notesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 space-y-4 border border-slate-200">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                <div class="flex items-center space-x-2 text-slate-900 font-bold text-base">
+                    <i class="fa-solid fa-note-sticky text-yellow-500"></i>
+                    <span>Trainee Personal Study Notes</span>
+                </div>
+                <button onclick="toggleNotesModal()" class="text-slate-400 hover:text-slate-600 text-lg p-1">&times;</button>
+            </div>
+            
+            <p class="text-xs text-slate-500">Record customized notes, key formulas, or specific areas to review later. Notes are automatically saved in browser session.</p>
+            
+            <textarea id="studentNotesArea" rows="10" placeholder="Type key learnings, PPPA rules, or pharmacy dispensing notes here..." class="w-full text-xs font-mono p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-pharmacy-500 leading-relaxed custom-scrollbar"></textarea>
+            
+            <div id="modalToast" class="hidden p-2 bg-emerald-100 text-emerald-800 text-xs rounded border border-emerald-300 font-semibold"></div>
+
+            <div class="flex items-center justify-between pt-2">
+                <div class="flex space-x-2">
+                    <button onclick="copyNotesToClipboard()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition flex items-center space-x-1">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Copy Notes</span>
+                    </button>
+                    <button onclick="clearNotes()" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-xs rounded-lg transition">
+                        Clear Notes
+                    </button>
+                </div>
+                <button onclick="saveNotes(); toggleNotesModal()" class="px-4 py-1.5 bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-bold text-xs rounded-lg transition">
+                    Save & Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let completedModules = new Set();
+        let secondsElapsed = 0;
+        let timerInterval = null;
+
+        // Exam Question Bank for Day 14
+        const examQuestions = [
+            {
+                q: "1. Under California Code of Regulations (16 CCR § 1707.2), when is a pharmacist legally MANDATED to offer patient consultation?",
+                options: [
+                    "A. Only when the patient explicitly requests it",
+                    "B. On all new prescriptions and whenever a prescription is refilled in a different dosage form or strength",
+                    "C. Only for controlled substance prescriptions",
+                    "D. Consultation is optional and at technician discretion"
+                ],
+                correct: 1,
+                rationale: "California law (16 CCR § 1707.2) strictly mandates that a pharmacist must offer consultation on all new prescriptions and whenever a medication is refilled in a different dosage form, strength, or direction."
+            },
+            {
+                q: "2. Under the Poison Prevention Packaging Act (PPPA) of 1970, which medication is STATUTORILY EXEMPT from child-resistant container requirements?",
+                options: [
+                    "A. Amoxicillin 500mg capsules",
+                    "B. Sublingual Nitroglycerin (SL NTG) tablets",
+                    "C. Ibuprofen 800mg tablets",
+                    "D. Alprazolam 0.5mg tablets"
+                ],
+                correct: 1,
+                rationale: "Sublingual Nitroglycerin is explicitly exempt from PPPA child-resistant packaging rules because immediate, unrestricted access is required during acute angina emergencies."
+            },
+            {
+                q: "3. What segment of an 11-digit NDC code ($5-4-2$ format) specifically identifies the drug entity, dosage form, and strength?",
+                options: [
+                    "A. First 5 digits (Labeler code)",
+                    "B. Middle 4 digits (Product code)",
+                    "C. Last 2 digits (Package code)",
+                    "D. DEA registration suffix"
+                ],
+                correct: 1,
+                rationale: "The middle 4 digits of an 11-digit NDC code specify the exact drug product, strength, and formulation."
+            },
+            {
+                q: "4. Under the CARA Act and California law, if a patient requests a partial fill on a Schedule II (C-II) controlled substance, how many days from the issue date does the patient have to receive the remaining quantity?",
+                options: [
+                    "A. 72 hours",
+                    "B. 14 days",
+                    "C. 30 days",
+                    "D. 60 days"
+                ],
+                correct: 2,
+                rationale: "Under CARA and California pharmacy law, partial fills of C-II prescriptions requested by a patient or prescriber must be completed within 30 days of the original issuance date."
+            },
+            {
+                q: "5. Which ISMP safety technique capitalizes unique letter strings to differentiate Look-Alike/Sound-Alike (LASA) drug names?",
+                options: [
+                    "A. Reverse Lettering",
+                    "B. Tall Man Lettering",
+                    "C. Bold Barcoding",
+                    "D. Monospaced Fonts"
+                ],
+                correct: 1,
+                rationale: "ISMP Tall Man Lettering uses selective uppercase lettering to highlight differences between similar drug names (e.g., predniSONE vs predniSOLONE)."
+            },
+            {
+                q: "6. A patient wishes to have all future prescriptions dispensed with easy-open (non-child-resistant) caps. What is legally required?",
+                options: [
+                    "A. A verbal authorization recorded by the cashier",
+                    "B. A signed blanket waiver from the patient on file in the pharmacy",
+                    "C. A blanket waiver signed by the patient's primary care physician",
+                    "D. Non-child-resistant caps are prohibited for all patients"
+                ],
+                correct: 1,
+                rationale: "A patient may request and sign a blanket waiver authorizing non-child-resistant caps on all their prescriptions."
+            },
+            {
+                q: "7. Which element is REQUIRED on a California prescription container label under CCR § 1707.5?",
+                options: [
+                    "A. Prescriber's social security number",
+                    "B. Patient's full legal name and clear directions for use in plain language",
+                    "C. Pharmacy owner's home address",
+                    "D. Manufacturer's wholesale purchase price"
+                ],
+                correct: 1,
+                rationale: "California CCR § 1707.5 requires patient-centered labeling featuring the patient's name, drug name/strength, clear plain-language directions, and purpose (if specified)."
+            },
+            {
+                q: "8. Which of the following drug classes is classified by ISMP as a High-Alert Medication in community pharmacy?",
+                options: [
+                    "A. Oral Antihistamines (e.g., Loratadine)",
+                    "B. Anticoagulants (e.g., Warfarin)",
+                    "C. Topical Hydrocortisone",
+                    "D. Synthetic Tear drops"
+                ],
+                correct: 1,
+                rationale: "Anticoagulants carry a heightened risk of causing severe patient harm or fatal bleeding events if administered or dosed incorrectly."
+            },
+            {
+                q: "9. When a patient arrives at the counter to pick up a NEW prescription, what is the Pharmacy Technician's legal role regarding consultation?",
+                options: [
+                    "A. Counsel the patient on drug side effects and administration",
+                    "B. Ask the patient if they want consultation and immediately connect them with the pharmacist if needed",
+                    "C. Skip consultation if the waiting line is long",
+                    "D. Explain how to take the medication using the paper insert"
+                ],
+                correct: 1,
+                rationale: "Technicians may only facilitate the offer to consult. Clinical counseling must be provided directly by a licensed pharmacist."
+            },
+            {
+                q: "10. Calculate total volume: Augmentin $400\text{ mg}/5\text{ mL}$ suspension. SIG: $7.5\text{ mL}$ PO BID for 10 days.",
+                options: [
+                    "A. $100\text{ mL}$",
+                    "B. $150\text{ mL}$",
+                    "C. $200\text{ mL}$",
+                    "D. $300\text{ mL}$"
+                ],
+                correct: 1,
+                rationale: "Daily volume = $7.5\text{ mL} \times 2\text{ doses/day} = 15\text{ mL/day}$. Total volume = $15\text{ mL/day} \times 10\text{ days} = 150\text{ mL}$."
+            },
+            {
+                q: "11. California pharmacies must report controlled substance dispensing data to CURES 2.0 within what timeframe?",
+                options: [
+                    "A. 1 business day",
+                    "B. 7 business days",
+                    "C. 30 calendar days",
+                    "D. End of each calendar month"
+                ],
+                correct: 0,
+                rationale: "California law mandates that controlled substance dispensing data (Schedules II–V) be submitted electronically to CURES 2.0 within 1 business day."
+            },
+            {
+                q: "12. Which auxiliary label must ALWAYS be placed on an oral liquid suspension bottle before dispensing?",
+                options: [
+                    "A. 'May Cause Drowsiness'",
+                    "B. 'Shake Well Before Use'",
+                    "C. 'Take On An Empty Stomach'",
+                    "D. 'For Topical Use Only'"
+                ],
+                correct: 1,
+                rationale: "Suspensions contain insoluble drug particles that settle over time. 'Shake Well Before Use' ensures uniform dosage distribution."
+            },
+            {
+                q: "13. What is the primary purpose of scanning the stock bottle barcode during dispensing verification?",
+                options: [
+                    "A. To calculate retail sales tax",
+                    "B. To verify that the selected stock container's NDC matches the entered prescription order exactly",
+                    "C. To send an automatic reorder to the drug wholesaler",
+                    "D. To print a customer register receipt"
+                ],
+                correct: 1,
+                rationale: "Barcode verification electronically matches the stock bottle's NDC to the computer order, eliminating drug selection errors."
+            },
+            {
+                q: "14. A FDA Medication Guide (MedGuide) is REQUIRED to be issued to patients dispensing which class of drugs?",
+                options: [
+                    "A. NSAIDs, Antidepressants, and Opioids",
+                    "B. Over-the-counter saline sprays",
+                    "C. Multivitamins",
+                    "D. Artificial tears"
+                ],
+                correct: 0,
+                rationale: "FDA mandates MedGuides for high-risk drug classes including NSAIDs (cardiovascular/GI risks), Antidepressants (suicidality warnings), and Opioids."
+            },
+            {
+                q: "15. A doctor writes a prescription for $60$ tablets with SIG: $1\text{ tab}$ PO QID. What is the calculated day supply?",
+                options: [
+                    "A. 10 Days",
+                    "B. 15 Days",
+                    "C. 20 Days",
+                    "D. 30 Days"
+                ],
+                correct: 1,
+                rationale: "Daily dosage = $1\text{ tab} \times 4\text{ times/day} = 4\text{ tabs/day}$. Day supply = $60\text{ tabs} \div 4\text{ tabs/day} = 15\text{ Days}$."
+            }
+        ];
+
+        window.onload = function() {
+            startTimer();
+            loadSavedNotes();
+        };
+
+        // Session Timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const hrs = String(Math.floor(secondsElapsed / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((secondsElapsed % 3600) / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                document.getElementById('sessionTimer').innerText = `${hrs}:${mins}:${secs}`;
+            }, 1000);
+        }
+
+        // Student Name Handler
+        function updateStudentName() {
+            const name = document.getElementById('studentNameInput').value;
+            localStorage.setItem('day14_student_name', name);
+        }
+
+        // Navigation Tab Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-teal-50', 'text-teal-900', 'border', 'border-teal-200');
+                btn.classList.add('text-slate-600');
+            });
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-600');
+                activeBtn.classList.add('bg-teal-50', 'text-teal-900', 'border', 'border-teal-200');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Mark Module Complete
+        function markModuleComplete(modId) {
+            completedModules.add(modId);
+            const statusBadge = document.getElementById(`status-${modId}`);
+            if (statusBadge) {
+                statusBadge.innerHTML = '<i class="fa-solid fa-circle-check text-teal-600"></i> Done';
+                statusBadge.classList.remove('bg-slate-100', 'text-slate-500');
+                statusBadge.classList.add('bg-teal-100', 'text-teal-800');
+            }
+
+            const total = 6;
+            const count = completedModules.size;
+            document.getElementById('modulesCompletedCount').innerText = `${count} / ${total} Modules`;
+            const pct = Math.round((count / total) * 100);
+            document.getElementById('overallProgressBar').style.width = `${pct}%`;
+        }
+
+        // Module 1 Case Check
+        function checkM1Case(choice) {
+            const feedback = document.getElementById('m1-case-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Verification!</strong> The middle 4 digits identify product strength and dosage form. A mismatch (0154 vs 0155) indicates a different strength or product and must NOT be dispensed.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Action.</strong> The middle 4 digits of an NDC code define the product entity and strength. A middle segment mismatch represents a medication/strength error!";
+            }
+        }
+
+        // Module 2 Packaging Quiz
+        function checkPackagingQuiz(choice) {
+            const feedback = document.getElementById('packaging-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct! Sublingual Nitroglycerin</strong> is statutorily exempt from the PPPA to ensure immediate emergency access during cardiac chest pain episodes.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Selection.</strong> Sublingual Nitroglycerin is explicitly exempted by federal law from child-resistant packaging requirements.";
+            }
+        }
+
+        // Module 3 Consultation Scenario
+        function checkConsultationScenario(choice) {
+            const feedback = document.getElementById('consultation-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Legal Protocol!</strong> Technicians cannot give clinical advice. Connecting the patient directly with the pharmacist fulfills CCR § 1707.2 and protects patient safety.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Violation of Scope.</strong> Answering clinical questions regarding administration or missed doses exceeds technician legal authority. Immediately transfer the patient to the pharmacist.";
+            }
+        }
+
+        // Module 4 Controlled Dispensing
+        function checkControlledDispensing(choice) {
+            const feedback = document.getElementById('controlled-dispensing-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Rule!</strong> Under CARA and California law, patient-requested C-II partial fills remain valid for up to 30 days from the original prescription issue date.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Timeframe.</strong> The 72-hour rule applies ONLY when the pharmacy is out of stock. Patient-requested partial fills under CARA allow up to 30 days from the date of issuance.";
+            }
+        }
+
+        // Module 5 Math Lab Practice
+        function checkMathLab(choice) {
+            const feedback = document.getElementById('math-lab-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct! 150 mL.</strong> Calculation: 7.5 mL/dose &times; 2 doses/day = 15 mL/day. 15 mL/day &times; 10 days = 150 mL total volume.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Calculation.</strong> Multiply daily volume by 10 days: (7.5 mL &times; 2) &times; 10 = 15 &times; 10 = 150 mL.";
+            }
+        }
+
+        // Exam Methods
+        function startFinalExam() {
+            document.getElementById('exam-start-box').classList.add('hidden');
+            document.getElementById('exam-container').classList.remove('hidden');
+
+            const list = document.getElementById('quiz-questions-list');
+            list.innerHTML = '';
+
+            examQuestions.forEach((q, idx) => {
+                const qCard = document.createElement('div');
+                qCard.className = 'p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-3';
+                
+                let optionsHtml = '';
+                q.options.forEach((opt, optIdx) => {
+                    optionsHtml += `
+                        <label class="flex items-center space-x-3 p-2.5 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition text-xs text-slate-800">
+                            <input type="radio" name="exam_q_${idx}" value="${optIdx}" class="text-pharmacy-600 focus:ring-pharmacy-500">
+                            <span>${opt}</span>
+                        </label>
+                    `;
+                });
+
+                qCard.innerHTML = `
+                    <div class="font-bold text-slate-900 text-xs sm:text-sm">${q.q}</div>
+                    <div class="space-y-2">${optionsHtml}</div>
+                    <div id="rationale_q_${idx}" class="hidden p-3 rounded-lg text-xs mt-2"></div>
+                `;
+                list.appendChild(qCard);
+            });
+        }
+
+        function submitFinalExam() {
+            let score = 0;
+            examQuestions.forEach((q, idx) => {
+                const selected = document.querySelector(`input[name="exam_q_${idx}"]:checked`);
+                const rationaleDiv = document.getElementById(`rationale_q_${idx}`);
+                rationaleDiv.classList.remove('hidden', 'bg-red-100', 'bg-emerald-100', 'text-red-900', 'text-emerald-900');
+
+                if (selected && parseInt(selected.value) === q.correct) {
+                    score++;
+                    rationaleDiv.classList.add('bg-emerald-100', 'text-emerald-900', 'border', 'border-emerald-200');
+                    rationaleDiv.innerHTML = `<strong>Correct!</strong> ${q.rationale}`;
+                } else {
+                    rationaleDiv.classList.add('bg-red-100', 'text-red-900', 'border', 'border-red-200');
+                    rationaleDiv.innerHTML = `<strong>Incorrect.</strong> ${q.rationale}`;
+                }
+            });
+
+            const percent = Math.round((score / examQuestions.length) * 100);
+            document.getElementById('overallScoreDisplay').innerText = `${percent}%`;
+            
+            const resultsBox = document.getElementById('exam-results-box');
+            resultsBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'bg-red-50', 'border-red-200');
+
+            if (percent >= 80) {
+                resultsBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+                resultsBox.innerHTML = `
+                    <div class="text-3xl"><i class="fa-solid fa-circle-check text-emerald-600"></i></div>
+                    <h3 class="text-xl font-bold">Congratulations! You Passed Day 14 Exam!</h3>
+                    <p class="text-xs">Your Score: <strong>${score} / ${examQuestions.length} (${percent}%)</strong></p>
+                    <p class="text-xs text-emerald-700">You have demonstrated core competency in California dispensing protocols, PPPA packaging laws, patient consultation scope, and safety calculations.</p>
+                `;
+                markModuleComplete('mod6');
+            } else {
+                resultsBox.classList.add('bg-red-50', 'border-red-300', 'text-red-900');
+                resultsBox.innerHTML = `
+                    <div class="text-3xl"><i class="fa-solid fa-triangle-exclamation text-red-600"></i></div>
+                    <h3 class="text-xl font-bold">Passing Score Not Met</h3>
+                    <p class="text-xs">Your Score: <strong>${score} / ${examQuestions.length} (${percent}%)</strong> (Passing threshold is 80%).</p>
+                    <p class="text-xs text-red-700">Please review the rationale notes above and retake the exam when ready.</p>
+                `;
+            }
+            resultsBox.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Personal Study Notes Modal Logic
+        function toggleNotesModal() {
+            const modal = document.getElementById('notesModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('modalToast');
+            toast.innerText = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        function saveNotes() {
+            const val = document.getElementById('studentNotesArea').value;
+            localStorage.setItem('day14_study_notes', val);
+            showToast("Notes saved successfully!");
+        }
+
+        function loadSavedNotes() {
+            const saved = localStorage.getItem('day14_study_notes');
+            if (saved) {
+                document.getElementById('studentNotesArea').value = saved;
+            }
+            const savedName = localStorage.getItem('day14_student_name');
+            if (savedName) {
+                document.getElementById('studentNameInput').value = savedName;
+            }
+        }
+
+        function clearNotes() {
+            document.getElementById('studentNotesArea').value = '';
+            localStorage.removeItem('day14_study_notes');
+            showToast("Study notes cleared.");
+        }
+
+        function copyNotesToClipboard() {
+            const notes = document.getElementById('studentNotesArea').value;
+            document.execCommand('copy');
+            showToast("Notes copied to clipboard!");
+        }
+    </script>
+</body>
+</html>
