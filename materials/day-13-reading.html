@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 13: Prescription Sources and Processing - Pharmacy Technician Training</title>
+    
+    <!-- External Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- MathJax for rendering equations -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        pharmacy: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            main { border: none !important; shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="h-full text-slate-800 font-sans flex flex-col antialiased selection:bg-teal-500 selection:text-white">
+
+    <!-- Top Header & Global Status Bar -->
+    <header class="bg-slate-900 text-white shrink-0 border-b border-slate-800 no-print sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-teal-500 to-emerald-400 p-2 rounded-lg text-slate-900 font-bold text-lg leading-none shadow-md">
+                    <i class="fa-solid fa-prescription-bottle-medical"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-teal-400 font-semibold uppercase tracking-wider">CA Pharmacy Tech Program</div>
+                    <div class="text-base font-bold text-white tracking-tight">Day 13: Prescription Sources & Processing</div>
+                </div>
+            </div>
+
+            <!-- Timer & Session Stats -->
+            <div class="hidden md:flex items-center space-x-6">
+                <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                    <i class="fa-regular fa-clock text-teal-400"></i>
+                    <span class="text-xs text-slate-300">Time Spent:</span>
+                    <span id="sessionTimer" class="font-mono text-sm font-semibold text-emerald-400">00:00:00</span>
+                </div>
+
+                <div class="text-xs text-slate-400 flex items-center space-x-1">
+                    <i class="fa-solid fa-hourglass-half text-teal-400"></i>
+                    <span>Target: 120 Minutes</span>
+                </div>
+
+                <button onclick="toggleNotesModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-note-sticky text-yellow-400"></i>
+                    <span>Study Notes</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Global Progress Bar -->
+        <div class="w-full bg-slate-800 h-1.5 relative">
+            <div id="overallProgressBar" class="bg-gradient-to-r from-teal-500 to-emerald-400 h-1.5 transition-all duration-500" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <div class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6 overflow-hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full lg:w-80 shrink-0 space-y-4 no-print">
+            <!-- Student Profile Card -->
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center font-bold border border-teal-200 text-lg">
+                        <i class="fa-solid fa-user-nurse"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Trainee Session</div>
+                        <input type="text" id="studentNameInput" value="Pharmacy Student" onchange="updateStudentName()" class="font-semibold text-slate-800 text-sm bg-transparent border-b border-dashed border-slate-300 focus:outline-none focus:border-pharmacy-500 w-full" title="Click to edit name">
+                    </div>
+                </div>
+                <div class="space-y-2 text-xs text-slate-600">
+                    <div class="flex justify-between border-b border-slate-100 pb-1">
+                        <span>Modules Completed:</span>
+                        <span id="modulesCompletedCount" class="font-semibold text-slate-800">0 / 6 Modules</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Final Exam Score:</span>
+                        <span id="overallScoreDisplay" class="font-semibold text-pharmacy-600">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="bg-white rounded-xl shadow-sm border border-slate-200 p-2 space-y-1">
+                <div class="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Day 13 Curriculum</div>
+
+                <button onclick="switchTab('overview')" id="nav-overview" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between transition bg-teal-50 text-teal-900 border border-teal-200">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-compass w-4 text-center text-teal-600"></i>
+                        <span>Course Overview</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-teal-500"></i>
+                </button>
+
+                <button onclick="switchTab('mod1')" id="nav-mod1" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-receipt w-4 text-center text-slate-400"></i>
+                        <span class="truncate">1. Sources & Legal Intake</span>
+                    </div>
+                    <span id="status-mod1" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod2')" id="nav-mod2" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-keyboard w-4 text-center text-slate-400"></i>
+                        <span class="truncate">2. Data Entry, SIG & DAW</span>
+                    </div>
+                    <span id="status-mod2" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">25m</span>
+                </button>
+
+                <button onclick="switchTab('mod3')" id="nav-mod3" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-credit-card w-4 text-center text-slate-400"></i>
+                        <span class="truncate">3. Insurance & Rejections</span>
+                    </div>
+                    <span id="status-mod3" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod4')" id="nav-mod4" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-shield-halved w-4 text-center text-slate-400"></i>
+                        <span class="truncate">4. Controlled Substances & DEA</span>
+                    </div>
+                    <span id="status-mod4" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod5')" id="nav-mod5" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-calculator w-4 text-center text-slate-400"></i>
+                        <span class="truncate">5. Day Supply & Math Lab</span>
+                    </div>
+                    <span id="status-mod5" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod6')" id="nav-mod6" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-clipboard-check w-4 text-center text-slate-400"></i>
+                        <span class="truncate">6. Certification Practice Exam</span>
+                    </div>
+                    <span id="status-mod6" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">15m</span>
+                </button>
+            </nav>
+
+            <!-- Quick Reference Drawer Box -->
+            <div class="bg-slate-900 text-slate-200 rounded-xl p-4 shadow-sm text-xs space-y-2.5 border border-slate-800">
+                <div class="font-bold text-teal-400 uppercase tracking-wider flex items-center justify-between">
+                    <span><i class="fa-solid fa-lightbulb text-yellow-400 mr-1.5"></i> Quick Processing Rules</span>
+                </div>
+                <ul class="space-y-2 text-slate-300">
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">DEA Formula:</strong> (1<sup>st</sup> + 3<sup>rd</sup> + 5<sup>th</sup>) + 2 × (2<sup>nd</sup> + 4<sup>th</sup> + 6<sup>th</sup>)</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">DAW 0:</strong> Generic allowed; <strong class="text-white">DAW 1:</strong> Prescriber required brand; <strong class="text-white">DAW 2:</strong> Patient requested brand.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">CA Security Pad:</strong> Thermo-chromic ink, "VOID" watermark, batch #, quantity boxes.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Eye Drop Metric:</strong> 1 mL = 20 drops (gtts).</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">CA Phone Scripts:</strong> Only RPh / Intern RPh may take NEW phone prescriptions!</span>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Workspace -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto custom-scrollbar min-h-[650px]">
+
+            <!-- ================= TAB: OVERVIEW ================= -->
+            <div id="tab-overview" class="tab-content space-y-6">
+                <div>
+                    <div class="inline-flex items-center space-x-2 bg-teal-100 text-teal-900 text-xs font-semibold px-3 py-1 rounded-full mb-3 border border-teal-200">
+                        <i class="fa-solid fa-graduation-cap text-teal-700"></i>
+                        <span>California Pharmacy Technician Curriculum</span>
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Day 13: Prescription Sources and Processing</h1>
+                    <p class="mt-2 text-slate-600 text-sm leading-relaxed">
+                        Welcome to Day 13 of your training program. Accurate prescription intake, patient data verification, computer order entry, third-party insurance adjudication, and controlled substance validation form the operational core of every retail and institutional pharmacy. This module equips you with California Board of Pharmacy regulatory knowledge, precise SIG translation skills, claim rejection troubleshooting abilities, and practical day-supply calculations.
+                    </p>
+                </div>
+
+                <!-- Detailed Syllabus Breakdown -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-pharmacy-600"></i>
+                        <span>2-Hour Training Schedule & Core Modules</span>
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 1 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Prescription Sources & Legal Intake</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Hardcopies, e-prescriptions (AB 2789), fax, phone orders; CA statutory elements; legal scope restrictions for telephone scripts.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 2 (25 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Data Entry, SIG & DAW</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Patient profile linking, Latin SIG abbreviation translation, and NCPDP Dispense As Written (DAW) indicator codes 0 through 9.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 3 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Insurance Billing & Rejections</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">BIN, PCN, Group, Member ID, Person Codes, copays, and resolving Rejections (Refill Too Soon, Prior Auth, Quantity Limits).</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 4 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Controlled Substances & DEA</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Schedule II-V rules, CA security paper features, mathematical DEA check-digit algorithm, and CURES database monitoring.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 5 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Day Supply & Math Lab</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Day supply formulas for oral solids, liquid drops (gtts/mL), insulin vials/pens (U-100), and 28-day expiration limits.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 6 (15 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Certification Practice Exam</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">15-question evaluation exam featuring real-world scenario analysis, error detection, and instant rationales.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Objectives -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Core Learning Competencies</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Legal Intake Validation:</strong> Verify all required statutory prescription elements under CA B&PC § 4040 and observe strict scope limits regarding verbal orders.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>SIG & DAW Accuracy:</strong> Translate complex Latin SIG codes into standard patient directions and assign proper DAW selection codes.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>PBM Claim Troubleshooting:</strong> Identify insurance routing parameters (BIN, PCN) and apply corrective override codes for claim rejections.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Controlled Substance Integrity:</strong> Validate DEA numbers mathematically, inspect CA security prescription forms, and manage schedule-based refill limits.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Start Action Callout -->
+                <div class="p-4 bg-slate-900 rounded-xl text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <div class="font-bold text-sm">Ready to begin Module 1?</div>
+                        <div class="text-xs text-slate-300">Start with Prescription Intake Channels & California Legal Requirements.</div>
+                    </div>
+                    <button onclick="switchTab('mod1')" class="px-5 py-2.5 bg-pharmacy-500 hover:bg-pharmacy-600 text-white rounded-lg font-bold text-xs transition flex items-center space-x-2 shrink-0">
+                        <span>Start Module 1</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 1 ================= -->
+            <div id="tab-mod1" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 1</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Prescription Sources & Legal Intake</h2>
+                    <p class="text-slate-600 text-sm mt-1">Understanding origin channels, mandatory legal components, and California-specific intake scope rules.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Prescription Origin Channels</h3>
+                    <p>Prescriptions enter the pharmacy workflow via four distinct channels, each governed by specific legal protocols:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4 text-xs">
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
+                            <div class="font-bold text-slate-900 flex items-center space-x-2">
+                                <i class="fa-solid fa-pen-nib text-pharmacy-600 text-sm"></i>
+                                <span class="text-sm">1. Written / Hardcopy</span>
+                            </div>
+                            <p class="text-slate-600 leading-relaxed">Presented in person by the patient or agent. Must be written in indelible ink or printed. Non-controlled medications may be written on standard prescription pads; controlled substances require official California Security Prescription forms.</p>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
+                            <div class="font-bold text-slate-900 flex items-center space-x-2">
+                                <i class="fa-solid fa-desktop text-pharmacy-600 text-sm"></i>
+                                <span class="text-sm">2. Electronic Prescriptions (eRx)</span>
+                            </div>
+                            <p class="text-slate-600 leading-relaxed">Transmitted directly from prescriber EHR/EMR software via encrypted pharmacy networks (e.g., Surescripts). Mandatory in California under Assembly Bill 2789 (effective Jan 1, 2021) for almost all prescriptions with narrow statutory exceptions.</p>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
+                            <div class="font-bold text-slate-900 flex items-center space-x-2">
+                                <i class="fa-solid fa-fax text-pharmacy-600 text-sm"></i>
+                                <span class="text-sm">3. Faxed Prescriptions</span>
+                            </div>
+                            <p class="text-slate-600 leading-relaxed">Must be transmitted directly from the prescriber's official office fax. The faxed document serves as the original hardcopy. Must include date, sender fax number, and office header. Faxed C-II scripts are generally prohibited except for hospice or long-term care facility patients.</p>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
+                            <div class="font-bold text-slate-900 flex items-center space-x-2">
+                                <i class="fa-solid fa-phone text-pharmacy-600 text-sm"></i>
+                                <span class="text-sm">4. Verbal / Telephone Orders</span>
+                            </div>
+                            <p class="text-slate-600 leading-relaxed">Phoned in by the prescriber or authorized agent. <strong class="text-red-700">CA Scope Rule:</strong> Under California Business and Professions Code, ONLY a Licensed Pharmacist or Pharmacist Intern may take NEW verbal prescriptions. Pharmacy Technicians cannot take phone orders for new scripts!</p>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Mandatory Statutory Requirements (CA B&PC § 4040)</h3>
+                    <p>Every valid prescription in California must contain specific statutory elements before processing:</p>
+
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg text-xs space-y-2 text-amber-950">
+                        <div class="font-bold text-sm text-amber-900">California Statutory Elements Checklist:</div>
+                        <ul class="list-disc list-inside space-y-1 text-slate-800">
+                            <li><strong>Patient Full Name & Address:</strong> (Address must be recorded in system profile or on prescription).</li>
+                            <li><strong>Drug Name, Strength, & Quantity:</strong> Exact item, dosage form, and numerical quantity.</li>
+                            <li><strong>Directions for Use (SIG):</strong> Specific instructions describing method, route, dosage, and frequency.</li>
+                            <li><strong>Date of Issuance:</strong> Date signed by prescriber. Non-controlled scripts expire in 1 year; C-II to C-V expire in 6 months.</li>
+                            <li><strong>Prescriber Information:</strong> Name, professional address, phone number, and license classification.</li>
+                            <li><strong>Prescriber Signature:</strong> Physical ink signature for paper, or encrypted digital signature for eRx.</li>
+                            <li><strong>DEA Registration Number:</strong> Mandatory if the prescription is for a Controlled Substance (Schedules II–V).</li>
+                        </ul>
+                    </div>
+
+                    <!-- Interactive Intake Scenario -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-clipboard-question text-yellow-400"></i>
+                            <span>Interactive Case Checkpoint: Intake Scope & Rules</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-4">A medical assistant calling from Dr. Smith's office wishes to dictate a new prescription for Amoxicillin 500mg #30. As a registered California Pharmacy Technician answering the phone, what is your correct legal action?</p>
+                        
+                        <div id="m1-case-options" class="space-y-2 text-xs">
+                            <button onclick="checkM1Case(1)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                A. Transcribe the prescription details onto a verbal pad, read it back to verify, and enter it into the computer queue.
+                            </button>
+                            <button onclick="checkM1Case(2)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                B. Courteously inform the caller that California law requires a Pharmacist or Intern Pharmacist to take new verbal prescriptions, and immediately transfer the call.
+                            </button>
+                            <button onclick="checkM1Case(3)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                C. Instruct the medical assistant to text the prescription details to your mobile phone for documentation.
+                            </button>
+                        </div>
+
+                        <div id="m1-case-feedback" class="mt-4 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('overview')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Overview</button>
+                    <button onclick="markModuleComplete('mod1'); switchTab('mod2')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Data Entry & DAW</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 2 ================= -->
+            <div id="tab-mod2" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 2</span>
+                        <span>•</span>
+                        <span>25 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Data Entry, SIG Decoding & DAW Selection</h2>
+                    <p class="text-slate-600 text-sm mt-1">Translating Latin SIG abbreviations, verifying profiles, and assigning Dispense As Written (DAW) codes.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Patient Profile Linking</h3>
+                    <p>Accurate computer entry begins with linking the order to the correct patient file. Crucial data points include:</p>
+                    <ul class="list-disc list-inside text-xs text-slate-600 space-y-1">
+                        <li><strong>Full Legal Name & Date of Birth (DOB):</strong> Essential for differentiating patients with identical names.</li>
+                        <li><strong>Allergies & Sensitivities:</strong> Document all drug allergies. Record <em>NKDA</em> (No Known Drug Allergies) if none exist.</li>
+                        <li><strong>Physical Address & Telephone Number:</strong> Mandatory for reporting and patient notifications.</li>
+                        <li><strong>Insurance Credentials:</strong> BIN, PCN, Group Number, Member ID, and Person Code.</li>
+                    </ul>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. SIG Code Abbreviation Dictionary</h3>
+                    <p>Technicians must translate Latin medical shorthand into standard English instructions for prescription labels:</p>
+
+                    <div class="overflow-x-auto my-4 border border-slate-200 rounded-lg">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">SIG Abbreviation</th>
+                                    <th class="p-2.5">Latin Term</th>
+                                    <th class="p-2.5">Meaning</th>
+                                    <th class="p-2.5">Patient Label Translation</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700 font-mono">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-pharmacy-700">1 tab po tid pc</td>
+                                    <td class="p-2.5 text-slate-500 font-sans">per os / ter in die / post cibum</td>
+                                    <td class="p-2.5 font-sans">1 tablet by mouth 3 times daily after meals</td>
+                                    <td class="p-2.5 text-slate-900 font-sans">Take 1 tablet by mouth 3 times daily after meals.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-pharmacy-700">1 gtt ou q4h prn</td>
+                                    <td class="p-2.5 text-slate-500 font-sans">oculus uterque / quaque 4 hora</td>
+                                    <td class="p-2.5 font-sans">1 drop in both eyes every 4 hours as needed</td>
+                                    <td class="p-2.5 text-slate-900 font-sans">Instill 1 drop into both eyes every 4 hours as needed.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-pharmacy-700">2 puff qid prn sob</td>
+                                    <td class="p-2.5 text-slate-500 font-sans">quater in die / pro re nata</td>
+                                    <td class="p-2.5 font-sans">2 puffs 4 times daily as needed for shortness of breath</td>
+                                    <td class="p-2.5 text-slate-900 font-sans">Inhale 2 puffs 4 times daily as needed for shortness of breath.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-pharmacy-700">1 tab po hs</td>
+                                    <td class="p-2.5 text-slate-500 font-sans">hora somni</td>
+                                    <td class="p-2.5 font-sans">1 tablet by mouth at bedtime</td>
+                                    <td class="p-2.5 text-slate-900 font-sans">Take 1 tablet by mouth at bedtime.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-pharmacy-700">1 supp pv qhs</td>
+                                    <td class="p-2.5 text-slate-500 font-sans">per vaginam / quaque hora somni</td>
+                                    <td class="p-2.5 font-sans">1 suppository vaginally every night at bedtime</td>
+                                    <td class="p-2.5 text-slate-900 font-sans">Insert 1 suppository vaginally every night at bedtime.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">3. Dispense As Written (DAW) Codes</h3>
+                    <p>NCPDP DAW codes signal to insurance processors why a generic or brand product was selected:</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 my-4 text-xs">
+                        <div class="p-3 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">DAW 0: No Product Selection Indicated</div>
+                            <div class="text-slate-600 mt-0.5">Default setting. Prescriber wrote generic or authorized substitution. Generic is dispensed.</div>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-red-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">DAW 1: Substitution Not Allowed by Prescriber</div>
+                            <div class="text-slate-600 mt-0.5">Prescriber mandated brand name product (e.g., wrote "Do Not Substitute" or marked DAW box).</div>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-blue-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">DAW 2: Patient Requested Brand Product</div>
+                            <div class="text-slate-600 mt-0.5">Prescriber allowed generic, but the patient explicitly requested brand. Patient may incur higher copay.</div>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-amber-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">DAW 4: Generic Out of Stock</div>
+                            <div class="text-slate-600 mt-0.5">Generic is permitted, but pharmacy is temporarily out of generic inventory and dispenses brand product.</div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive DAW Trainer -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-gamepad text-yellow-400"></i>
+                            <span>Interactive DAW Code Challenge</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Scenario:</strong> Dr. Lee prescribes Lipitor 20mg and leaves "Do Not Substitute" unchecked. However, the patient, Mrs. Davis, insists on receiving brand Lipitor because generic atorvastatin upsets her stomach. Which DAW code must be transmitted?</p>
+                        <div class="flex flex-wrap gap-2 text-xs">
+                            <button onclick="checkDAW('0')" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">DAW 0</button>
+                            <button onclick="checkDAW('1')" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">DAW 1</button>
+                            <button onclick="checkDAW('2')" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">DAW 2</button>
+                            <button onclick="checkDAW('4')" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">DAW 4</button>
+                        </div>
+                        <div id="daw-feedback" class="mt-3 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod1')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Intake</button>
+                    <button onclick="markModuleComplete('mod2'); switchTab('mod3')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Insurance Billing</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 3 ================= -->
+            <div id="tab-mod3" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 3</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Insurance Billing & Rejection Resolution</h2>
+                    <p class="text-slate-600 text-sm mt-1">Understanding Pharmacy Benefit Manager (PBM) cards and resolving online claim rejections.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Insurance Credentials</h3>
+                    <p>Entering insurance data requires five specific parameters to route claims electronically:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 my-4 text-xs">
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="font-bold text-pharmacy-700">1. BIN (Bank Identification Number)</div>
+                            <div class="text-slate-600 mt-1">6-digit routing code identifying the PBM processor (e.g., Express Scripts, CVS Caremark).</div>
+                        </div>
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="font-bold text-pharmacy-700">2. PCN (Processor Control Number)</div>
+                            <div class="text-slate-600 mt-1">Secondary alphanumeric code routing claims to specific benefit plan sub-networks.</div>
+                        </div>
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="font-bold text-pharmacy-700">3. Group Number</div>
+                            <div class="text-slate-600 mt-1">Identifies the specific employer or plan sponsor purchasing the health coverage.</div>
+                        </div>
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="font-bold text-pharmacy-700">4. Member ID / Subscriber ID</div>
+                            <div class="text-slate-600 mt-1">Unique alphanumeric code assigned to the primary insured cardholder.</div>
+                        </div>
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div class="font-bold text-pharmacy-700">5. Person Code (Relationship Code)</div>
+                            <div class="text-slate-600 mt-1">Defines individual beneficiary: 01 = Cardholder, 02 = Spouse, 03 = First Child, etc.</div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Resolving Common Claim Rejections</h3>
+
+                    <div class="space-y-3 text-xs my-4">
+                        <div class="p-3.5 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                            <div class="font-bold text-red-900 text-sm">Rejection Code 79: "Refill Too Soon"</div>
+                            <div class="text-slate-700 mt-1"><strong>Cause:</strong> Attempting to fill before 75% to 85% of previous day supply has elapsed.</div>
+                            <div class="text-slate-700 mt-1"><strong>Action:</strong> Check remaining doses with patient. If dosage was changed, obtain updated SIG prescription. If traveling, submit a "Vacation Override" code (SCC 03).</div>
+                        </div>
+
+                        <div class="p-3.5 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg">
+                            <div class="font-bold text-amber-900 text-sm">Rejection Code 75: "Prior Authorization Required"</div>
+                            <div class="text-slate-700 mt-1"><strong>Cause:</strong> Drug is non-formulary, high cost, or requires clinical justification.</div>
+                            <div class="text-slate-700 mt-1"><strong>Action:</strong> Notify prescriber's office via electronic PA system (CoverMyMeds) and inform patient of delay.</div>
+                        </div>
+
+                        <div class="p-3.5 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+                            <div class="font-bold text-blue-900 text-sm">Rejection: "Plan Limitation / Quantity Exceeded"</div>
+                            <div class="text-slate-700 mt-1"><strong>Cause:</strong> Prescribed quantity exceeds maximum allowable units per 30-day period.</div>
+                            <div class="text-slate-700 mt-1"><strong>Action:</strong> Adjust quantity to match plan cap or request PA override.</div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Rejection Simulator -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-triangle-exclamation text-yellow-400"></i>
+                            <span>Interactive Claim Rejection Simulator</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Status:</strong> <span class="bg-red-500 text-white px-2 py-0.5 rounded font-mono font-bold">REJECTED - Code 79</span> "Refill Too Soon. Filled 10 days ago for 30-day supply."</p>
+                        <p class="text-xs text-slate-300 mb-4">The patient explains they are leaving tomorrow morning for an extended 4-week vacation in Europe. What is your correct action?</p>
+
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkRejectionSim(1)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">1. Change day supply in computer to 10 days so claim adjudicates automatically.</button>
+                            <button onclick="checkRejectionSim(2)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">2. Transmit Submission Clarification Code 03 (Vacation Override) or contact PBM for lost/travel override.</button>
+                            <button onclick="checkRejectionSim(3)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">3. Tell patient they cannot receive medication prior to scheduled refill date.</button>
+                        </div>
+
+                        <div id="sim-feedback" class="mt-3 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod2')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Data Entry</button>
+                    <button onclick="markModuleComplete('mod3'); switchTab('mod4')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Controlled Substances</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 4 ================= -->
+            <div id="tab-mod4" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 4</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Controlled Substance Processing & DEA Verification</h2>
+                    <p class="text-slate-600 text-sm mt-1">Schedule II-V legal rules, California security paper specifications, and DEA check-digit calculations.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Controlled Substance Schedule Rules</h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4 text-xs">
+                        <div class="p-4 bg-red-50 border-l-4 border-red-600 rounded-r-lg">
+                            <div class="font-bold text-red-900 text-sm flex items-center justify-between">
+                                <span>Schedule II (C-II)</span>
+                                <span class="bg-red-200 text-red-900 px-2 py-0.5 rounded text-[10px] font-bold">High Abuse Potential</span>
+                            </div>
+                            <ul class="list-disc list-inside space-y-1 mt-2 text-red-950">
+                                <li><strong>Drugs:</strong> Oxycodone, Hydrocodone/APAP (Norco), Adderall, Methylphenidate, Fentanyl.</li>
+                                <li><strong>Refills:</strong> <strong class="underline">ZERO Refills Allowed</strong>.</li>
+                                <li><strong>Validity:</strong> Valid for 6 months from date written in California.</li>
+                                <li><strong>Telephone Scripts:</strong> Emergency situations only (RPh directly). Written security paper copy required within 7 days.</li>
+                            </ul>
+                        </div>
+
+                        <div class="p-4 bg-amber-50 border-l-4 border-amber-600 rounded-r-lg">
+                            <div class="font-bold text-amber-900 text-sm flex items-center justify-between">
+                                <span>Schedule III–V (C-III, C-IV, C-V)</span>
+                                <span class="bg-amber-200 text-amber-900 px-2 py-0.5 rounded text-[10px] font-bold">Moderate-Low Abuse</span>
+                            </div>
+                            <ul class="list-disc list-inside space-y-1 mt-2 text-amber-950">
+                                <li><strong>Drugs:</strong> Tylenol #3 (C-III), Alprazolam/Xanax (C-IV), Tramadol (C-IV), Lyrica (C-V).</li>
+                                <li><strong>Refills:</strong> Maximum of <strong>5 Refills</strong> within 6 months.</li>
+                                <li><strong>Quantity Cap:</strong> Total refills combined cannot exceed a 120-day supply total.</li>
+                                <li><strong>Validity:</strong> Valid for 6 months from issue date.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. DEA Check Digit Formula</h3>
+                    <p>Every DEA registration number consists of 2 letters followed by 7 digits (e.g., <code class="bg-slate-100 text-slate-900 px-1 py-0.5 rounded font-mono font-bold">AB1234567</code>):</p>
+
+                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-lg text-xs space-y-2">
+                        <div><strong>First Letter:</strong> Identifies registrant (<code class="font-mono font-bold">A, B, F, G</code> = Doctors/Pharmacies; <code class="font-mono font-bold">M</code> = Mid-level Practitioners NP/PA).</div>
+                        <div><strong>Second Letter:</strong> First letter of prescriber's last name.</div>
+                        <div class="bg-white p-3 rounded border border-slate-200 font-mono text-slate-800 space-y-1">
+                            <div><strong>Step 1:</strong> (1<sup>st</sup> + 3<sup>rd</sup> + 5<sup>th</sup> digits)</div>
+                            <div><strong>Step 2:</strong> (2<sup>nd</sup> + 4<sup>th</sup> + 6<sup>th</sup> digits) × 2</div>
+                            <div><strong>Step 3:</strong> Sum of Step 1 + Sum of Step 2</div>
+                            <div class="text-teal-700 font-bold">Rule: Last digit of Step 3 total MUST match 7<sup>th</sup> digit of DEA number.</div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive DEA Validator Tool -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-calculator text-yellow-400"></i>
+                            <span>Interactive DEA Check-Digit Validator</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3">Enter a 9-character DEA number to verify mathematical validity:</p>
+
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" id="deaInput" placeholder="e.g. BS1234564" maxlength="9" class="uppercase font-mono text-sm px-3.5 py-2 bg-slate-800 text-white border border-slate-700 rounded-lg focus:outline-none focus:border-teal-400 flex-1">
+                            <button onclick="validateDEANumber()" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-500 font-bold text-xs rounded-lg transition">Validate DEA</button>
+                        </div>
+
+                        <div id="dea-output" class="mt-4 p-3.5 rounded-lg text-xs hidden font-mono"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod3')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Insurance</button>
+                    <button onclick="markModuleComplete('mod4'); switchTab('mod5')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Prescription Math</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 5 ================= -->
+            <div id="tab-mod5" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 5</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Day Supply & Prescription Math Lab</h2>
+                    <p class="text-slate-600 text-sm mt-1">Precision calculations for oral solids, eye/ear drop conversions, and insulin pen/vial units.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Core Day Supply Equation</h3>
+
+                    <div class="p-4 bg-teal-50 border border-teal-200 rounded-lg text-xs text-teal-900 my-4 text-center">
+                        <div class="font-bold text-xs uppercase tracking-wider text-pharmacy-800 mb-1">Day Supply Formula</div>
+                        <div class="text-sm font-semibold">Day Supply = Total Quantity Dispensed ÷ (Doses per Day × Units per Dose)</div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Ophthalmic & Otic Drop Conversions</h3>
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg text-xs space-y-2 text-amber-950">
+                        <div class="font-bold text-sm text-amber-900">Standard Drop Metric: 1 mL = 20 drops (gtts)</div>
+                        <p><strong>Sample Problem:</strong> Timolol 0.5% Ophthalmic Solution. SIG: Instill 1 drop OU bid. Bottle size: 10 mL. Calculate day supply.</p>
+                        <div class="bg-white p-3 rounded border border-amber-200 text-slate-800 space-y-1 font-mono">
+                            <div>Total drops in bottle = 10 mL × 20 drops/mL = 200 drops</div>
+                            <div>Daily usage = 1 drop × 2 eyes × 2 times/day = 4 drops/day</div>
+                            <div class="font-bold text-teal-800">Day Supply = 200 drops ÷ 4 drops/day = 50 Days</div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">3. Insulin Vial & Pen Math Rules</h3>
+                    <ul class="list-disc list-inside text-xs text-slate-600 space-y-1.5">
+                        <li><strong>Concentration:</strong> U-100 insulin = 100 units/mL.</li>
+                        <li><strong>Vials (10 mL):</strong> 10 mL × 100 units/mL = 1,000 units total per vial.</li>
+                        <li><strong>Pens (3 mL each):</strong> 3 mL × 100 units/mL = 300 units per pen (Box of 5 pens = 1,500 units total).</li>
+                        <li><strong>Expiration Rule:</strong> Opened room-temperature insulin vials/pens expire after <strong>28 days</strong> regardless of remaining volume.</li>
+                    </ul>
+
+                    <!-- Interactive Math Practice Lab -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-square-calculator text-yellow-400"></i>
+                            <span>Interactive Math Lab Practice</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Practice Case:</strong> Lantus SoloStar 100 units/mL (Box of 5 pens × 3 mL each). SIG: Inject 35 units SQ once daily at bedtime. What is the calculated day supply for the full box of 5 pens?</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs my-3">
+                            <button onclick="checkMathLab(1)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">A. 30 Days</button>
+                            <button onclick="checkMathLab(2)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">B. 42 Days</button>
+                            <button onclick="checkMathLab(3)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">C. 28 Days</button>
+                        </div>
+
+                        <div id="math-lab-feedback" class="p-3.5 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod4')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Controlled</button>
+                    <button onclick="markModuleComplete('mod5'); switchTab('mod6')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Certification Exam</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 6 (FINAL EXAM) ================= -->
+            <div id="tab-mod6" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 6</span>
+                        <span>•</span>
+                        <span>15 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Day 13 Certification Practice Exam</h2>
+                    <p class="text-slate-600 text-sm mt-1">Evaluate your understanding of intake rules, SIG translation, insurance rejections, DEA validation, and day-supply math.</p>
+                </div>
+
+                <!-- Exam Start Intro -->
+                <div id="exam-start-box" class="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center space-y-4">
+                    <div class="w-16 h-16 bg-pharmacy-100 text-pharmacy-700 rounded-full flex items-center justify-center mx-auto text-2xl font-bold border border-pharmacy-200">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">15-Question Comprehensive Certification Exam</h3>
+                    <p class="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">Passing threshold is 80% (12/15 correct). Detailed rationale provided for every question upon completion.</p>
+                    <button onclick="startFinalExam()" class="px-6 py-3 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg font-bold text-xs transition shadow-md inline-flex items-center space-x-2">
+                        <span>Begin Assessment Exam</span>
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                </div>
+
+                <!-- Exam Container -->
+                <div id="exam-container" class="hidden space-y-6">
+                    <div id="quiz-questions-list" class="space-y-6"></div>
+
+                    <div class="pt-4 border-t border-slate-200 flex justify-end">
+                        <button onclick="submitFinalExam()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-lg transition flex items-center space-x-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Submit Assessment Exam</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Exam Results Box -->
+                <div id="exam-results-box" class="hidden p-6 rounded-xl border text-center space-y-4"></div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod5')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Math Lab</button>
+                    <button onclick="switchTab('overview')" class="px-4 py-2 bg-slate-800 text-white hover:bg-slate-900 rounded-lg text-xs font-semibold">Return to Overview</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Study Notes Modal Window -->
+    <div id="notesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 space-y-4 border border-slate-200">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                <div class="flex items-center space-x-2 text-slate-900 font-bold text-base">
+                    <i class="fa-solid fa-note-sticky text-yellow-500"></i>
+                    <span>Trainee Personal Study Notes</span>
+                </div>
+                <button onclick="toggleNotesModal()" class="text-slate-400 hover:text-slate-600 text-lg p-1">&times;</button>
+            </div>
+            
+            <p class="text-xs text-slate-500">Record customized notes, key formulas, or specific areas to review later. Notes are automatically saved in browser session.</p>
+            
+            <textarea id="studentNotesArea" rows="10" placeholder="Type key learnings, DEA formula steps, or pharmacy notes here..." class="w-full text-xs font-mono p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-pharmacy-500 leading-relaxed custom-scrollbar"></textarea>
+            
+            <div class="flex items-center justify-between pt-2">
+                <div class="flex space-x-2">
+                    <button onclick="copyNotesToClipboard()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition flex items-center space-x-1">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Copy Notes</span>
+                    </button>
+                    <button onclick="clearNotes()" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-xs rounded-lg transition">
+                        Clear
+                    </button>
+                </div>
+                <button onclick="saveNotes(); toggleNotesModal()" class="px-4 py-1.5 bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-bold text-xs rounded-lg transition">
+                    Save & Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let completedModules = new Set();
+        let secondsElapsed = 0;
+        let timerInterval = null;
+
+        // Exam Question Bank
+        const examQuestions = [
+            {
+                q: "1. Under California pharmacy law, which of the following personnel is LEGALLY PERMITTED to accept a new verbal prescription over the telephone from a physician's office?",
+                options: [
+                    "A. Registered Pharmacy Technician",
+                    "B. Pharmacy Technician Trainee",
+                    "C. Licensed Pharmacist or Intern Pharmacist",
+                    "D. Pharmacy Clerk / Cashier"
+                ],
+                correct: 2,
+                rationale: "Under California Business and Professions Code, only a Licensed Pharmacist or Pharmacist Intern under direct supervision may accept new verbal prescription orders."
+            },
+            {
+                q: "2. Under Assembly Bill 2789 in California, prescriptions are generally required to be issued using which transmission channel?",
+                options: [
+                    "A. Hand-written paper pads",
+                    "B. Electronic Prescribing (eRx)",
+                    "C. Telephone oral dictation",
+                    "D. Direct facsimile (fax)"
+                ],
+                correct: 1,
+                rationale: "California AB 2789 mandates electronic prescribing (eRx) for all healthcare practitioners issuing prescriptions, with limited statutory exceptions."
+            },
+            {
+                q: "3. What does NCPDP DAW Code 1 signify during prescription data entry?",
+                options: [
+                    "A. Patient requested brand-name medication",
+                    "B. Generic product is out of stock in pharmacy",
+                    "C. Prescriber mandated brand-name product (Substitution Not Allowed)",
+                    "D. Brand product dispensed as generic price"
+                ],
+                correct: 2,
+                rationale: "DAW 1 indicates that the prescriber explicitly ordered the brand-name drug and prohibited generic substitution."
+            },
+            {
+                q: "4. A patient brings in a prescription written for Lipitor, but requests brand name. Prescriber did not prohibit generic. Which DAW code is used?",
+                options: [
+                    "A. DAW 0",
+                    "B. DAW 1",
+                    "C. DAW 2",
+                    "D. DAW 4"
+                ],
+                correct: 2,
+                rationale: "DAW 2 is assigned when the prescriber allows generic substitution, but the patient specifically requests the brand-name product."
+            },
+            {
+                q: "5. Translate the following SIG: '1 gtt ou q4h prn'.",
+                options: [
+                    "A. Instill 1 drop in left eye every 4 hours as needed",
+                    "B. Instill 1 drop in right eye 4 times daily",
+                    "C. Instill 1 drop into both eyes every 4 hours as needed",
+                    "D. Take 1 tablet by mouth every 4 hours as needed"
+                ],
+                correct: 2,
+                rationale: "'1 gtt' = 1 drop; 'ou' (oculus uterque) = both eyes; 'q4h' = every 4 hours; 'prn' = as needed."
+            },
+            {
+                q: "6. An insurance claim returns rejected with NCPDP Code 79 ('Refill Too Soon'). What does this indicate?",
+                options: [
+                    "A. The drug is not covered on the plan formulary",
+                    "B. Patient is trying to refill before 75%-85% of previous day supply was consumed",
+                    "C. Prescriber DEA number is invalid",
+                    "D. Member ID number was entered incorrectly"
+                ],
+                correct: 1,
+                rationale: "Rejection 79 indicates that the plan detects the patient should still have medication remaining based on previous billing date and day supply."
+            },
+            {
+                q: "7. Which PBM credential identifies the specific employer or plan sponsor group on an insurance card?",
+                options: [
+                    "A. BIN (Bank Identification Number)",
+                    "B. PCN (Processor Control Number)",
+                    "C. Group Number",
+                    "D. Person Code"
+                ],
+                correct: 2,
+                rationale: "The Group Number identifies the specific company, employer, or plan sponsor funding the health benefit."
+            },
+            {
+                q: "8. How many refills are legally permitted on a Schedule II (C-II) controlled substance prescription in California?",
+                options: [
+                    "A. Maximum 5 refills",
+                    "B. Maximum 12 refills",
+                    "C. ZERO refills",
+                    "D. Up to 120-day total supply"
+                ],
+                correct: 2,
+                rationale: "Federal and California state laws strictly prohibit any refills on Schedule II controlled substances."
+            },
+            {
+                q: "9. What is the maximum refill limit for Schedule III and IV controlled substance prescriptions in California?",
+                options: [
+                    "A. No refills allowed",
+                    "B. Maximum 5 refills within 6 months of issue date",
+                    "C. Up to 11 refills within 12 months",
+                    "D. Unlimited refills for 1 year"
+                ],
+                correct: 1,
+                rationale: "C-III through C-V prescriptions may be refilled up to a maximum of 5 times within 6 months of original issuance date."
+            },
+            {
+                q: "10. Validate the DEA number 'BS1234564'. Is the check-digit valid?",
+                options: [
+                    "A. Valid: Step 1 (1+3+5=9) + Step 2 (2+4+6=12 x 2 = 24) = 33. Ends in 3.",
+                    "B. Valid: Step 1 (1+3+5=9) + Step 2 (2+4+6=12 x 2 = 24) = 33 -> 4",
+                    "C. Valid: Step 1 (1+3+5=9) + Step 2 (2+4+6=12 x 2 = 24) = 33. Final digit is 4.",
+                    "D. Invalid: Step 1 (1+3+5=9) + Step 2 (2+4+6=12 x 2 = 24) = 33. Last digit is 3, but 7th digit is 4."
+                ],
+                correct: 3,
+                rationale: "Step 1: 1+3+5 = 9. Step 2: (2+4+6)*2 = 24. Total = 9+24 = 33. The last digit of 33 is 3, which does NOT match the 7th digit (4). Thus, it is INVALID."
+            },
+            {
+                q: "11. Standard liquid drop metric used for calculating day supply in pharmacy is:",
+                options: [
+                    "A. 5 drops = 1 mL",
+                    "B. 10 drops = 1 mL",
+                    "C. 20 drops = 1 mL",
+                    "D. 50 drops = 1 mL"
+                ],
+                correct: 2,
+                rationale: "Standard pharmacy conversion metric for ophthalmic/otic liquids is 20 drops (gtts) per 1 mL."
+            },
+            {
+                q: "12. Calculate day supply: Timolol 0.5% 5 mL bottle. SIG: 1 gtt OU bid.",
+                options: [
+                    "A. 15 Days",
+                    "B. 25 Days",
+                    "C. 50 Days",
+                    "D. 100 Days"
+                ],
+                correct: 1,
+                rationale: "Total drops = 5 mL * 20 gtts/mL = 100 drops. Daily dose = 1 gtt * 2 eyes * 2 times/day = 4 drops/day. Day supply = 100 / 4 = 25 Days."
+            },
+            {
+                q: "13. How many total units of insulin are contained in a 10 mL vial of U-100 Insulin?",
+                options: [
+                    "A. 100 units",
+                    "B. 500 units",
+                    "C. 1,000 units",
+                    "D. 3,000 units"
+                ],
+                correct: 2,
+                rationale: "U-100 insulin contains 100 units per mL. A 10 mL vial contains 10 mL * 100 units/mL = 1,000 units total."
+            },
+            {
+                q: "14. Once an insulin pen or vial is opened and kept at room temperature, what is the standard maximum discard rule?",
+                options: [
+                    "A. 7 days",
+                    "B. 14 days",
+                    "C. 28 days",
+                    "D. 90 days"
+                ],
+                correct: 2,
+                rationale: "Most room-temperature opened insulin products expire 28 days after initial puncture/room temperature exposure."
+            },
+            {
+                q: "15. Which of the following features is REQUIRED on California Security Prescription forms for controlled substances?",
+                options: [
+                    "A. Yellow neon paper background",
+                    "B. 'VOID' watermark visible when copied and thermo-chromic heat-sensitive ink",
+                    "C. Prescriber's social security number",
+                    "D. Holographic metallic sticker"
+                ],
+                correct: 1,
+                rationale: "California law specifies Security Prescription pads must include a 'VOID' watermark, thermo-chromic ink, batch number, and preprinted prescriber data."
+            }
+        ];
+
+        window.onload = function() {
+            startTimer();
+            loadSavedNotes();
+        };
+
+        // Session Timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const hrs = String(Math.floor(secondsElapsed / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((secondsElapsed % 3600) / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                document.getElementById('sessionTimer').innerText = `${hrs}:${mins}:${secs}`;
+            }, 1000);
+        }
+
+        // Student Name Handler
+        function updateStudentName() {
+            const name = document.getElementById('studentNameInput').value;
+            localStorage.setItem('day13_student_name', name);
+        }
+
+        // Navigation Tab Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-teal-50', 'text-teal-900', 'border', 'border-teal-200');
+                btn.classList.add('text-slate-600');
+            });
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-600');
+                activeBtn.classList.add('bg-teal-50', 'text-teal-900', 'border', 'border-teal-200');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Mark Module Complete
+        function markModuleComplete(modId) {
+            completedModules.add(modId);
+            const statusBadge = document.getElementById(`status-${modId}`);
+            if (statusBadge) {
+                statusBadge.innerHTML = '<i class="fa-solid fa-circle-check text-teal-600"></i> Done';
+                statusBadge.classList.remove('bg-slate-100', 'text-slate-500');
+                statusBadge.classList.add('bg-teal-100', 'text-teal-800');
+            }
+
+            const total = 6;
+            const count = completedModules.size;
+            document.getElementById('modulesCompletedCount').innerText = `${count} / ${total} Modules`;
+            const pct = Math.round((count / total) * 100);
+            document.getElementById('overallProgressBar').style.width = `${pct}%`;
+        }
+
+        // Module 1 Case Check
+        function checkM1Case(choice) {
+            const feedback = document.getElementById('m1-case-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/40', 'bg-emerald-900/40', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct!</strong> Under California law (B&PC § 4052), Pharmacy Technicians cannot accept new verbal prescriptions. Only a Pharmacist or Intern Pharmacist may receive telephone script dictations.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Action.</strong> Technicians are strictly prohibited from receiving new verbal orders over the phone in California. The call must be transferred to the Pharmacist immediately.";
+            }
+        }
+
+        // DAW Interactive Check
+        function checkDAW(code) {
+            const feedback = document.getElementById('daw-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (code === '2') {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct! DAW 2</strong> applies because generic substitution was permitted by the doctor, but the patient explicitly requested the brand-name product.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Selection.</strong> Since the prescriber did NOT block generic substitution, but the patient requested brand Lipitor, the correct NCPDP code is <strong>DAW 2</strong>.";
+            }
+        }
+
+        // Rejection Sim Check
+        function checkRejectionSim(choice) {
+            const feedback = document.getElementById('sim-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Procedure!</strong> Submitting Submission Clarification Code 03 (Vacation Override) or contacting the PBM for travel authorization resolves the rejection legally and safely.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect.</strong> Falsifying day supply in the computer system constitutes insurance fraud. Overrides must be submitted using proper PBM clarification codes.";
+            }
+        }
+
+        // Math Lab Practice Check
+        function checkMathLab(choice) {
+            const feedback = document.getElementById('math-lab-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct! 42 Days.</strong> Calculation: 5 pens × 3 mL = 15 mL total volume. 15 mL × 100 units/mL = 1,500 total units. Daily dose = 35 units/day. Day Supply = 1,500 ÷ 35 = 42.85 → 42 full days.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect.</strong> Remember to calculate total units across all 5 pens: 5 pens × 3 mL × 100 units/mL = 1,500 units. Divided by 35 units/day = 42 Days.";
+            }
+        }
+
+        // DEA Check Digit Calculator
+        function validateDEANumber() {
+            const raw = document.getElementById('deaInput').value.trim().toUpperCase();
+            const out = document.getElementById('dea-output');
+            out.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+
+            if (raw.length !== 9) {
+                out.classList.add('bg-amber-900/60', 'text-amber-200', 'border', 'border-amber-700');
+                out.innerHTML = "<strong>Error:</strong> DEA Number must be exactly 9 characters long (2 letters + 7 digits).";
+                return;
+            }
+
+            const l1 = raw.charAt(0);
+            const l2 = raw.charAt(1);
+            const digits = raw.substring(2);
+
+            if (!/^[A-Z]{2}\d{7}$/.test(raw)) {
+                out.classList.add('bg-amber-900/60', 'text-amber-200', 'border', 'border-amber-700');
+                out.innerHTML = "<strong>Format Error:</strong> Must start with 2 letters followed by 7 numeric digits.";
+                return;
+            }
+
+            const d1 = parseInt(digits.charAt(0));
+            const d2 = parseInt(digits.charAt(1));
+            const d3 = parseInt(digits.charAt(2));
+            const d4 = parseInt(digits.charAt(3));
+            const d5 = parseInt(digits.charAt(4));
+            const d6 = parseInt(digits.charAt(5));
+            const d7 = parseInt(digits.charAt(6));
+
+            const step1 = d1 + d3 + d5;
+            const step2 = (d2 + d4 + d6) * 2;
+            const total = step1 + step2;
+            const calculatedCheckDigit = total % 10;
+
+            let resultHtml = `<div><strong>Registrant Letter:</strong> ${l1} | <strong>Prescriber Initial:</strong> ${l2}</div>`;
+            resultHtml += `<div><strong>Step 1</strong> (1st+3rd+5th): ${d1}+${d3}+${d5} = ${step1}</div>`;
+            resultHtml += `<div><strong>Step 2</strong> ((2nd+4th+6th)*2): (${d2}+${d4}+${d6})*2 = ${step2}</div>`;
+            resultHtml += `<div><strong>Step 3</strong> Total: ${step1} + ${step2} = ${total}</div>`;
+            resultHtml += `<div><strong>Calculated Check Digit:</strong> ${calculatedCheckDigit} | <strong>Actual 7th Digit:</strong> ${d7}</div>`;
+
+            if (calculatedCheckDigit === d7) {
+                out.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                out.innerHTML = resultHtml + `<div class="mt-2 text-emerald-300 font-bold"><i class="fa-solid fa-circle-check"></i> VALID DEA NUMBER!</div>`;
+            } else {
+                out.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                out.innerHTML = resultHtml + `<div class="mt-2 text-red-300 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> INVALID DEA NUMBER! Check digit mismatch.</div>`;
+            }
+        }
+
+        // Exam Methods
+        function startFinalExam() {
+            document.getElementById('exam-start-box').classList.add('hidden');
+            document.getElementById('exam-container').classList.remove('hidden');
+
+            const list = document.getElementById('quiz-questions-list');
+            list.innerHTML = '';
+
+            examQuestions.forEach((q, idx) => {
+                const qCard = document.createElement('div');
+                qCard.className = 'p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-3';
+                
+                let optionsHtml = '';
+                q.options.forEach((opt, optIdx) => {
+                    optionsHtml += `
+                        <label class="flex items-center space-x-3 p-2.5 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition text-xs text-slate-800">
+                            <input type="radio" name="exam_q_${idx}" value="${optIdx}" class="text-pharmacy-600 focus:ring-pharmacy-500">
+                            <span>${opt}</span>
+                        </label>
+                    `;
+                });
+
+                qCard.innerHTML = `
+                    <div class="font-bold text-slate-900 text-xs sm:text-sm">${q.q}</div>
+                    <div class="space-y-2">${optionsHtml}</div>
+                    <div id="rationale_q_${idx}" class="hidden p-3 rounded-lg text-xs mt-2"></div>
+                `;
+                list.appendChild(qCard);
+            });
+        }
+
+        function submitFinalExam() {
+            let score = 0;
+            examQuestions.forEach((q, idx) => {
+                const selected = document.querySelector(`input[name="exam_q_${idx}"]:checked`);
+                const rationaleDiv = document.getElementById(`rationale_q_${idx}`);
+                rationaleDiv.classList.remove('hidden', 'bg-red-100', 'bg-emerald-100', 'text-red-900', 'text-emerald-900');
+
+                if (selected && parseInt(selected.value) === q.correct) {
+                    score++;
+                    rationaleDiv.classList.add('bg-emerald-100', 'text-emerald-900', 'border', 'border-emerald-200');
+                    rationaleDiv.innerHTML = `<strong>Correct!</strong> ${q.rationale}`;
+                } else {
+                    rationaleDiv.classList.add('bg-red-100', 'text-red-900', 'border', 'border-red-200');
+                    rationaleDiv.innerHTML = `<strong>Incorrect.</strong> ${q.rationale}`;
+                }
+            });
+
+            const percent = Math.round((score / examQuestions.length) * 100);
+            document.getElementById('overallScoreDisplay').innerText = `${percent}%`;
+            
+            const resultsBox = document.getElementById('exam-results-box');
+            resultsBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'bg-red-50', 'border-red-200');
+
+            if (percent >= 80) {
+                resultsBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+                resultsBox.innerHTML = `
+                    <div class="text-3xl"><i class="fa-solid fa-circle-check text-emerald-600"></i></div>
+                    <h3 class="text-xl font-bold">Congratulations! You Passed Day 13 Exam!</h3>
+                    <p class="text-xs">Your Score: <strong>${score} / ${examQuestions.length} (${percent}%)</strong></p>
+                    <p class="text-xs text-emerald-700">You have demonstrated core competency in California intake laws, SIG translation, insurance claims, and DEA validation.</p>
+                `;
+                markModuleComplete('mod6');
+            } else {
+                resultsBox.classList.add('bg-red-50', 'border-red-300', 'text-red-900');
+                resultsBox.innerHTML = `
+                    <div class="text-3xl"><i class="fa-solid fa-triangle-exclamation text-red-600"></i></div>
+                    <h3 class="text-xl font-bold">Passing Score Not Met</h3>
+                    <p class="text-xs">Your Score: <strong>${score} / ${examQuestions.length} (${percent}%)</strong> (Passing threshold is 80%).</p>
+                    <p class="text-xs text-red-700">Please review the rationale notes above and retake the exam when ready.</p>
+                `;
+            }
+            resultsBox.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Personal Study Notes Modal Logic
+        function toggleNotesModal() {
+            const modal = document.getElementById('notesModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function saveNotes() {
+            const val = document.getElementById('studentNotesArea').value;
+            localStorage.setItem('day13_study_notes', val);
+        }
+
+        function loadSavedNotes() {
+            const saved = localStorage.getItem('day13_study_notes');
+            if (saved) {
+                document.getElementById('studentNotesArea').value = saved;
+            }
+            const savedName = localStorage.getItem('day13_student_name');
+            if (savedName) {
+                document.getElementById('studentNameInput').value = savedName;
+            }
+        }
+
+        function clearNotes() {
+            if (confirm("Are you sure you want to clear your study notes?")) {
+                document.getElementById('studentNotesArea').value = '';
+                localStorage.removeItem('day13_study_notes');
+            }
+        }
+
+        function copyNotesToClipboard() {
+            const notes = document.getElementById('studentNotesArea').value;
+            navigator.clipboard.writeText(notes).then(() => {
+                alert("Notes copied to clipboard!");
+            });
+        }
+    </script>
+</body>
+</html>
