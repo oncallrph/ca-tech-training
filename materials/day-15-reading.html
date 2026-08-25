@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 15: Medication Inventory Management</title>
+    
+    <!-- External Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- MathJax for rendering equations -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        pharmacy: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            main { border: none !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-800 flex flex-col bg-slate-100 antialiased">
+
+    <!-- Top Header & Global Status Bar -->
+    <header class="bg-slate-900 text-white shrink-0 border-b border-slate-800 no-print sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-teal-500 to-emerald-400 p-2 rounded-lg text-slate-900 font-bold text-lg leading-none shadow-md">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-teal-400 font-semibold uppercase tracking-wider">CA Pharmacy Tech Program</div>
+                    <div class="text-base font-bold text-white tracking-tight">Day 15: Medication Inventory Management</div>
+                </div>
+            </div>
+
+            <!-- Timer & Session Stats -->
+            <div class="hidden md:flex items-center space-x-6">
+                <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                    <i class="fa-regular fa-clock text-teal-400"></i>
+                    <span class="text-xs text-slate-300">Time Spent:</span>
+                    <span id="sessionTimer" class="font-mono text-sm font-semibold text-emerald-400">00:00:00</span>
+                </div>
+
+                <div class="text-xs text-slate-400 flex items-center space-x-1">
+                    <i class="fa-solid fa-hourglass-half text-teal-400"></i>
+                    <span>Target: 120 Minutes</span>
+                </div>
+
+                <button onclick="toggleNotesModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-note-sticky text-yellow-400"></i>
+                    <span>Study Notes</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Global Progress Bar -->
+        <div class="w-full bg-slate-800 h-1.5 relative">
+            <div id="overallProgressBar" class="bg-gradient-to-r from-teal-500 to-emerald-400 h-1.5 transition-all duration-500" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <div class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6 overflow-hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full lg:w-80 shrink-0 space-y-4 no-print">
+            <!-- Student Profile Card -->
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center font-bold border border-teal-200 text-lg">
+                        <i class="fa-solid fa-user-nurse"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Trainee Session</div>
+                        <input type="text" id="studentNameInput" value="Pharmacy Student" onchange="updateStudentName()" class="font-semibold text-slate-800 text-sm bg-transparent border-b border-dashed border-slate-300 focus:outline-none focus:border-pharmacy-500 w-full" title="Click to edit name">
+                    </div>
+                </div>
+                <div class="space-y-2 text-xs text-slate-600">
+                    <div class="flex justify-between border-b border-slate-100 pb-1">
+                        <span>Modules Completed:</span>
+                        <span id="modulesCompletedCount" class="font-semibold text-slate-800">0 / 6 Modules</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Final Exam Score:</span>
+                        <span id="overallScoreDisplay" class="font-semibold text-pharmacy-600">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="bg-white rounded-xl shadow-sm border border-slate-200 p-2 space-y-1">
+                <div class="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Day 15 Curriculum</div>
+
+                <button onclick="switchTab('overview')" id="nav-overview" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between transition bg-teal-50 text-teal-900 border border-teal-200">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-compass w-4 text-center text-teal-600"></i>
+                        <span>Course Overview</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-teal-500"></i>
+                </button>
+
+                <button onclick="switchTab('mod1')" id="nav-mod1" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-cart-flatbed w-4 text-center text-slate-400"></i>
+                        <span class="truncate">1. Purchasing & Ordering Workflows</span>
+                    </div>
+                    <span id="status-mod1" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod2')" id="nav-mod2" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-arrow-rotate-left w-4 text-center text-slate-400"></i>
+                        <span class="truncate">2. PAR Levels & Reorder Math</span>
+                    </div>
+                    <span id="status-mod2" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">25m</span>
+                </button>
+
+                <button onclick="switchTab('mod3')" id="nav-mod3" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-vault w-4 text-center text-slate-400"></i>
+                        <span class="truncate">3. Controlled Perpetual Inventory</span>
+                    </div>
+                    <span id="status-mod3" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod4')" id="nav-mod4" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-triangle-exclamation w-4 text-center text-slate-400"></i>
+                        <span class="truncate">4. Expiration & Drug Recalls</span>
+                    </div>
+                    <span id="status-mod4" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod5')" id="nav-mod5" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-calculator w-4 text-center text-slate-400"></i>
+                        <span class="truncate">5. Inventory Metrics & Math Lab</span>
+                    </div>
+                    <span id="status-mod5" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod6')" id="nav-mod6" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-clipboard-check w-4 text-center text-slate-400"></i>
+                        <span class="truncate">6. Certification Practice Exam</span>
+                    </div>
+                    <span id="status-mod6" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">15m</span>
+                </button>
+            </nav>
+
+            <!-- Quick Reference Drawer Box -->
+            <div class="bg-slate-900 text-slate-200 rounded-xl p-4 shadow-sm text-xs space-y-2.5 border border-slate-800">
+                <div class="font-bold text-teal-400 uppercase tracking-wider flex items-center justify-between">
+                    <span><i class="fa-solid fa-lightbulb text-yellow-400 mr-1.5"></i> Key Inventory Rules</span>
+                </div>
+                <ul class="space-y-2 text-slate-300">
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Stock Rotation:</strong> Always follow <strong>FEFO</strong> (First Expired, First Out) when placing stock on shelves.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Reorder Point:</strong> \(ROP = (d \times L) + SS\) (Demand \(\times\) Lead Time + Safety Stock).</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Class I Recall:</strong> Dangerous products that cause serious health consequences or death.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">DEA Biennial Inventory:</strong> Mandatory physical count of all controlled substances every 2 years.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Reverse Distributor:</strong> Licensed entity used to handle destroyed or expired controlled drugs (Form 41).</span>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Workspace -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto custom-scrollbar min-h-[650px]">
+
+            <!-- ================= TAB: OVERVIEW ================= -->
+            <div id="tab-overview" class="tab-content space-y-6">
+                <div>
+                    <div class="inline-flex items-center space-x-2 bg-teal-100 text-teal-900 text-xs font-semibold px-3 py-1 rounded-full mb-3 border border-teal-200">
+                        <i class="fa-solid fa-graduation-cap text-teal-700"></i>
+                        <span>California Pharmacy Technician Curriculum</span>
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Day 15: Medication Inventory Management</h1>
+                    <p class="mt-2 text-slate-600 text-sm leading-relaxed">
+                        Welcome to Day 15 of your training program. Efficient inventory management balances product availability with financial control while maintaining regulatory compliance. Today's curriculum covers purchasing systems, periodic and perpetual inventory counts, reorder math (PAR & ROP), controlled substance auditing, drug recall execution, expired medication processing, and core financial performance metrics.
+                    </p>
+                </div>
+
+                <!-- Detailed Syllabus Breakdown -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-pharmacy-600"></i>
+                        <span>2-Hour Training Schedule & Core Modules</span>
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 1 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Purchasing & Ordering Workflows</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Wholesalers, Prime Vendor Agreements, automated ordering systems, DEA Form 222 / CSOS C-II procurement, and receiving verification.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 2 (25 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">PAR Levels & Reorder Math</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Periodic vs. continuous systems, PAR levels, minimum/maximum thresholds, Reorder Point (ROP) formulas, and FEFO stock rotation.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 3 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Controlled Perpetual Inventory</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Schedule II perpetual logs, DEA biennial inventory mandates, physical counts, discrepancy auditing, and Form 106 theft reporting.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 4 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Expiration & Drug Recalls</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">FDA Recall Classes (Class I, II, III), rapid removal protocols, reverse distributor processing (DEA Form 41), and short-dated stock management.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 5 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Inventory Metrics & Math Lab</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Inventory Turnover Ratio (ITR), Days Inventory Outstanding (DIO), shrinkage calculations, and stock valuation math.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 6 (15 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Certification Practice Exam</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">15-question comprehensive assessment testing real-world inventory scenarios, legal compliance, and inventory math calculations.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Objectives -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Core Learning Competencies</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Procurement & Receiving:</strong> Process daily electronic orders, verify invoices against purchase orders, and inspect incoming stock.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Reorder Math & Rotation:</strong> Calculate Reorder Points (\(ROP\)) and enforce FEFO (First Expired, First Out) stock placement.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Controlled Inventory Compliance:</strong> Maintain C-II perpetual logs, execute DEA biennial physical inventories, and document destruction.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Recalls & Financial Metrics:</strong> Execute Class I–III drug recalls and calculate Inventory Turnover Ratio (\(ITR\)) and Days Inventory Outstanding (\(DIO\)).</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Start Action Callout -->
+                <div class="p-4 bg-slate-900 rounded-xl text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <div class="font-bold text-sm">Ready to begin Module 1?</div>
+                        <div class="text-xs text-slate-300">Start with Purchasing & Ordering Workflows.</div>
+                    </div>
+                    <button onclick="switchTab('mod1')" class="px-5 py-2.5 bg-pharmacy-500 hover:bg-pharmacy-600 text-white rounded-lg font-bold text-xs transition flex items-center space-x-2 shrink-0">
+                        <span>Start Module 1</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 1 ================= -->
+            <div id="tab-mod1" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 1</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Medication Purchasing & Ordering Workflows</h2>
+                    <p class="text-slate-600 text-sm mt-1">Primary wholesalers, Prime Vendor Agreements, automated ordering systems, and controlled drug ordering.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Procurement Channels in Pharmacy</h3>
+                    <p>Pharmacies source pharmaceuticals through three primary channels depending on cost structures, urgency, and manufacturer contracts:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4 text-xs">
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">Primary Wholesaler</div>
+                            <div class="text-slate-600 mt-1">Full-line distributors (e.g., AmerisourceBergen, Cardinal Health, McKesson). Provide next-day delivery for 90%+ of pharmacy stock under a <strong>Prime Vendor Agreement (PVA)</strong>.</div>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-blue-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">Direct Manufacturer</div>
+                            <div class="text-slate-600 mt-1">Purchasing directly from drug makers. Used primarily for specialized biologics, high-cost specialty drugs, or during major wholesaler stock shortages.</div>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-amber-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">Secondary Wholesaler</div>
+                            <div class="text-slate-600 mt-1">Used to source hard-to-find medications or back-ordered items not currently stocked by the primary wholesaler.</div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Schedule II Controlled Substance Procurement</h3>
+                    <p>Ordering Schedule II (C-II) controlled substances requires strict federal tracking under DEA oversight:</p>
+
+                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-lg text-xs space-y-3 my-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="p-3 bg-white rounded border border-slate-200">
+                                <span class="font-bold text-teal-800 text-sm block mb-1"><i class="fa-solid fa-file-invoice mr-1.5"></i> DEA Form 222 (Paper)</span>
+                                <span class="text-slate-600 leading-relaxed">Traditional paper ordering form. Must be signed by the DEA registrant or individual holding Power of Attorney (POA). Copy 1 & 2 sent to supplier; pharmacy retains Copy 3. (Note: Single-sheet form standard adopted in 2019/2021).</span>
+                            </div>
+                            <div class="p-3 bg-white rounded border border-slate-200">
+                                <span class="font-bold text-blue-800 text-sm block mb-1"><i class="fa-solid fa-laptop-code mr-1.5"></i> CSOS (Electronic)</span>
+                                <span class="text-slate-600 leading-relaxed">Controlled Substance Ordering System. Digital equivalent utilizing PKI digital certificates. Allows ordering of C-II through C-V without paper forms, higher line-item limits, and faster delivery.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">3. Receiving & Invoice Verification Steps</h3>
+                    <p>Upon receiving stock shipments, technicians must execute a strict 4-step intake protocol:</p>
+                    <ol class="list-decimal list-inside space-y-2 text-xs text-slate-700 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                        <li><strong>Box Count & Physical Inspection:</strong> Verify tote/box counts match the courier manifest and inspect containers for damage or broken seals.</li>
+                        <li><strong>Invoice Verification:</strong> Cross-check delivered drug name, NDC, strength, quantity, and lot number against the wholesale invoice packing slip.</li>
+                        <li><strong>Refrigerated & Cold-Chain Check:</strong> Immediately unpack cold-chain items ($2^\circ\text{C}$ to $8^\circ\text{C}$ / $36^\circ\text{F}$ to $46^\circ\text{F}$) and verify temperature indicators before general stock.</li>
+                        <li><strong>Stock Entry & Sign-Off:</strong> Update electronic perpetual inventory systems and file signed invoices (C-II invoices must be kept SEPARATELY from non-controlled invoices for 2 years in CA).</li>
+                    </ol>
+
+                    <!-- Interactive Module 1 Checkpoint -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-truck-ramp-box text-yellow-400"></i>
+                            <span>Interactive Case Checkpoint: C-II Receiving Protocol</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-2"><strong>Scenario:</strong> A shipment tote arrives containing regular maintenance drugs along with a order of Oxycodone $10\text{ mg}$ tablets (Schedule II) ordered via paper DEA Form 222. What must the technician record on the pharmacy's Copy 3 (or purchaser copy) of Form 222 upon receipt?</p>
+                        
+                        <div class="space-y-2 text-xs mt-3">
+                            <button onclick="checkM1Case(1)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                A. Only the signature of the courier delivery driver.
+                            </button>
+                            <button onclick="checkM1Case(2)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                B. The actual number of commercial containers received and the date received for each line item.
+                            </button>
+                            <button onclick="checkM1Case(3)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                C. The retail selling price of each Oxycodone bottle.
+                            </button>
+                        </div>
+
+                        <div id="m1-case-feedback" class="mt-4 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('overview')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Overview</button>
+                    <button onclick="markModuleComplete('mod1'); switchTab('mod2')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: PAR Levels & Reorder Math</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 2 ================= -->
+            <div id="tab-mod2" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 2</span>
+                        <span>•</span>
+                        <span>25 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">PAR Levels, Reorder Point (ROP) Math & Stock Rotation</h2>
+                    <p class="text-slate-600 text-sm mt-1">Periodic vs. continuous systems, safety stock calculations, and FEFO/FIFO stock management rules.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. PAR Levels & Minimum / Maximum Systems</h3>
+                    <p>Pharmacies maintain preset inventory thresholds to prevent stockouts while preventing over-investment of cash in excess inventory:</p>
+
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg text-xs space-y-2 text-amber-950">
+                        <div class="font-bold text-sm text-amber-900">Core Inventory Terms:</div>
+                        <ul class="list-disc list-inside space-y-1 text-slate-800">
+                            <li><strong>PAR Level (Periodic Automatic Replacement):</strong> The target baseline quantity of a medication that should be on hand at any given time.</li>
+                            <li><strong>Minimum Level (Reorder Point):</strong> The lowest threshold quantity stock can reach before an automated reorder is triggered.</li>
+                            <li><strong>Maximum Level:</strong> The ceiling limit of stock to prevent overstocking and shelf clutter.</li>
+                            <li><strong>Safety Stock (\(SS\)):</strong> Buffer inventory held to protect against unexpected demand spikes or vendor delivery delays.</li>
+                        </ul>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Reorder Point (ROP) Formula & Calculation</h3>
+                    <p>The <strong>Reorder Point (\(ROP\))</strong> represents the stock level that triggers a purchase order. It accounts for daily usage rate, wholesaler lead time, and safety stock buffer:</p>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl my-4 text-xs space-y-3">
+                        <div class="font-mono text-center text-emerald-400 text-sm font-bold bg-slate-800 p-3 rounded border border-slate-700">
+                            \(ROP = (d \times L) + SS\)
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-slate-300 text-[11px] font-mono">
+                            <div>\(d\) = Average Daily Usage (units/day)</div>
+                            <div>\(L\) = Lead Time (days to arrive)</div>
+                            <div>\(SS\) = Safety Stock (buffer units)</div>
+                        </div>
+                        <div class="border-t border-slate-800 pt-2 text-slate-300">
+                            <strong>Sample Math Walkthrough:</strong>
+                            <p class="mt-1">A pharmacy dispenses an average of $20$ bottles of Atorvastatin $20\text{ mg}$ daily ($d = 20$). The wholesaler takes $2$ days to deliver ($L = 2$). The pharmacy maintains a safety stock buffer of $10$ bottles ($SS = 10$).</p>
+                            <div class="font-mono text-teal-300 mt-1">
+                                \(ROP = (20 \times 2) + 10 = 40 + 10 = 50\text{ bottles}\)
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-1"><em>Conclusion: When stock drops to 50 bottles, an order MUST be placed!</em></p>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">3. Stock Placement & FEFO Rule</h3>
+                    <p>Proper shelf management prevents medication expiration losses. Pharmacies strictly enforce the <strong>FEFO (First Expired, First Out)</strong> protocol:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4 text-xs">
+                        <div class="p-4 bg-teal-50 border border-teal-200 rounded-lg space-y-1.5">
+                            <div class="font-bold text-teal-900 flex items-center space-x-2">
+                                <i class="fa-solid fa-hourglass-start text-pharmacy-600 text-sm"></i>
+                                <span class="text-sm">FEFO (First Expired, First Out)</span>
+                            </div>
+                            <p class="text-slate-700 leading-relaxed">Newly received shipments are placed <strong>BEHIND</strong> existing stock on the shelf. The bottles expiring earliest are pulled forward to be dispensed first.</p>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
+                            <div class="font-bold text-slate-900 flex items-center space-x-2">
+                                <i class="fa-solid fa-boxes-packing text-slate-600 text-sm"></i>
+                                <span class="text-sm">FIFO vs. FEFO Distinctions</span>
+                            </div>
+                            <p class="text-slate-600 leading-relaxed">While FIFO (First In, First Out) uses arrival date, FEFO specifically prioritizes <strong>expiration date</strong>—critical when newer shipments arrive with shorter expiration dates than existing stock!</p>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Module 2 Quiz -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-calculator text-yellow-400"></i>
+                            <span>Interactive ROP Calculation Challenge</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Practice Problem:</strong> A community pharmacy dispenses $15$ boxes of Insulin Glargine daily. Supplier lead time is $3$ days, and safety stock policy requires maintaining $15$ boxes buffer. What is the Reorder Point (\(ROP\))?</p>
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod2Quiz(1)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">A. 45 boxes</button>
+                            <button onclick="checkMod2Quiz(2)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">B. 60 boxes</button>
+                            <button onclick="checkMod2Quiz(3)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">C. 75 boxes</button>
+                        </div>
+                        <div id="mod2-quiz-feedback" class="mt-3 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod1')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Purchasing</button>
+                    <button onclick="markModuleComplete('mod2'); switchTab('mod3')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Controlled Perpetual Inventory</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 3 ================= -->
+            <div id="tab-mod3" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 3</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Controlled Substance Perpetual Inventory & Auditing</h2>
+                    <p class="text-slate-600 text-sm mt-1">Schedule II perpetual logs, mandatory DEA biennial counts, discrepancy tracking, and DEA Form 106 theft reporting.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Schedule II Perpetual Inventory Maintenance</h3>
+                    <p>Federal and California regulations require continuous, real-time tracking of all Schedule II (C-II) controlled substances in a <strong>Perpetual Inventory Log</strong>:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 my-4 text-xs">
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">1. Exact Count Requirement</div>
+                            <div class="text-slate-600 mt-1">C-II medications require an <strong>exact physical count</strong> for all inventory reconciliation, perpetual log balances, and biennial counts.</div>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">2. C-III through C-V Rule</div>
+                            <div class="text-slate-600 mt-1">Estimated counts are allowed for C-III to C-V containers holding under 1,000 units. Containers holding over 1,000 units require an exact count if opened.</div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-2">
+                        <div class="font-bold text-slate-900 text-sm">Perpetual Log Formula:</div>
+                        <div class="font-mono text-teal-800 bg-white p-2.5 rounded border border-slate-200">
+                            \(\text{Ending Balance} = \text{Beginning Balance} + \text{Received Stock} - \text{Dispensed Quantity}\)
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. DEA Biennial Physical Inventory Mandate</h3>
+                    <p>Every licensed pharmacy must conduct a physical inventory of all controlled substances at least <strong>every two years (biennially)</strong>:</p>
+
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg text-xs space-y-2 text-red-950">
+                        <div class="font-bold text-sm text-red-900">Key DEA Biennial Inventory Rules:</div>
+                        <ul class="list-disc list-inside space-y-1 text-slate-800">
+                            <li><strong>Timing:</strong> Must be taken either at opening of business (AOB) or close of business (COB) on the inventory date.</li>
+                            <li><strong>Record Retention:</strong> Inventory records must be kept at the licensed location for at least <strong>2 years</strong> (California law requires C-II records stored separately).</li>
+                            <li><strong>Newly Scheduled Drugs:</strong> When a non-controlled drug is reclassified as a controlled substance, a physical inventory of that drug must be conducted on the <em>effective date of scheduling</em>.</li>
+                        </ul>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">3. Theft & Significant Loss Reporting (DEA Form 106)</h3>
+                    <p>When a theft or significant loss of controlled substances occurs, specific reporting timelines must be met under federal and state law:</p>
+
+                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-lg text-xs space-y-2">
+                        <div class="flex items-center space-x-2 font-bold text-slate-900 text-sm">
+                            <i class="fa-solid fa-shield-cat text-pharmacy-600"></i>
+                            <span>DEA Form 106 Protocol</span>
+                        </div>
+                        <p class="text-slate-600">The pharmacy must notify the DEA Field Division in writing within <strong>1 business day</strong> of discovery of theft or significant loss. <strong>DEA Form 106</strong> must be completed and submitted detailing the lost drugs, NDCs, and circumstances.</p>
+                    </div>
+
+                    <!-- Interactive Consultation Simulator -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-vault text-yellow-400"></i>
+                            <span>Interactive Perpetual Inventory Audit</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Audit Scenario:</strong> The perpetual log for Methylphenidate $10\text{ mg}$ shows an expected balance of $140$ tablets. During a physical audit count, you find only $100$ tablets. What is the immediate required step?</p>
+
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod3Scenario(1)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">1. Change the log entry to 100 without alerting anyone to avoid paperwork.</button>
+                            <button onclick="checkMod3Scenario(2)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">2. Immediately recount physical stock, review recent dispensing logs and invoices, and report the discrepancy to the Pharmacist-in-Charge (PIC).</button>
+                            <button onclick="checkMod3Scenario(3)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">3. Order 40 additional tablets to replace the missing inventory before the end of the day.</button>
+                        </div>
+
+                        <div id="mod3-feedback" class="mt-3 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod2')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: PAR Levels</button>
+                    <button onclick="markModuleComplete('mod3'); switchTab('mod4')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Recalls & Expiration</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 4 ================= -->
+            <div id="tab-mod4" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 4</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Drug Recalls, Expiration Management & Reverse Distributors</h2>
+                    <p class="text-slate-600 text-sm mt-1">FDA recall classification levels, short-dated pull schedules, reverse distributors, and DEA Form 41 destruction rules.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. FDA Drug Recall Classifications</h3>
+                    <p>When a drug product is defective or poses a health risk, the FDA issues or oversees a drug recall classified into three severity tiers:</p>
+
+                    <div class="overflow-x-auto my-4 border border-slate-200 rounded-lg">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">Recall Class</th>
+                                    <th class="p-2.5">Health Hazard Severity</th>
+                                    <th class="p-2.5">Example Real-World Scenario</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-red-700">Class I Recall</td>
+                                    <td class="p-2.5">High probability of <strong>serious adverse health consequences or death</strong>.</td>
+                                    <td class="p-2.5">Label mix-up involving potent concentrated heart medication or bacterial contamination in sterile IV fluids.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-amber-700">Class II Recall</td>
+                                    <td class="p-2.5">May cause <strong>temporary or medically reversible</strong> adverse health consequences.</td>
+                                    <td class="p-2.5">Sub-potent oral tablet dosage or minor impurity within allowable safety margins.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-blue-700">Class III Recall</td>
+                                    <td class="p-2.5">Unlikely to cause adverse health consequences.</td>
+                                    <td class="p-2.5">Packaging typo, container color variation, or minor labeling formatting error.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Expiration Date Interpretation & Pull Schedules</h3>
+                    <p>Medication expiration dates represent the last date the manufacturer guarantees full potency and safety:</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4 text-xs">
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                            <div class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-calendar-xmark text-pharmacy-600"></i>
+                                <span>Month/Year Rule</span>
+                            </div>
+                            <p class="text-slate-600 leading-relaxed">If an expiration date lists only month and year (e.g., <code class="font-mono text-teal-700 bg-teal-50 px-1 py-0.5 rounded">08/2026</code>), the medication is valid through the <strong>LAST DAY of that month</strong> (August 31, 2026).</p>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                            <div class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-boxes-packing text-pharmacy-600"></i>
+                                <span>Short-Dated Pull Schedule</span>
+                            </div>
+                            <p class="text-slate-600 leading-relaxed">Pharmacies routinely pull medications expiring within <strong>3 to 6 months</strong> from active inventory and move them to a designated "Short-Date Quarantine" shelf for return or disposal.</p>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">3. Disposal via Reverse Distributors (DEA Form 41)</h3>
+                    <p>Pharmacies cannot simply throw away or flush expired medications. They utilize specialized DEA-registered entities:</p>
+                    <div class="bg-teal-50 border border-teal-200 p-4 rounded-lg text-xs space-y-2 text-teal-950">
+                        <div class="font-bold text-sm text-teal-900">Reverse Distributor Process:</div>
+                        <ul class="list-disc list-inside space-y-1 text-slate-800">
+                            <li><strong>Controlled Substance Destruction:</strong> Controlled drugs are transferred to a reverse distributor, who processes <strong>DEA Form 41</strong> (Registrant Record of Controlled Substances Destroyed).</li>
+                            <li><strong>C-II Transfer:</strong> Transferring Schedule II drugs to a reverse distributor requires issuing a <strong>DEA Form 222</strong> from the reverse distributor to the pharmacy.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Interactive Recall Tool -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-triangle-exclamation text-yellow-400"></i>
+                            <span>Interactive Recall Execution Check</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Urgent Recall Alert:</strong> The FDA issues a <strong>Class I Recall</strong> for a specific lot of Fentanyl transdermal patches due to a gel leak defect. What is the immediate action required by the pharmacy technician?</p>
+
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod4Recall(1)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">A. Leave the patches on the active shelf until the next monthly routine count.</button>
+                            <button onclick="checkMod4Recall(2)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">B. Immediately quarantine the affected lot from active inventory, stop dispensing, and notify the PIC for return handling.</button>
+                            <button onclick="checkMod4Recall(3)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">C. Relabel the boxes with an auxiliary warning sticker and continue dispensing.</button>
+                        </div>
+
+                        <div id="mod4-recall-feedback" class="mt-4 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod3')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Controlled</button>
+                    <button onclick="markModuleComplete('mod4'); switchTab('mod5')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Inventory Metrics & Math Lab</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 5 ================= -->
+            <div id="tab-mod5" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 5</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Inventory Performance Metrics & Financial Math Lab</h2>
+                    <p class="text-slate-600 text-sm mt-1">Inventory Turnover Ratio (ITR), Days Inventory Outstanding (DIO), shrinkage, and gross margin calculations.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Inventory Turnover Ratio (ITR)</h3>
+                    <p>The <strong>Inventory Turnover Ratio (\(ITR\))</strong> measures how many times a pharmacy sells and replaces its stock over a given period (usually 1 year). Higher turnover indicates efficient stock management without tied-up capital:</p>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl my-4 text-xs space-y-3">
+                        <div class="font-mono text-center text-teal-300 text-sm font-bold bg-slate-800 p-3 rounded border border-slate-700">
+                            \(ITR = \frac{\text{Cost of Goods Sold (COGS)}}{\text{Average Inventory Value}}\)
+                        </div>
+                        <div class="text-slate-300 text-[11px] leading-relaxed">
+                            <strong>Sample Problem:</strong> A retail pharmacy has annual Cost of Goods Sold (\(COGS\)) of $\$2,400,000$ and maintains an Average Inventory Value of $\$200,000$.
+                            <div class="font-mono text-emerald-400 mt-1">
+                                \(ITR = \frac{\$2,400,000}{\$200,000} = 12\text{ turns per year}\)
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Days Inventory Outstanding (DIO)</h3>
+                    <p><strong>Days Inventory Outstanding (\(DIO\))</strong> measures the average number of days it takes to turn inventory into sales:</p>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl my-4 text-xs space-y-3">
+                        <div class="font-mono text-center text-teal-300 text-sm font-bold bg-slate-800 p-3 rounded border border-slate-700">
+                            \(DIO = \frac{365}{ITR}\)
+                        </div>
+                        <div class="text-slate-300 text-[11px] leading-relaxed">
+                            <strong>Using the previous ITR of 12 turns/year:</strong>
+                            <div class="font-mono text-emerald-400 mt-1">
+                                \(DIO = \frac{365}{12} \approx 30.4\text{ days}\)
+                            </div>
+                            <p class="text-slate-400 mt-1"><em>Interpretation: On average, stock sits on the shelf for approximately 30 days before being sold.</em></p>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">3. Inventory Shrinkage Calculations</h3>
+                    <p><strong>Shrinkage</strong> represents lost inventory value due to theft, damage, expiration, or administrative errors:</p>
+
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg text-xs space-y-2 text-amber-950">
+                        <div class="font-bold text-sm text-amber-900">Shrinkage Formula:</div>
+                        <div class="font-mono bg-white p-2.5 rounded border border-amber-200 text-slate-800">
+                            \(\text{Shrinkage} = \text{Book Inventory Value} - \text{Physical Inventory Value}\)
+                        </div>
+                    </div>
+
+                    <!-- Interactive Math Practice Lab -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-calculator text-yellow-400"></i>
+                            <span>Interactive Inventory Math Practice</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Math Lab Case:</strong> A pharmacy's annual Cost of Goods Sold (\(COGS\)) is $\$1,800,000$, and its Average Inventory Value is $\$150,000$. Calculate the Inventory Turnover Ratio (\(ITR\)) and Days Inventory Outstanding (\(DIO\)).</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs my-3">
+                            <button onclick="checkMathLab(1)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">A. ITR = 10, DIO = 36.5 days</button>
+                            <button onclick="checkMathLab(2)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">B. ITR = 12, DIO = 30.4 days</button>
+                            <button onclick="checkMathLab(3)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">C. ITR = 15, DIO = 24.3 days</button>
+                        </div>
+
+                        <div id="math-lab-feedback" class="p-3.5 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod4')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Recalls</button>
+                    <button onclick="markModuleComplete('mod5'); switchTab('mod6')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Certification Exam</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 6 (FINAL EXAM) ================= -->
+            <div id="tab-mod6" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 6</span>
+                        <span>•</span>
+                        <span>15 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Day 15 Certification Practice Exam</h2>
+                    <p class="text-slate-600 text-sm mt-1">Evaluate your understanding of purchasing workflows, PAR levels, ROP math, controlled inventory auditing, recall execution, and financial inventory metrics.</p>
+                </div>
+
+                <!-- Exam Start Intro -->
+                <div id="exam-start-box" class="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center space-y-4">
+                    <div class="w-16 h-16 bg-pharmacy-100 text-pharmacy-700 rounded-full flex items-center justify-center mx-auto text-2xl font-bold border border-pharmacy-200">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">15-Question Comprehensive Certification Exam</h3>
+                    <p class="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">Passing threshold is 80% (12/15 correct). Detailed rationale provided for every question upon completion.</p>
+                    <button onclick="startFinalExam()" class="px-6 py-3 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg font-bold text-xs transition shadow-md inline-flex items-center space-x-2">
+                        <span>Begin Assessment Exam</span>
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                </div>
+
+                <!-- Exam Container -->
+                <div id="exam-container" class="hidden space-y-6">
+                    <div id="quiz-questions-list" class="space-y-6"></div>
+
+                    <div class="pt-4 border-t border-slate-200 flex justify-end">
+                        <button onclick="submitFinalExam()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-lg transition flex items-center space-x-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Submit Assessment Exam</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Exam Results Box -->
+                <div id="exam-results-box" class="hidden p-6 rounded-xl border text-center space-y-4"></div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod5')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Inventory Metrics</button>
+                    <button onclick="switchTab('overview')" class="px-4 py-2 bg-slate-800 text-white hover:bg-slate-900 rounded-lg text-xs font-semibold">Return to Overview</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Study Notes Modal Window -->
+    <div id="notesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 space-y-4 border border-slate-200">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                <div class="flex items-center space-x-2 text-slate-900 font-bold text-base">
+                    <i class="fa-solid fa-note-sticky text-yellow-500"></i>
+                    <span>Trainee Personal Study Notes</span>
+                </div>
+                <button onclick="toggleNotesModal()" class="text-slate-400 hover:text-slate-600 text-lg p-1">&times;</button>
+            </div>
+            
+            <p class="text-xs text-slate-500">Record customized notes, key formulas, or specific areas to review later. Notes are automatically saved in browser session.</p>
+            
+            <textarea id="studentNotesArea" rows="10" placeholder="Type key learnings, FEFO rules, or pharmacy inventory notes here..." class="w-full text-xs font-mono p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-pharmacy-500 leading-relaxed custom-scrollbar"></textarea>
+            
+            <div id="modalToast" class="hidden p-2 bg-emerald-100 text-emerald-800 text-xs rounded border border-emerald-300 font-semibold"></div>
+
+            <div class="flex items-center justify-between pt-2">
+                <div class="flex space-x-2">
+                    <button onclick="copyNotesToClipboard()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition flex items-center space-x-1">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Copy Notes</span>
+                    </button>
+                    <button onclick="clearNotes()" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-xs rounded-lg transition">
+                        Clear Notes
+                    </button>
+                </div>
+                <button onclick="saveNotes(); toggleNotesModal()" class="px-4 py-1.5 bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-bold text-xs rounded-lg transition">
+                    Save & Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let completedModules = new Set();
+        let secondsElapsed = 0;
+        let timerInterval = null;
+
+        // Exam Question Bank for Day 15: Inventory Management
+        const examQuestions = [
+            {
+                q: "1. What stock rotation principle mandates placing newly received drug containers BEHIND existing stock so that products expiring soonest are dispensed first?",
+                options: [
+                    "A. LIFO (Last In, First Out)",
+                    "B. FEFO (First Expired, First Out)",
+                    "C. JIT (Just-In-Time)",
+                    "D. PAR (Periodic Automatic Replacement)"
+                ],
+                correct: 1,
+                rationale: "FEFO (First Expired, First Out) ensures that medications with the nearest expiration date are placed at the front of the shelf to be dispensed prior to newer stock."
+            },
+            {
+                q: "2. Under DEA regulations, how frequently must a pharmacy perform a complete physical inventory count of all controlled substances?",
+                options: [
+                    "A. Monthly",
+                    "B. Annually",
+                    "C. At least every 2 years (Biennially)",
+                    "D. Every 5 years"
+                ],
+                correct: 2,
+                rationale: "Federal law requires a complete physical inventory of all controlled substances (Schedules II–V) at least biennially (every two years)."
+            },
+            {
+                q: "3. Which FDA recall classification represents the MOST severe hazard, involving a strong likelihood of serious health consequences or death?",
+                options: [
+                    "A. Class I Recall",
+                    "B. Class II Recall",
+                    "C. Class III Recall",
+                    "D. Market Withdrawal"
+                ],
+                correct: 0,
+                rationale: "Class I recalls are the most urgent and dangerous, involving products that cause serious health consequences or death."
+            },
+            {
+                q: "4. A pharmacy dispenses 20 bottles of Lisinopril daily ($d = 20$). Supplier lead time is 2 days ($L = 2$), and safety stock buffer is 10 bottles ($SS = 10$). What is the Reorder Point ($ROP$)?",
+                options: [
+                    "A. 30 bottles",
+                    "B. 40 bottles",
+                    "C. 50 bottles",
+                    "D. 60 bottles"
+                ],
+                correct: 2,
+                rationale: "Formula: $ROP = (d \\times L) + SS = (20 \\times 2) + 10 = 40 + 10 = 50$ bottles."
+            },
+            {
+                q: "5. What DEA form must be submitted within 1 business day following the discovery of a significant loss or theft of controlled substances?",
+                options: [
+                    "A. DEA Form 222",
+                    "B. DEA Form 41",
+                    "C. DEA Form 106",
+                    "D. DEA Form 224"
+                ],
+                correct: 2,
+                rationale: "DEA Form 106 is specifically designated for reporting theft or significant loss of controlled substances."
+            },
+            {
+                q: "6. When transferring expired Schedule II controlled substances to a reverse distributor for destruction, what document must the reverse distributor issue to the pharmacy?",
+                options: [
+                    "A. DEA Form 222",
+                    "B. DEA Form 106",
+                    "C. OSHA Safety Data Sheet",
+                    "D. EPA Hazardous Waste Manifest"
+                ],
+                correct: 0,
+                rationale: "Transfer of C-II medications to a reverse distributor requires an official DEA Form 222 issued by the reverse distributor to the pharmacy."
+            },
+            {
+                q: "7. A stock bottle displays an expiration date of '09/2027'. On what specific date does this medication officially expire?",
+                options: [
+                    "A. September 1, 2027",
+                    "B. September 15, 2027",
+                    "C. September 30, 2027",
+                    "D. October 1, 2027"
+                ],
+                correct: 2,
+                rationale: "When an expiration date includes only a month and year, the drug remains valid through the final calendar day of that month (September 30, 2027)."
+            },
+            {
+                q: "8. Calculate the Inventory Turnover Ratio ($ITR$) for a pharmacy with annual Cost of Goods Sold ($COGS$) of $1,800,000 and Average Inventory Value of $150,000.",
+                options: [
+                    "A. 8 turns/year",
+                    "B. 10 turns/year",
+                    "C. 12 turns/year",
+                    "D. 15 turns/year"
+                ],
+                correct: 2,
+                rationale: "Formula: $ITR = \\frac{COGS}{\\text{Average Inventory}} = \\frac{\\$1,800,000}{\\$150,000} = 12$ turns per year."
+            },
+            {
+                q: "9. What electronic system allows authorized pharmacies to order Schedule II controlled substances digitally without paper forms?",
+                options: [
+                    "A. CURES 2.0",
+                    "B. CSOS (Controlled Substance Ordering System)",
+                    "C. HIPAA EDI 835",
+                    "D. FDA MedWatch"
+                ],
+                correct: 1,
+                rationale: "CSOS allows digital procurement of C-II through C-V controlled substances using digital certificates under DEA rules."
+            },
+            {
+                q: "10. What term describes the discrepancy between the financial book value of inventory and the actual physical stock value due to theft, damage, or errors?",
+                options: [
+                    "A. Gross Margin",
+                    "B. Shrinkage",
+                    "C. Safety Stock",
+                    "D. Carrying Cost"
+                ],
+                correct: 1,
+                rationale: "Shrinkage represents lost inventory value caused by theft, expiry, spillage, or accounting discrepancies."
+            },
+            {
+                q: "11. If a pharmacy has an Inventory Turnover Ratio ($ITR$) of 12, what is the Days Inventory Outstanding ($DIO$)?",
+                options: [
+                    "A. 12.0 Days",
+                    "B. 24.3 Days",
+                    "C. 30.4 Days",
+                    "D. 45.0 Days"
+                ],
+                correct: 2,
+                rationale: "Formula: $DIO = \\frac{365}{ITR} = \\frac{365}{12} \\approx 30.41$ days."
+            },
+            {
+                q: "12. Under California law, how long must records of C-II drug purchases, invoices, and perpetual inventory logs be retained on file?",
+                options: [
+                    "A. 1 Year",
+                    "B. 2 Years",
+                    "C. 5 Years",
+                    "D. 7 Years"
+                ],
+                correct: 1,
+                rationale: "California pharmacy law requires all prescription, invoice, and inventory records for controlled substances to be maintained for at least 2 years."
+            },
+            {
+                q: "13. What is the primary purpose of maintaining a Safety Stock ($SS$) buffer for high-volume medications?",
+                options: [
+                    "A. To maximize tax deductions at year-end",
+                    "B. To protect against unexpected spikes in patient demand or wholesaler delivery delays",
+                    "C. To replace ruined medications",
+                    "D. To fill up empty shelf space"
+                ],
+                correct: 1,
+                rationale: "Safety stock serves as a buffer against stockouts during unexpected surges in usage or vendor supply chain delays."
+            },
+            {
+                q: "14. Which document is utilized by a reverse distributor to record the official destruction of controlled substances?",
+                options: [
+                    "A. DEA Form 41",
+                    "B. DEA Form 106",
+                    "C. DEA Form 222",
+                    "D. FDA Form 3500"
+                ],
+                correct: 0,
+                rationale: "DEA Form 41 (Registrant Record of Controlled Substances Destroyed) is used to document the destruction of controlled drugs."
+            },
+            {
+                q: "15. A pharmacy orders 90% of its total inventory through a single primary wholesale contract to receive volume discounts. What is this agreement called?",
+                options: [
+                    "A. Sole Source Patent License",
+                    "B. Prime Vendor Agreement (PVA)",
+                    "C. Group Purchasing Organization (GPO)",
+                    "D. Direct Purchase License"
+                ],
+                correct: 1,
+                rationale: "A Prime Vendor Agreement (PVA) is a contract between a pharmacy and a primary wholesaler guaranteeing committed purchasing volume in exchange for competitive pricing."
+            }
+        ];
+
+        window.onload = function() {
+            startTimer();
+            loadSavedNotes();
+        };
+
+        // Session Timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const hrs = String(Math.floor(secondsElapsed / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((secondsElapsed % 3600) / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                document.getElementById('sessionTimer').innerText = `${hrs}:${mins}:${secs}`;
+            }, 1000);
+        }
+
+        // Student Name Handler
+        function updateStudentName() {
+            const name = document.getElementById('studentNameInput').value;
+            localStorage.setItem('day15_student_name', name);
+        }
+
+        // Navigation Tab Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-teal-50', 'text-teal-900', 'border', 'border-teal-200');
+                btn.classList.add('text-slate-600');
+            });
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-600');
+                activeBtn.classList.add('bg-teal-50', 'text-teal-900', 'border', 'border-teal-200');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Mark Module Complete
+        function markModuleComplete(modId) {
+            completedModules.add(modId);
+            const statusBadge = document.getElementById(`status-${modId}`);
+            if (statusBadge) {
+                statusBadge.innerHTML = '<i class="fa-solid fa-circle-check text-teal-600"></i> Done';
+                statusBadge.classList.remove('bg-slate-100', 'text-slate-500');
+                statusBadge.classList.add('bg-teal-100', 'text-teal-800');
+            }
+
+            const total = 6;
+            const count = completedModules.size;
+            document.getElementById('modulesCompletedCount').innerText = `${count} / ${total} Modules`;
+            const pct = Math.round((count / total) * 100);
+            document.getElementById('overallProgressBar').style.width = `${pct}%`;
+        }
+
+        // Module 1 Case Check
+        function checkM1Case(choice) {
+            const feedback = document.getElementById('m1-case-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Protocol!</strong> On Copy 3 of DEA Form 222 (or the purchaser receipt copy), the receiver must record the actual number of commercial containers received and the date received for each line item.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Action.</strong> Federal regulations require recording the number of packages received and the date received directly on Copy 3 of Form 222 upon intake.";
+            }
+        }
+
+        // Module 2 Packaging/ROP Quiz
+        function checkMod2Quiz(choice) {
+            const feedback = document.getElementById('mod2-quiz-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct ROP Calculation!</strong> $ROP = (d \\times L) + SS = (15 \\times 3) + 15 = 45 + 15 = 60$ boxes. When inventory reaches 60 boxes, an order must be generated.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Calculation.</strong> Multiply daily usage by lead time, then add safety stock: $(15 \\times 3) + 15 = 45 + 15 = 60$ boxes.";
+            }
+        }
+
+        // Module 3 Audit Scenario
+        function checkMod3Scenario(choice) {
+            const feedback = document.getElementById('mod3-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Protocol!</strong> Discrepancies in C-II perpetual inventory must be immediately verified with a recount, cross-checked against filled orders/invoices, and reported to the Pharmacist-in-Charge (PIC) to investigate potential loss or diversion.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Violation of Federal Law.</strong> Falsifying perpetual records or hiding C-II inventory discrepancies is illegal. Immediately recount and report discrepancies to the PIC.";
+            }
+        }
+
+        // Module 4 Recall Tool
+        function checkMod4Recall(choice) {
+            const feedback = document.getElementById('mod4-recall-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Action!</strong> Class I recalls involve life-threatening risks. Stock must be immediately quarantined from active inventory to ensure zero further dispensing to patients.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Procedure.</strong> Class I recalls require immediate quarantine and removal from dispensing areas to protect patient safety.";
+            }
+        }
+
+        // Module 5 Math Lab Practice
+        function checkMathLab(choice) {
+            const feedback = document.getElementById('math-lab-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Financial Metrics!</strong> $ITR = \\frac{\\$1,800,000}{\\$150,000} = 12$ turns/year. $DIO = \\frac{365}{12} = 30.41$ days.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Calculation.</strong> Divide COGS by average inventory for ITR: $\\$1,800,000 \\div \\$150,000 = 12$. Then $DIO = 365 \\div 12 = 30.4$ days.";
+            }
+        }
+
+        // Exam Methods
+        function startFinalExam() {
+            document.getElementById('exam-start-box').classList.add('hidden');
+            document.getElementById('exam-container').classList.remove('hidden');
+
+            const list = document.getElementById('quiz-questions-list');
+            list.innerHTML = '';
+
+            examQuestions.forEach((q, idx) => {
+                const qCard = document.createElement('div');
+                qCard.className = 'p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-3';
+                
+                let optionsHtml = '';
+                q.options.forEach((opt, optIdx) => {
+                    optionsHtml += `
+                        <label class="flex items-center space-x-3 p-2.5 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition text-xs text-slate-800">
+                            <input type="radio" name="exam_q_${idx}" value="${optIdx}" class="text-pharmacy-600 focus:ring-pharmacy-500">
+                            <span>${opt}</span>
+                        </label>
+                    `;
+                });
+
+                qCard.innerHTML = `
+                    <div class="font-bold text-slate-900 text-xs sm:text-sm">${q.q}</div>
+                    <div class="space-y-2">${optionsHtml}</div>
+                    <div id="rationale_q_${idx}" class="hidden p-3 rounded-lg text-xs mt-2"></div>
+                `;
+                list.appendChild(qCard);
+            });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function submitFinalExam() {
+            let score = 0;
+            examQuestions.forEach((q, idx) => {
+                const selected = document.querySelector(`input[name="exam_q_${idx}"]:checked`);
+                const rationaleDiv = document.getElementById(`rationale_q_${idx}`);
+                rationaleDiv.classList.remove('hidden', 'bg-red-100', 'bg-emerald-100', 'text-red-900', 'text-emerald-900');
+
+                if (selected && parseInt(selected.value) === q.correct) {
+                    score++;
+                    rationaleDiv.classList.add('bg-emerald-100', 'text-emerald-900', 'border', 'border-emerald-200');
+                    rationaleDiv.innerHTML = `<strong>Correct!</strong> ${q.rationale}`;
+                } else {
+                    rationaleDiv.classList.add('bg-red-100', 'text-red-900', 'border', 'border-red-200');
+                    rationaleDiv.innerHTML = `<strong>Incorrect.</strong> ${q.rationale}`;
+                }
+            });
+
+            const percent = Math.round((score / examQuestions.length) * 100);
+            document.getElementById('overallScoreDisplay').innerText = `${percent}%`;
+            
+            const resultsBox = document.getElementById('exam-results-box');
+            resultsBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'bg-red-50', 'border-red-200');
+
+            if (percent >= 80) {
+                resultsBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+                resultsBox.innerHTML = `
+                    <div class="text-3xl"><i class="fa-solid fa-circle-check text-emerald-600"></i></div>
+                    <h3 class="text-xl font-bold">Congratulations! You Passed Day 15 Exam!</h3>
+                    <p class="text-xs">Your Score: <strong>${score} / ${examQuestions.length} (${percent}%)</strong></p>
+                    <p class="text-xs text-emerald-700">You have demonstrated core competency in medication purchasing workflows, PAR & ROP math, controlled perpetual inventory audits, recall execution, and financial inventory metrics.</p>
+                `;
+                markModuleComplete('mod6');
+            } else {
+                resultsBox.classList.add('bg-red-50', 'border-red-300', 'text-red-900');
+                resultsBox.innerHTML = `
+                    <div class="text-3xl"><i class="fa-solid fa-triangle-exclamation text-red-600"></i></div>
+                    <h3 class="text-xl font-bold">Passing Score Not Met</h3>
+                    <p class="text-xs">Your Score: <strong>${score} / ${examQuestions.length} (${percent}%)</strong> (Passing threshold is 80%).</p>
+                    <p class="text-xs text-red-700">Please review the rationale notes above and retake the exam when ready.</p>
+                `;
+            }
+            resultsBox.scrollIntoView({ behavior: 'smooth' });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Personal Study Notes Modal Logic
+        function toggleNotesModal() {
+            const modal = document.getElementById('notesModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('modalToast');
+            toast.innerText = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        function saveNotes() {
+            const val = document.getElementById('studentNotesArea').value;
+            localStorage.setItem('day15_study_notes', val);
+            showToast("Notes saved successfully!");
+        }
+
+        function loadSavedNotes() {
+            const saved = localStorage.getItem('day15_study_notes');
+            if (saved) {
+                document.getElementById('studentNotesArea').value = saved;
+            }
+            const savedName = localStorage.getItem('day15_student_name');
+            if (savedName) {
+                document.getElementById('studentNameInput').value = savedName;
+            }
+        }
+
+        function clearNotes() {
+            document.getElementById('studentNotesArea').value = '';
+            localStorage.removeItem('day15_study_notes');
+            showToast("Study notes cleared.");
+        }
+
+        function copyNotesToClipboard() {
+            const notes = document.getElementById('studentNotesArea').value;
+            navigator.clipboard.writeText(notes).then(() => {
+                showToast("Notes copied to clipboard!");
+            }).catch(() => {
+                showToast("Failed to copy notes.");
+            });
+        }
+    </script>
+</body>
+</html>

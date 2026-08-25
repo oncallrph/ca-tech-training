@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 16: Medication Information and Drug Classifications</title>
+    
+    <!-- External Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- MathJax for rendering equations -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        pharmacy: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            main { border: none !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-800 flex flex-col bg-slate-100 antialiased">
+
+    <!-- Top Header & Global Status Bar -->
+    <header class="bg-slate-900 text-white shrink-0 border-b border-slate-800 no-print sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-teal-500 to-emerald-400 p-2 rounded-lg text-slate-900 font-bold text-lg leading-none shadow-md">
+                    <i class="fa-solid fa-book-medical"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-teal-400 font-semibold uppercase tracking-wider">CA Pharmacy Tech Program</div>
+                    <div class="text-base font-bold text-white tracking-tight">Day 16: Medication Information & Drug Classifications</div>
+                </div>
+            </div>
+
+            <!-- Timer & Session Stats -->
+            <div class="hidden md:flex items-center space-x-6">
+                <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                    <i class="fa-regular fa-clock text-teal-400"></i>
+                    <span class="text-xs text-slate-300">Time Spent:</span>
+                    <span id="sessionTimer" class="font-mono text-sm font-semibold text-emerald-400">00:00:00</span>
+                </div>
+
+                <div class="text-xs text-slate-400 flex items-center space-x-1">
+                    <i class="fa-solid fa-hourglass-half text-teal-400"></i>
+                    <span>Target: 120 Minutes</span>
+                </div>
+
+                <button onclick="toggleNotesModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-note-sticky text-yellow-400"></i>
+                    <span>Study Notes</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Global Progress Bar -->
+        <div class="w-full bg-slate-800 h-1.5 relative">
+            <div id="overallProgressBar" class="bg-gradient-to-r from-teal-500 to-emerald-400 h-1.5 transition-all duration-500" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <div class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6 overflow-hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full lg:w-80 shrink-0 space-y-4 no-print">
+            <!-- Student Profile Card -->
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center font-bold border border-teal-200 text-lg">
+                        <i class="fa-solid fa-user-nurse"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Trainee Session</div>
+                        <input type="text" id="studentNameInput" value="Pharmacy Student" onchange="updateStudentName()" class="font-semibold text-slate-800 text-sm bg-transparent border-b border-dashed border-slate-300 focus:outline-none focus:border-pharmacy-500 w-full" title="Click to edit name">
+                    </div>
+                </div>
+                <div class="space-y-2 text-xs text-slate-600">
+                    <div class="flex justify-between border-b border-slate-100 pb-1">
+                        <span>Modules Completed:</span>
+                        <span id="modulesCompletedCount" class="font-semibold text-slate-800">0 / 6 Modules</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Final Exam Score:</span>
+                        <span id="overallScoreDisplay" class="font-semibold text-pharmacy-600">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="bg-white rounded-xl shadow-sm border border-slate-200 p-2 space-y-1">
+                <div class="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Day 16 Curriculum</div>
+
+                <button onclick="switchTab('overview')" id="nav-overview" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between transition bg-teal-50 text-teal-900 border border-teal-200">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-compass w-4 text-center text-teal-600"></i>
+                        <span>Course Overview</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-teal-500"></i>
+                </button>
+
+                <button onclick="switchTab('mod1')" id="nav-mod1" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-book-atlas w-4 text-center text-slate-400"></i>
+                        <span class="truncate">1. Drug Information Resources</span>
+                    </div>
+                    <span id="status-mod1" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod2')" id="nav-mod2" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-pills w-4 text-center text-slate-400"></i>
+                        <span class="truncate">2. Therapeutic Drug Classes</span>
+                    </div>
+                    <span id="status-mod2" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">25m</span>
+                </button>
+
+                <button onclick="switchTab('mod3')" id="nav-mod3" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-[#000] fa-font w-4 text-center text-slate-400"></i>
+                        <span class="truncate">3. Drug Stems & LASA Safety</span>
+                    </div>
+                    <span id="status-mod3" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod4')" id="nav-mod4" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-triangle-exclamation w-4 text-center text-slate-400"></i>
+                        <span class="truncate">4. Drug Interactions & Safety</span>
+                    </div>
+                    <span id="status-mod4" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod5')" id="nav-mod5" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-calculator w-4 text-center text-slate-400"></i>
+                        <span class="truncate">5. Clinical Math & Case Lab</span>
+                    </div>
+                    <span id="status-mod5" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod6')" id="nav-mod6" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-clipboard-check w-4 text-center text-slate-400"></i>
+                        <span class="truncate">6. Certification Practice Exam</span>
+                    </div>
+                    <span id="status-mod6" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">15m</span>
+                </button>
+            </nav>
+
+            <!-- Quick Reference Drawer Box -->
+            <div class="bg-slate-900 text-slate-200 rounded-xl p-4 shadow-sm text-xs space-y-2.5 border border-slate-800">
+                <div class="font-bold text-teal-400 uppercase tracking-wider flex items-center justify-between">
+                    <span><i class="fa-solid fa-lightbulb text-yellow-400 mr-1.5"></i> Reference Cheat Sheet</span>
+                </div>
+                <ul class="space-y-2 text-slate-300">
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Orange Book:</strong> Approved drug products with therapeutic equivalence evaluations (FDA).</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Purple Book:</strong> Licensed biological products and biosimilar/interchangeable evaluations.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Red Book:</strong> Pricing resource (AWP - Average Wholesale Price) and NDC listings.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Yellow Book:</strong> CDC Health Information for International Travel.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Pink Book:</strong> CDC Epidemiology and Prevention of Vaccine-Preventable Diseases.</span>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Workspace -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto custom-scrollbar min-h-[650px]">
+
+            <!-- ================= TAB: OVERVIEW ================= -->
+            <div id="tab-overview" class="tab-content space-y-6">
+                <div>
+                    <div class="inline-flex items-center space-x-2 bg-teal-100 text-teal-900 text-xs font-semibold px-3 py-1 rounded-full mb-3 border border-teal-200">
+                        <i class="fa-solid fa-graduation-cap text-teal-700"></i>
+                        <span>California Pharmacy Technician Curriculum</span>
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Day 16: Medication Information & Drug Classifications</h1>
+                    <p class="mt-2 text-slate-600 text-sm leading-relaxed">
+                        Welcome to Day 16 of your pharmacy technician training program. Mastery of drug classifications, reference literature, generic-brand stems, and drug interaction awareness is essential for preventing medication errors and assisting pharmacists safely. Today's curriculum covers drug reference hierarchies (FDA books), major organ system drug classes, generic drug naming conventions (USAN stems), Tall Man lettering, boxed warnings, narrow therapeutic index (NTI) drugs, and clinical calculations.
+                    </p>
+                </div>
+
+                <!-- Detailed Syllabus Breakdown -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-pharmacy-600"></i>
+                        <span>2-Hour Training Schedule & Core Modules</span>
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 1 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Drug Information Resources</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Primary, secondary, and tertiary references. FDA Official Books (Orange, Purple, Red, Yellow, Pink, Green Books) and digital clinical tools.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 2 (25 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Therapeutic Drug Classes</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Major body system classifications: Cardiovascular, CNS, Respiratory, Endocrine, Anti-infective, Gastrointestinal, and Musculoskeletal.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 3 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Drug Stems & LASA Safety</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">USAN generic drug suffixes (-pril, -sartan, -olol, -statin, -prazole, -cillin), ISMP Look-Alike Sound-Alike (LASA) lists, and Tall Man Lettering.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 4 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Drug Interactions & Safety</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Drug-drug, drug-food, and drug-disease interactions, FDA Boxed/Black Box Warnings, Narrow Therapeutic Index (NTI) drugs, and pregnancy categories.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 5 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Clinical Math & Case Lab</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Renal function estimations (Cockcroft-Gault formula), Body Surface Area (BSA) calculations, dosage screening, and clinical case resolution.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 6 (15 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Certification Practice Exam</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">15-question comprehensive assessment testing drug reference identification, stem recognition, interaction screening, and clinical math.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Objectives -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Core Learning Competencies</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Resource Navigation:</strong> Identify appropriate tertiary resources (Orange Book, Red Book, Lexicomp, Facts & Comparisons) for clinical inquiries.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Therapeutic Classification:</strong> Categorize top 200 drugs by therapeutic class, mechanism, and primary indication.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Safety & Name Stems:</strong> Recognize USAN generic drug stems and apply ISMP Tall Man Lettering to prevent LASA errors.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Interactions & Clinical Math:</strong> Identify severe drug interactions, NTI drugs, and execute renal clearance (Cockcroft-Gault) and BSA calculations.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Start Action Callout -->
+                <div class="p-4 bg-slate-900 rounded-xl text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <div class="font-bold text-sm">Ready to begin Module 1?</div>
+                        <div class="text-xs text-slate-300">Start with Drug Information Resources & Reference Books.</div>
+                    </div>
+                    <button onclick="switchTab('mod1')" class="px-5 py-2.5 bg-pharmacy-500 hover:bg-pharmacy-600 text-white rounded-lg font-bold text-xs transition flex items-center space-x-2 shrink-0">
+                        <span>Start Module 1</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 1 ================= -->
+            <div id="tab-mod1" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 1</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Drug Information Resources & Literature Hierarchy</h2>
+                    <p class="text-slate-600 text-sm mt-1">Primary, secondary, and tertiary literature, official FDA reference books, and digital clinical decision tools.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Hierarchy of Information Sources</h3>
+                    <p>Drug information is categorized into three levels based on novelty, detail, and level of peer review:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4 text-xs">
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">Primary Literature</div>
+                            <div class="text-slate-600 mt-1">Original research studies, clinical trials, and journal articles (e.g., NEJM, JAMA). Most current, but requires critical appraisal.</div>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-blue-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">Secondary Literature</div>
+                            <div class="text-slate-600 mt-1">Indexing and abstracting services that guide users to primary literature (e.g., PubMed/MEDLINE, Embase, Cochrane Library).</div>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-amber-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">Tertiary Literature</div>
+                            <div class="text-slate-600 mt-1">Summarized, consolidated information from primary sources (e.g., textbooks, drug compendia, Facts & Comparisons, Micromedex). First-line resource for daily practice.</div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. FDA & Standard Reference Books (Color Books)</h3>
+                    <p>Standard pharmacy reference books provide specialized drug data mandated by law and clinical practice guidelines:</p>
+
+                    <div class="overflow-x-auto my-4 border border-slate-200 rounded-lg">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">Reference Guide</th>
+                                    <th class="p-2.5">Primary Focus & Contents</th>
+                                    <th class="p-2.5">Common Clinical Use Case</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-orange-600"><i class="fa-solid fa-book mr-1.5"></i> FDA Orange Book</td>
+                                    <td class="p-2.5">Approved Drug Products with <strong>Therapeutic Equivalence</strong> Evaluations.</td>
+                                    <td class="p-2.5">Verifying if generic drug A is AB-rated to substitute for brand drug B.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-purple-700"><i class="fa-solid fa-book mr-1.5"></i> FDA Purple Book</td>
+                                    <td class="p-2.5">Lists licensed <strong>Biological Products</strong> and biosimilar/interchangeable evaluations.</td>
+                                    <td class="p-2.5">Determining if a biosimilar insulin or mAb can be interchanged.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-red-600"><i class="fa-solid fa-book mr-1.5"></i> Red Book</td>
+                                    <td class="p-2.5">Drug pricing information, Average Wholesale Price (AWP), NDCs, and packaging.</td>
+                                    <td class="p-2.5">Financial reimbursement and drug cost comparisons.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-yellow-600"><i class="fa-solid fa-book mr-1.5"></i> CDC Yellow Book</td>
+                                    <td class="p-2.5">Health Information for International Travel (vaccines, prophylaxis).</td>
+                                    <td class="p-2.5">Checking malaria prophylaxis rules for travel to endemic countries.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-pink-600"><i class="fa-solid fa-book mr-1.5"></i> CDC Pink Book</td>
+                                    <td class="p-2.5">Epidemiology and Prevention of Vaccine-Preventable Diseases.</td>
+                                    <td class="p-2.5">Reviewing childhood and adult immunization schedules.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-emerald-700"><i class="fa-solid fa-book mr-1.5"></i> FDA Green Book</td>
+                                    <td class="p-2.5">Approved Animal Drug Products (veterinary pharmaceuticals).</td>
+                                    <td class="p-2.5">Checking animal dosage forms and safety regulations.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">3. Clinical Compendia & Specialty References</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 my-4 text-xs">
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                            <span class="font-bold text-slate-900 block mb-1">Trissel's Handbook on Injectable Drugs</span>
+                            <span class="text-slate-600">The gold standard reference for IV drug compatibility, stability, physical dilution, and Y-site co-infusion data.</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                            <span class="font-bold text-slate-900 block mb-1">Briggs' Drugs in Pregnancy & Lactation</span>
+                            <span class="text-slate-600">Comprehensive reference for placental transfer, fetal risk factors, and breastmilk excretion data.</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                            <span class="font-bold text-slate-900 block mb-1">Goodman & Gilman's</span>
+                            <span class="text-slate-600">The Pharmacological Basis of Therapeutics—indepth clinical pharmacology and receptor mechanism text.</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                            <span class="font-bold text-slate-900 block mb-1">Sanford Guide</span>
+                            <span class="text-slate-600">Gold standard guidance for antimicrobial therapy, dosing, organism susceptibility, and antibiotic selection.</span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Module 1 Checkpoint -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-circle-question text-yellow-400"></i>
+                            <span>Interactive Case Checkpoint: Reference Selection</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-2"><strong>Scenario:</strong> A pharmacist asks you to verify whether a newly released generic Metoprolol Succinate ER tablet is rated as therapeutically equivalent to Toprol-XL so that it can be substituted at prescription entry. Which FDA reference resource must you consult?</p>
+                        
+                        <div class="space-y-2 text-xs mt-3">
+                            <button onclick="checkM1Case(1)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                A. The CDC Yellow Book
+                            </button>
+                            <button onclick="checkM1Case(2)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                B. The FDA Orange Book (Approved Drug Products with Therapeutic Equivalence)
+                            </button>
+                            <button onclick="checkM1Case(3)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                C. The FDA Purple Book
+                            </button>
+                        </div>
+
+                        <div id="m1-case-feedback" class="mt-4 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('overview')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Overview</button>
+                    <button onclick="markModuleComplete('mod1'); switchTab('mod2')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Therapeutic Drug Classes</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 2 ================= -->
+            <div id="tab-mod2" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 2</span>
+                        <span>•</span>
+                        <span>25 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Major Therapeutic Drug Classifications</h2>
+                    <p class="text-slate-600 text-sm mt-1">Organ-system classification, mechanisms of action, and high-frequency top-200 medications.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Cardiovascular System Agents</h3>
+                    <p>Cardiovascular drugs manage hypertension, heart failure, dyslipidemia, and thromboembolic disorders:</p>
+
+                    <div class="overflow-x-auto my-4 border border-slate-200 rounded-lg">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">Sub-Class</th>
+                                    <th class="p-2.5">Mechanism of Action</th>
+                                    <th class="p-2.5">Generic (Brand) Examples</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-semibold text-slate-900">ACE Inhibitors</td>
+                                    <td class="p-2.5">Blocks conversion of Angiotensin I to II; reduces vasoconstriction.</td>
+                                    <td class="p-2.5">Lisinopril (Zestril), Enalapril (Vasotec)</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-semibold text-slate-900">ARBs</td>
+                                    <td class="p-2.5">Blocks Angiotensin II Type-1 receptors directly.</td>
+                                    <td class="p-2.5">Losartan (Cozaar), Valsartan (Diovan)</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-semibold text-slate-900">Beta Blockers</td>
+                                    <td class="p-2.5">Blocks $\beta_1$ adrenergic cardiac receptors; reduces heart rate & BP.</td>
+                                    <td class="p-2.5">Metoprolol (Lopressor/Toprol-XL), Atenolol (Tenormin)</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-semibold text-slate-900">Statins (HMG-CoA Reductase Inhibitors)</td>
+                                    <td class="p-2.5">Inhibits rate-limiting hepatic cholesterol synthesis enzyme.</td>
+                                    <td class="p-2.5">Atorvastatin (Lipitor), Simvastatin (Zocor), Rosuvastatin (Crestor)</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-semibold text-slate-900">Anticoagulants</td>
+                                    <td class="p-2.5">Inhibits clotting cascade factors (Xa or IIa) to prevent thrombi.</td>
+                                    <td class="p-2.5">Warfarin (Coumadin), Apixaban (Eliquis), Rivaroxaban (Xarelto)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Central Nervous System (CNS) & Metabolic Agents</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4 text-xs">
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                            <div class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-brain text-pharmacy-600"></i>
+                                <span>CNS & Psychotropic Agents</span>
+                            </div>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600">
+                                <li><strong>SSRIs:</strong> Sertraline (Zoloft), Fluoxetine (Prozac), Escitalopram (Lexapro) – increases synaptic serotonin.</li>
+                                <li><strong>Benzodiazepines (C-IV):</strong> Alprazolam (Xanax), Lorazepam (Ativan) – enhances GABA activity.</li>
+                                <li><strong>Anticonvulsants:</strong> Gabapentin (Neurontin), Levetiracetam (Keppra).</li>
+                            </ul>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                            <div class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-notes-medical text-pharmacy-600"></i>
+                                <span>Endocrine & Diabetes Agents</span>
+                            </div>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600">
+                                <li><strong>Biguanides:</strong> Metformin (Glucophage) – decreases hepatic glucose production.</li>
+                                <li><strong>Insulins:</strong> Rapid-acting (Lispro/Humalog), Long-acting (Glargine/Lantus).</li>
+                                <li><strong>Thyroid Hormone:</strong> Levothyroxine (Synthroid) – synthetic T4 replacement.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">3. Anti-Infective & Gastrointestinal Agents</h3>
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg text-xs space-y-2 text-amber-950">
+                        <div class="font-bold text-sm text-amber-900">Key Anti-Infective Classes:</div>
+                        <ul class="list-disc list-inside space-y-1 text-slate-800">
+                            <li><strong>Penicillins & Cephalosporins:</strong> Amoxicillin (Amoxil), Cephalexin (Keflex) – inhibits bacterial cell wall synthesis.</li>
+                            <li><strong>Fluoroquinolones:</strong> Ciprofloxacin (Cipro), Levofloxacin (Levaquin) – inhibits bacterial DNA gyrase.</li>
+                            <li><strong>Macrolides:</strong> Azithromycin (Zithromax) – inhibits 50S ribosomal protein synthesis.</li>
+                            <li><strong>Proton Pump Inhibitors (PPIs):</strong> Omeprazole (Prilosec), Pantoprazole (Protonix) – suppresses gastric $H^+/K^+$ ATPase pump.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Interactive Module 2 Quiz -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-vial text-yellow-400"></i>
+                            <span>Interactive Drug Classification Challenge</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Question:</strong> Which of the following medications belongs to the HMG-CoA Reductase Inhibitor ("Statin") drug class used to treat hyperlipidemia?</p>
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod2Quiz(1)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">A. Lisinopril</button>
+                            <button onclick="checkMod2Quiz(2)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">B. Atorvastatin</button>
+                            <button onclick="checkMod2Quiz(3)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">C. Metoprolol Tartrate</button>
+                        </div>
+                        <div id="mod2-quiz-feedback" class="mt-3 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod1')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Drug Info Resources</button>
+                    <button onclick="markModuleComplete('mod2'); switchTab('mod3')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Drug Stems & LASA Safety</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 3 ================= -->
+            <div id="tab-mod3" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 3</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Generic USAN Stems, LASA Drugs & Tall Man Lettering</h2>
+                    <p class="text-slate-600 text-sm mt-1">United States Adopted Names (USAN) stem rules, ISMP Look-Alike Sound-Alike error prevention, and Tall Man lettering standards.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Common USAN Generic Drug Suffixes (Stems)</h3>
+                    <p>Generic drug names contain official stems (prefixes or suffixes) designated by the USAN Council that identify the drug's therapeutic class and mechanism:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 my-4 text-xs">
+                        <div class="p-3 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <span class="font-bold text-slate-900 font-mono text-sm block">-pril (ACE Inhibitors)</span>
+                            <span class="text-slate-600">Lisinopril, Enalapril, Ramipril (Indication: Hypertension, Heart Failure).</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <span class="font-bold text-slate-900 font-mono text-sm block">-sartan (ARBs)</span>
+                            <span class="text-slate-600">Losartan, Valsartan, Olmesartan (Indication: Hypertension).</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <span class="font-bold text-slate-900 font-mono text-sm block">-olol (Beta Blockers)</span>
+                            <span class="text-slate-600">Atenolol, Metoprolol, Propranolol (Indication: Angina, Hypertension).</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <span class="font-bold text-slate-900 font-mono text-sm block">-statin (HMG-CoA Reductase Inhibitors)</span>
+                            <span class="text-slate-600">Atorvastatin, Simvastatin, Pravastatin (Indication: High Cholesterol).</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <span class="font-bold text-slate-900 font-mono text-sm block">-prazole (Proton Pump Inhibitors)</span>
+                            <span class="text-slate-600">Omeprazole, Pantoprazole, Esomeprazole (Indication: GERD, Ulcers).</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <span class="font-bold text-slate-900 font-mono text-sm block">-cillin (Penicillin Antibiotics)</span>
+                            <span class="text-slate-600">Amoxicillin, Ampicillin, Penicillin VK (Indication: Bacterial Infections).</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <span class="font-bold text-slate-900 font-mono text-sm block">-mab (Monoclonal Antibodies)</span>
+                            <span class="text-slate-600">Adalimumab, Infliximab, Rituximab (Indication: Autoimmune/Oncology).</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <span class="font-bold text-slate-900 font-mono text-sm block">-glinide / -gliptin (Antidiabetics)</span>
+                            <span class="text-slate-600">Repaglinide, Sitagliptin, Linagliptin (Indication: Type 2 Diabetes).</span>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. ISMP Look-Alike Sound-Alike (LASA) & Tall Man Lettering</h3>
+                    <p>To prevent dangerous mix-ups between look-alike drug names, the Institute for Safe Medication Practices (ISMP) and FDA mandate <strong>Tall Man Lettering</strong> (selective capitalization):</p>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl my-4 text-xs space-y-3">
+                        <div class="font-mono text-center text-teal-300 text-sm font-bold bg-slate-800 p-3 rounded border border-slate-700">
+                            Tall Man Lettering Examples
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-slate-200 font-mono text-[11px]">
+                            <div class="bg-slate-800 p-2.5 rounded border border-slate-700">
+                                <span class="text-yellow-400 font-bold">hydrOXYzine</span> (Antihistamine) vs. <span class="text-teal-300 font-bold">hydrALAZine</span> (Antihypertensive)
+                            </div>
+                            <div class="bg-slate-800 p-2.5 rounded border border-slate-700">
+                                <span class="text-yellow-400 font-bold">vinBLAStine</span> (Oncology) vs. <span class="text-teal-300 font-bold">vinCRIStine</span> (Oncology)
+                            </div>
+                            <div class="bg-slate-800 p-2.5 rounded border border-slate-700">
+                                <span class="text-yellow-400 font-bold">BUSpirone</span> (Anxiolytic) vs. <span class="text-teal-300 font-bold">buPROPrion</span> (Antidepressant)
+                            </div>
+                            <div class="bg-slate-800 p-2.5 rounded border border-slate-700">
+                                <span class="text-yellow-400 font-bold">predniSONE</span> (Steroid) vs. <span class="text-teal-300 font-bold">predniSOLONE</span> (Steroid)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive LASA Audit Scenario -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-eye text-yellow-400"></i>
+                            <span>Interactive LASA Safety Scenario</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Safety Audit:</strong> You are pulling stock for a prescription written for <span class="font-mono text-yellow-300">buPROPrion 150 mg</span>. Next to it on the shelf sits <span class="font-mono text-teal-300">BUSpirone 15 mg</span>. What is the primary clinical safety rationale for using Tall Man Lettering on these stock bottle labels?</p>
+
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod3Scenario(1)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">1. To make the brand name print larger for advertising purposes.</button>
+                            <button onclick="checkMod3Scenario(2)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">2. To visually highlight the differing letter sequences in look-alike sound-alike drug names and prevent selection errors.</button>
+                            <button onclick="checkMod3Scenario(3)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">3. To indicate that the drug is a Schedule II controlled substance.</button>
+                        </div>
+
+                        <div id="mod3-feedback" class="mt-3 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod2')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Therapeutic Classes</button>
+                    <button onclick="markModuleComplete('mod3'); switchTab('mod4')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Drug Interactions & Safety</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 4 ================= -->
+            <div id="tab-mod4" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 4</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Drug Interactions, Warnings & Special Safety Concerns</h2>
+                    <p class="text-slate-600 text-sm mt-1">Drug-drug, drug-food, and drug-disease interactions, FDA Boxed Warnings, and Narrow Therapeutic Index (NTI) drugs.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Major Drug-Drug & Drug-Food Interactions</h3>
+                    <p>Technicians must recognize high-risk drug interaction patterns during prescription entry to flag them for pharmacist review:</p>
+
+                    <div class="overflow-x-auto my-4 border border-slate-200 rounded-lg">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">Interaction Pair / Agent</th>
+                                    <th class="p-2.5">Mechanism of Interaction</th>
+                                    <th class="p-2.5">Clinical Adverse Consequence</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-red-700">Warfarin + NSAIDs (Aspirin/Ibuprofen)</td>
+                                    <td class="p-2.5">Additive antiplatelet & mucosal erosion effect.</td>
+                                    <td class="p-2.5">Severe gastrointestinal hemorrhage / bleeding.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-amber-700">Grapefruit Juice + Statins (Atorvastatin/Simvastatin)</td>
+                                    <td class="p-2.5">Inhibits intestinal CYP3A4 enzyme breakdown.</td>
+                                    <td class="p-2.5">Increased serum statin levels, risking rhabdomyolysis.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-blue-700">ACE Inhibitor + Potassium Supplement</td>
+                                    <td class="p-2.5">ACE inhibitors reduce aldosterone, retaining $K^+$.</td>
+                                    <td class="p-2.5">Hyperkalemia leading to cardiac arrhythmias.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-purple-700">Tetracyclines/Fluoroquinolones + Dairy/Antacids</td>
+                                    <td class="p-2.5">Chelation bonding with $Ca^{2+}$, $Mg^{2+}$, $Fe^{2+}$ cations.</td>
+                                    <td class="p-2.5">Inactivation of antibiotic absorption; treatment failure.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. FDA Boxed Warnings (Black Box Warnings)</h3>
+                    <p>An <strong>FDA Boxed Warning</strong> is the FDA's strictest warning for prescription drugs, alerting prescribers to serious, life-threatening risks:</p>
+
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg text-xs space-y-2 text-red-950">
+                        <div class="font-bold text-sm text-red-900"><i class="fa-solid fa-square-exclamation mr-1.5"></i> Notable Black Box Warnings:</div>
+                        <ul class="list-disc list-inside space-y-1 text-slate-800">
+                            <li><strong>Fluoroquinolones (e.g., Ciprofloxacin):</strong> Risk of tendonitis and tendon rupture (Achilles tendon).</li>
+                            <li><strong>Antidepressants (SSRIs):</strong> Increased risk of suicidal thoughts in children, adolescents, and young adults ($< 24$ years).</li>
+                            <li><strong>Opioids + Benzodiazepines:</strong> Concomitant use causes severe respiratory depression, coma, and death.</li>
+                            <li><strong>Metformin:</strong> Risk of fatal Lactic Acidosis in severe renal impairment.</li>
+                        </ul>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">3. Narrow Therapeutic Index (NTI) Medications</h3>
+                    <p>NTI drugs have a narrow margin between therapeutic effectiveness and lethal toxicity. Small changes in dose or concentration lead to failure or severe toxicity:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4 text-xs">
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                            <span class="font-bold text-slate-900 block">Warfarin (Coumadin)</span>
+                            <span class="text-slate-600">Monitored via INR (target typically 2.0 - 3.0).</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                            <span class="font-bold text-slate-900 block">Digoxin (Lanoxin)</span>
+                            <span class="text-slate-600">Cardiac glycoside; toxicity causes visual halos & arrhythmias.</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                            <span class="font-bold text-slate-900 block">Levothyroxine (Synthroid)</span>
+                            <span class="text-slate-600">Monitored via TSH levels; precise mcg dosing.</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                            <span class="font-bold text-slate-900 block">Lithium (Eskalith)</span>
+                            <span class="text-slate-600">Mood stabilizer; toxicity causes tremors and renal failure.</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                            <span class="font-bold text-slate-900 block">Theophylline</span>
+                            <span class="text-slate-600">Bronchodilator; narrow blood level window.</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                            <span class="font-bold text-slate-900 block">Phenytoin (Dilantin)</span>
+                            <span class="text-slate-600">Anticonvulsant; saturable nonlinear kinetics.</span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Safety Alert Check -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-triangle-exclamation text-yellow-400"></i>
+                            <span>Interactive Drug Interaction Alert</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Clinical Scenario:</strong> A patient filling a prescription for Ciprofloxacin (a fluoroquinolone antibiotic) asks for an over-the-counter antacid containing Calcium and Magnesium. What primary counseling warning must be provided regarding taking these together?</p>
+
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod4Recall(1)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">A. Antacids double the absorption of Ciprofloxacin, causing toxicity.</button>
+                            <button onclick="checkMod4Recall(2)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">B. Cations in the antacid chelate (bind) to Ciprofloxacin, preventing its absorption and causing antibiotic failure; space doses by at least 2 hours before or 6 hours after.</button>
+                            <button onclick="checkMod4Recall(3)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">C. The combination turns urine bright blue but is completely harmless.</button>
+                        </div>
+
+                        <div id="mod4-recall-feedback" class="mt-4 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod3')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Drug Stems</button>
+                    <button onclick="markModuleComplete('mod4'); switchTab('mod5')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Clinical Math & Case Lab</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 5 ================= -->
+            <div id="tab-mod5" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 5</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Clinical Calculations & Drug Information Case Lab</h2>
+                    <p class="text-slate-600 text-sm mt-1">Renal clearance estimation (Cockcroft-Gault), Body Surface Area (BSA) dosing, and dose screening math.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Creatinine Clearance (\(CrCl\)) Estimation (Cockcroft-Gault Formula)</h3>
+                    <p>Renally eliminated drugs (e.g., Gabapentin, Levofloxacin, Vancomycin) require dose adjustment based on estimated kidney function (\(CrCl\)):</p>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl my-4 text-xs space-y-3">
+                        <div class="font-mono text-center text-teal-300 text-sm font-bold bg-slate-800 p-3 rounded border border-slate-700">
+                            \(CrCl \text{ (mL/min)} = \frac{(140 - \text{Age}) \times \text{Weight (kg)}}{72 \times SCr \text{ (mg/dL)}} \quad [\times 0.85 \text{ if Female}]\)
+                        </div>
+                        <div class="text-slate-300 text-[11px] leading-relaxed">
+                            <strong>Sample Problem:</strong> Calculate the estimated $CrCl$ for a 60-year-old male weighing $72\text{ kg}$ with a Serum Creatinine ($SCr$) of $1.0\text{ mg/dL}$.
+                            <div class="font-mono text-emerald-400 mt-1">
+                                \(CrCl = \frac{(140 - 60) \times 72}{72 \times 1.0} = \frac{80 \times 72}{72} = 80\text{ mL/min}\)
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Body Surface Area (BSA) Dosing Formula</h3>
+                    <p>Oncology chemotherapy and specialized pediatric regimens are calculated using Body Surface Area ($BSA$ in $m^2$) via Mosteller's formula:</p>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl my-4 text-xs space-y-3">
+                        <div class="font-mono text-center text-teal-300 text-sm font-bold bg-slate-800 p-3 rounded border border-slate-700">
+                            \(BSA \text{ (m}^2\text{)} = \sqrt{\frac{\text{Height (cm)} \times \text{Weight (kg)}}{3600}}\)
+                        </div>
+                        <div class="text-slate-300 text-[11px] leading-relaxed">
+                            <strong>Sample Problem:</strong> A pediatric patient has a $BSA$ of $1.2\text{ m}^2$. The prescribed chemotherapy dose is $150\text{ mg/m}^2/\text{day}$. What total daily dose in mg should be dispensed?
+                            <div class="font-mono text-emerald-400 mt-1">
+                                \(\text{Total Daily Dose} = 1.2\text{ m}^2 \times 150\text{ mg/m}^2 = 180\text{ mg}\)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Math Practice Lab -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-calculator text-yellow-400"></i>
+                            <span>Interactive Clinical Math Practice</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Math Lab Case:</strong> A 70-year-old female patient ($SCr = 1.0\text{ mg/dL}$, weight = $72\text{ kg}$) requires estimated $CrCl$ calculation. Remember to apply the female multiplier of $0.85$! What is her estimated $CrCl$?</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs my-3">
+                            <button onclick="checkMathLab(1)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">A. 70.0 mL/min</button>
+                            <button onclick="checkMathLab(2)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">B. 59.5 mL/min</button>
+                            <button onclick="checkMathLab(3)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">C. 45.2 mL/min</button>
+                        </div>
+
+                        <div id="math-lab-feedback" class="p-3.5 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod4')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Interactions</button>
+                    <button onclick="markModuleComplete('mod5'); switchTab('mod6')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Certification Exam</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 6 (FINAL EXAM) ================= -->
+            <div id="tab-mod6" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 6</span>
+                        <span>•</span>
+                        <span>15 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Day 16 Certification Practice Exam</h2>
+                    <p class="text-slate-600 text-sm mt-1">Evaluate your mastery of drug reference books, therapeutic classifications, generic stems, LASA error prevention, black box warnings, and clinical math calculations.</p>
+                </div>
+
+                <!-- Exam Start Intro -->
+                <div id="exam-start-box" class="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center space-y-4">
+                    <div class="w-16 h-16 bg-pharmacy-100 text-pharmacy-700 rounded-full flex items-center justify-center mx-auto text-2xl font-bold border border-pharmacy-200">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">15-Question Comprehensive Certification Exam</h3>
+                    <p class="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">Passing threshold is 80% (12/15 correct). Detailed rationale provided for every question upon completion.</p>
+                    <button onclick="startFinalExam()" class="px-6 py-3 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg font-bold text-xs transition shadow-md inline-flex items-center space-x-2">
+                        <span>Begin Assessment Exam</span>
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                </div>
+
+                <!-- Exam Container -->
+                <div id="exam-container" class="hidden space-y-6">
+                    <div id="quiz-questions-list" class="space-y-6"></div>
+
+                    <div class="pt-4 border-t border-slate-200 flex justify-end">
+                        <button onclick="submitFinalExam()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-lg transition flex items-center space-x-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Submit Assessment Exam</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Exam Results Box -->
+                <div id="exam-results-box" class="hidden p-6 rounded-xl border text-center space-y-4"></div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod5')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Clinical Math</button>
+                    <button onclick="switchTab('overview')" class="px-4 py-2 bg-slate-800 text-white hover:bg-slate-900 rounded-lg text-xs font-semibold">Return to Overview</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Study Notes Modal Window -->
+    <div id="notesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 space-y-4 border border-slate-200">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                <div class="flex items-center space-x-2 text-slate-900 font-bold text-base">
+                    <i class="fa-solid fa-note-sticky text-yellow-500"></i>
+                    <span>Trainee Personal Study Notes</span>
+                </div>
+                <button onclick="toggleNotesModal()" class="text-slate-400 hover:text-slate-600 text-lg p-1">&times;</button>
+            </div>
+            
+            <p class="text-xs text-slate-500">Record customized notes, key formulas, or specific areas to review later. Notes are automatically saved in browser session.</p>
+            
+            <textarea id="studentNotesArea" rows="10" placeholder="Type key learnings, USAN stems, Orange Book rules, or drug information notes here..." class="w-full text-xs font-mono p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-pharmacy-500 leading-relaxed custom-scrollbar"></textarea>
+            
+            <div id="modalToast" class="hidden p-2 bg-emerald-100 text-emerald-800 text-xs rounded border border-emerald-300 font-semibold"></div>
+
+            <div class="flex items-center justify-between pt-2">
+                <div class="flex space-x-2">
+                    <button onclick="copyNotesToClipboard()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition flex items-center space-x-1">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Copy Notes</span>
+                    </button>
+                    <button onclick="clearNotes()" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-xs rounded-lg transition">
+                        Clear Notes
+                    </button>
+                </div>
+                <button onclick="saveNotes(); toggleNotesModal()" class="px-4 py-1.5 bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-bold text-xs rounded-lg transition">
+                    Save & Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let completedModules = new Set();
+        let secondsElapsed = 0;
+        let timerInterval = null;
+
+        // Exam Question Bank for Day 16: Medication Information & Drug Classifications
+        const examQuestions = [
+            {
+                q: "1. Which official FDA reference publication lists approved drug products and their therapeutic equivalence (generic substitution) evaluations?",
+                options: [
+                    "A. CDC Pink Book",
+                    "B. FDA Orange Book",
+                    "C. FDA Purple Book",
+                    "D. Red Book"
+                ],
+                correct: 1,
+                rationale: "The FDA Orange Book (Approved Drug Products with Therapeutic Equivalence Evaluations) is used to verify generic therapeutic equivalence (e.g., AB ratings)."
+            },
+            {
+                q: "2. What generic drug suffix (stem) identifies medications belonging to the Angiotensin-Converting Enzyme (ACE) Inhibitor class?",
+                options: [
+                    "A. -sartan",
+                    "B. -olol",
+                    "C. -pril",
+                    "D. -statin"
+                ],
+                correct: 2,
+                rationale: "The stem '-pril' (e.g., Lisinopril, Enalapril) designates ACE inhibitors used for hypertension and heart failure."
+            },
+            {
+                q: "3. What reference is recognized as the gold standard resource for determining intravenous drug compatibility, stability, and dilution guidelines?",
+                options: [
+                    "A. Trissel's Handbook on Injectable Drugs",
+                    "B. CDC Yellow Book",
+                    "C. Goodman & Gilman's",
+                    "D. Remington's Pharmaceutical Sciences"
+                ],
+                correct: 0,
+                rationale: "Trissel's Handbook on Injectable Drugs is the primary resource for IV drug stability and Y-site compatibility."
+            },
+            {
+                q: "4. What clinical safety practice utilizes mixed-case lettering on drug packaging labels to differentiate look-alike sound-alike (LASA) medication names?",
+                options: [
+                    "A. Camel Case",
+                    "B. Tall Man Lettering",
+                    "C. Barcode Verification",
+                    "D. USAN Nomenclature"
+                ],
+                correct: 1,
+                rationale: "Tall Man Lettering (e.g., BUSpirone vs. buPROPrion) highlights visual differences in similar drug names to prevent errors."
+            },
+            {
+                q: "5. Which medication belongs to the Narrow Therapeutic Index (NTI) drug class and requires strict blood plasma monitoring to avoid toxicity?",
+                options: [
+                    "A. Amoxicillin",
+                    "B. Warfarin",
+                    "C. Ibuprofen",
+                    "D. Omeprazole"
+                ],
+                correct: 1,
+                rationale: "Warfarin has a narrow therapeutic index and requires routine INR blood level monitoring to balance efficacy against severe bleeding risk."
+            },
+            {
+                q: "6. The generic stem '-statin' (e.g., Atorvastatin, Simvastatin) indicates that the drug belongs to which pharmacological class?",
+                options: [
+                    "A. Beta-1 Adrenergic Receptor Blocker",
+                    "B. HMG-CoA Reductase Inhibitor",
+                    "C. Proton Pump Inhibitor",
+                    "D. Loop Diuretic"
+                ],
+                correct: 1,
+                rationale: "'-statin' drugs inhibit HMG-CoA reductase, the rate-limiting enzyme in hepatic cholesterol synthesis."
+            },
+            {
+                q: "7. What FDA reference lists biological products and interchangeable biosimilar evaluation data?",
+                options: [
+                    "A. Red Book",
+                    "B. Green Book",
+                    "C. Purple Book",
+                    "D. Yellow Book"
+                ],
+                correct: 2,
+                rationale: "The FDA Purple Book lists biological products, biosimilars, and interchangeable biological evaluations."
+            },
+            {
+                q: "8. Concomitant administration of Ciprofloxacin and an antacid containing Magnesium or Calcium leads to which drug interaction mechanism?",
+                options: [
+                    "A. Chelation bonding that prevents antibiotic gastrointestinal absorption",
+                    "B. Enzyme induction accelerating metabolism",
+                    "C. Additive CNS depression",
+                    "D. Synergistic renal excretion"
+                ],
+                correct: 0,
+                rationale: "Polyvalent cations ($Ca^{2+}, Mg^{2+}, Al^{3+}, Fe^{2+}$) chelate fluoroquinolones, forming insoluble complexes that block antibiotic absorption."
+            },
+            {
+                q: "9. Calculate the estimated Creatinine Clearance ($CrCl$) for a 60-year-old male weighing $72\\text{ kg}$ with a Serum Creatinine ($SCr$) of $1.0\\text{ mg/dL}$ using Cockcroft-Gault.",
+                options: [
+                    "A. 60 mL/min",
+                    "B. 80 mL/min",
+                    "C. 100 mL/min",
+                    "D. 120 mL/min"
+                ],
+                correct: 1,
+                rationale: "Formula: $CrCl = \\frac{(140 - 60) \\times 72}{72 \\times 1.0} = \\frac{80 \\times 72}{72} = 80$ mL/min."
+            },
+            {
+                q: "10. What generic stem identifies Proton Pump Inhibitors (PPIs) used for gastroesophageal reflux disease (GERD)?",
+                options: [
+                    "A. -prazole",
+                    "B. -tidine",
+                    "C. -setron",
+                    "D. -glitazone"
+                ],
+                correct: 0,
+                rationale: "The stem '-prazole' (e.g., Omeprazole, Pantoprazole) designates PPIs that block gastric acid secretion."
+            },
+            {
+                q: "11. What warning label issue represents the FDA's most stringent warning regarding potential life-threatening risks associated with a drug?",
+                options: [
+                    "A. Black Box / Boxed Warning",
+                    "B. Auxiliary Label",
+                    "C. Medication Guide Notice",
+                    "D. Class III Recall Alert"
+                ],
+                correct: 0,
+                rationale: "An FDA Boxed Warning (Black Box Warning) is the strongest safety warning issued for prescription drugs."
+            },
+            {
+                q: "12. What primary reference book is consulted to locate drug pricing data including Average Wholesale Price (AWP) and NDC listings?",
+                options: [
+                    "A. Red Book",
+                    "B. Orange Book",
+                    "C. Yellow Book",
+                    "D. Pink Book"
+                ],
+                correct: 0,
+                rationale: "The Red Book provides official drug pricing parameters (AWP) and product packaging details."
+            },
+            {
+                q: "13. A chemotherapy dose is ordered at $100\\text{ mg/m}^2$. If the patient's calculated Body Surface Area ($BSA$) is $1.6\\text{ m}^2$, what is the total dose to be administered?",
+                options: [
+                    "A. 100 mg",
+                    "B. 120 mg",
+                    "C. 160 mg",
+                    "D. 200 mg"
+                ],
+                correct: 2,
+                rationale: "Total Dose = $1.6\\text{ m}^2 \\times 100\\text{ mg/m}^2 = 160\\text{ mg}$."
+            },
+            {
+                q: "14. Which reference guide would be consulted specifically for CDC travel health recommendations, travel vaccines, and endemic disease precautions?",
+                options: [
+                    "A. CDC Yellow Book",
+                    "B. CDC Pink Book",
+                    "C. FDA Orange Book",
+                    "D. Green Book"
+                ],
+                correct: 0,
+                rationale: "The CDC Yellow Book (Health Information for International Travel) provides global travel vaccination and prophylactic guidelines."
+            },
+            {
+                q: "15. Patients taking Warfarin alongside over-the-counter NSAIDs (such as Ibuprofen or Naproxen) face an increased risk of which adverse effect?",
+                options: [
+                    "A. Severe Gastrointestinal Bleeding and Hemorrhage",
+                    "B. Acute Renal Failure only",
+                    "C. Severe Hypertension",
+                    "D. Hyperglycemia"
+                ],
+                correct: 0,
+                rationale: "Combining Warfarin (an anticoagulant) with NSAIDs (antiplatelet & GI mucosal irritant) dramatically elevates gastrointestinal bleeding risks."
+            }
+        ];
+
+        window.onload = function() {
+            startTimer();
+            loadSavedNotes();
+        };
+
+        // Session Timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const hrs = String(Math.floor(secondsElapsed / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((secondsElapsed % 3600) / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                document.getElementById('sessionTimer').innerText = `${hrs}:${mins}:${secs}`;
+            }, 1000);
+        }
+
+        // Student Name Handler
+        function updateStudentName() {
+            const name = document.getElementById('studentNameInput').value;
+            localStorage.setItem('day16_student_name', name);
+        }
+
+        // Navigation Tab Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-teal-50', 'text-teal-900', 'border', 'border-teal-200');
+                btn.classList.add('text-slate-600');
+            });
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-600');
+                activeBtn.classList.add('bg-teal-50', 'text-teal-900', 'border', 'border-teal-200');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Mark Module Complete
+        function markModuleComplete(modId) {
+            completedModules.add(modId);
+            const statusBadge = document.getElementById(`status-${modId}`);
+            if (statusBadge) {
+                statusBadge.innerHTML = '<i class="fa-solid fa-circle-check text-teal-600"></i> Done';
+                statusBadge.classList.remove('bg-slate-100', 'text-slate-500');
+                statusBadge.classList.add('bg-teal-100', 'text-teal-800');
+            }
+
+            const total = 6;
+            const count = completedModules.size;
+            document.getElementById('modulesCompletedCount').innerText = `${count} / ${total} Modules`;
+            const pct = Math.round((count / total) * 100);
+            document.getElementById('overallProgressBar').style.width = `${pct}%`;
+        }
+
+        // Module 1 Checkpoint Check
+        function checkM1Case(choice) {
+            const feedback = document.getElementById('m1-case-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Choice!</strong> The FDA Orange Book evaluates therapeutic equivalence (AB rating) for generic substitution eligibility.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Resource.</strong> Therapeutic equivalence between brand and generic drugs is evaluated in the FDA Orange Book.";
+            }
+        }
+
+        // Module 2 Quiz Check
+        function checkMod2Quiz(choice) {
+            const feedback = document.getElementById('mod2-quiz-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Classification!</strong> Atorvastatin (Lipitor) is an HMG-CoA Reductase Inhibitor ('statin') used to treat high cholesterol.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Choice.</strong> Atorvastatin ends in the stem '-statin', designating HMG-CoA reductase inhibitors.";
+            }
+        }
+
+        // Module 3 Audit Check
+        function checkMod3Scenario(choice) {
+            const feedback = document.getElementById('mod3-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Safety Rationale!</strong> Tall Man Lettering draws visual attention to differing letter sequences in Look-Alike Sound-Alike drug names to prevent mis-selection.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Rationale.</strong> Tall Man Lettering is specifically an ISMP safety convention to prevent LASA dispensing errors.";
+            }
+        }
+
+        // Module 4 Recall Check
+        function checkMod4Recall(choice) {
+            const feedback = document.getElementById('mod4-recall-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Interaction Warning!</strong> Polyvalent cations ($Ca^{2+}, Mg^{2+}$) chelate fluoroquinolones like Ciprofloxacin, preventing intestinal absorption. Doses must be spaced apart.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Warning.</strong> Antacids bind/chelate fluoroquinolones, inactivating the antibiotic unless administration is properly spaced.";
+            }
+        }
+
+        // Module 5 Math Lab Check
+        function checkMathLab(choice) {
+            const feedback = document.getElementById('math-lab-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Calculation!</strong> $CrCl = \\frac{(140 - 70) \\times 72}{72 \\times 1.0} \\times 0.85 = 70 \\times 0.85 = 59.5\\text{ mL/min}$.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Calculation.</strong> Apply the formula: $\\frac{(140 - 70) \\times 72}{72} = 70$. Then multiply by $0.85$ for female gender $= 59.5$ mL/min.";
+            }
+        }
+
+        // Exam Methods
+        function startFinalExam() {
+            document.getElementById('exam-start-box').classList.add('hidden');
+            document.getElementById('exam-container').classList.remove('hidden');
+
+            const list = document.getElementById('quiz-questions-list');
+            list.innerHTML = '';
+
+            examQuestions.forEach((q, idx) => {
+                const qCard = document.createElement('div');
+                qCard.className = 'p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-3';
+                
+                let optionsHtml = '';
+                q.options.forEach((opt, optIdx) => {
+                    optionsHtml += `
+                        <label class="flex items-center space-x-3 p-2.5 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition text-xs text-slate-800">
+                            <input type="radio" name="exam_q_${idx}" value="${optIdx}" class="text-pharmacy-600 focus:ring-pharmacy-500">
+                            <span>${opt}</span>
+                        </label>
+                    `;
+                });
+
+                qCard.innerHTML = `
+                    <div class="font-bold text-slate-900 text-xs sm:text-sm">${q.q}</div>
+                    <div class="space-y-2">${optionsHtml}</div>
+                    <div id="rationale_q_${idx}" class="hidden p-3 rounded-lg text-xs mt-2"></div>
+                `;
+                list.appendChild(qCard);
+            });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function submitFinalExam() {
+            let score = 0;
+            examQuestions.forEach((q, idx) => {
+                const selected = document.querySelector(`input[name="exam_q_${idx}"]:checked`);
+                const rationaleDiv = document.getElementById(`rationale_q_${idx}`);
+                rationaleDiv.classList.remove('hidden', 'bg-red-100', 'bg-emerald-100', 'text-red-900', 'text-emerald-900');
+
+                if (selected && parseInt(selected.value) === q.correct) {
+                    score++;
+                    rationaleDiv.classList.add('bg-emerald-100', 'text-emerald-900', 'border', 'border-emerald-200');
+                    rationaleDiv.innerHTML = `<strong>Correct!</strong> ${q.rationale}`;
+                } else {
+                    rationaleDiv.classList.add('bg-red-100', 'text-red-900', 'border', 'border-red-200');
+                    rationaleDiv.innerHTML = `<strong>Incorrect.</strong> ${q.rationale}`;
+                }
+            });
+
+            const percent = Math.round((score / examQuestions.length) * 100);
+            document.getElementById('overallScoreDisplay').innerText = `${percent}%`;
+            
+            const resultsBox = document.getElementById('exam-results-box');
+            resultsBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'bg-red-50', 'border-red-200');
+
+            if (percent >= 80) {
+                resultsBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+                resultsBox.innerHTML = `
+                    <div class="text-3xl"><i class="fa-solid fa-circle-check text-emerald-600"></i></div>
+                    <h3 class="text-xl font-bold">Congratulations! You Passed Day 16 Exam!</h3>
+                    <p class="text-xs">Your Score: <strong>${score} / ${examQuestions.length} (${percent}%)</strong></p>
+                    <p class="text-xs text-emerald-700">You have demonstrated core competency in drug reference books, therapeutic classifications, USAN stems, LASA error prevention, interaction screening, and clinical calculations.</p>
+                `;
+                markModuleComplete('mod6');
+            } else {
+                resultsBox.classList.add('bg-red-50', 'border-red-300', 'text-red-900');
+                resultsBox.innerHTML = `
+                    <div class="text-3xl"><i class="fa-solid fa-triangle-exclamation text-red-600"></i></div>
+                    <h3 class="text-xl font-bold">Passing Score Not Met</h3>
+                    <p class="text-xs">Your Score: <strong>${score} / ${examQuestions.length} (${percent}%)</strong> (Passing threshold is 80%).</p>
+                    <p class="text-xs text-red-700">Please review the rationale notes above and retake the exam when ready.</p>
+                `;
+            }
+            resultsBox.scrollIntoView({ behavior: 'smooth' });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Personal Study Notes Modal Logic
+        function toggleNotesModal() {
+            const modal = document.getElementById('notesModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('modalToast');
+            toast.innerText = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        function saveNotes() {
+            const val = document.getElementById('studentNotesArea').value;
+            localStorage.setItem('day16_study_notes', val);
+            showToast("Notes saved successfully!");
+        }
+
+        function loadSavedNotes() {
+            const saved = localStorage.getItem('day16_study_notes');
+            if (saved) {
+                document.getElementById('studentNotesArea').value = saved;
+            }
+            const savedName = localStorage.getItem('day16_student_name');
+            if (savedName) {
+                document.getElementById('studentNameInput').value = savedName;
+            }
+        }
+
+        function clearNotes() {
+            document.getElementById('studentNotesArea').value = '';
+            localStorage.removeItem('day16_study_notes');
+            showToast("Study notes cleared.");
+        }
+
+        function copyNotesToClipboard() {
+            const notes = document.getElementById('studentNotesArea').value;
+            navigator.clipboard.writeText(notes).then(() => {
+                showToast("Notes copied to clipboard!");
+            }).catch(() => {
+                showToast("Failed to copy notes.");
+            });
+        }
+    </script>
+</body>
+</html>
