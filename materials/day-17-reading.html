@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 17: Over-the-Counter (OTC) Medications</title>
+
+    <!-- External Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- MathJax for rendering equations -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        pharmacy: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            main { border: none !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans antialiased text-slate-800 bg-slate-100 selection:bg-teal-500 selection:text-white">
+
+    <!-- Top Header & Global Status Bar -->
+    <header class="bg-slate-900 text-white shrink-0 border-b border-slate-800 no-print sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-teal-500 to-emerald-400 p-2 rounded-lg text-slate-900 font-bold text-lg leading-none shadow-md">
+                    <i class="fa-solid fa-prescription-bottle-medical"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-teal-400 font-semibold uppercase tracking-wider">CA Pharmacy Tech Program</div>
+                    <div class="text-base font-bold text-white tracking-tight">Day 17: Over-the-Counter (OTC) Medications</div>
+                </div>
+            </div>
+
+            <!-- Timer & Session Stats -->
+            <div class="hidden md:flex items-center space-x-6">
+                <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                    <i class="fa-regular fa-clock text-teal-400"></i>
+                    <span class="text-xs text-slate-300">Time Spent:</span>
+                    <span id="sessionTimer" class="font-mono text-sm font-semibold text-emerald-400">00:00:00</span>
+                </div>
+
+                <div class="text-xs text-slate-400 flex items-center space-x-1">
+                    <i class="fa-solid fa-hourglass-half text-teal-400"></i>
+                    <span>Target: 120 Minutes</span>
+                </div>
+
+                <button onclick="toggleNotesModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-note-sticky text-yellow-400"></i>
+                    <span>Study Notes</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Global Progress Bar -->
+        <div class="w-full bg-slate-800 h-1.5 relative">
+            <div id="overallProgressBar" class="bg-gradient-to-r from-teal-500 to-emerald-400 h-1.5 transition-all duration-500" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <div class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6 overflow-hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full lg:w-80 shrink-0 space-y-4 no-print">
+            <!-- Student Profile Card -->
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center font-bold border border-teal-200 text-lg">
+                        <i class="fa-solid fa-user-nurse"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Trainee Session</div>
+                        <input type="text" id="studentNameInput" value="Pharmacy Student" onchange="updateStudentName()" class="font-semibold text-slate-800 text-sm bg-transparent border-b border-dashed border-slate-300 focus:outline-none focus:border-pharmacy-500 w-full" title="Click to edit name">
+                    </div>
+                </div>
+                <div class="space-y-2 text-xs text-slate-600">
+                    <div class="flex justify-between border-b border-slate-100 pb-1">
+                        <span>Modules Completed:</span>
+                        <span id="modulesCompletedCount" class="font-semibold text-slate-800">0 / 6 Modules</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Final Exam Score:</span>
+                        <span id="overallScoreDisplay" class="font-semibold text-pharmacy-600">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="bg-white rounded-xl shadow-sm border border-slate-200 p-2 space-y-1">
+                <div class="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Day 17 Curriculum</div>
+
+                <button onclick="switchTab('overview')" id="nav-overview" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between transition bg-teal-50 text-teal-900 border border-teal-200">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-compass w-4 text-center text-teal-600"></i>
+                        <span>Course Overview</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-teal-500"></i>
+                </button>
+
+                <button onclick="switchTab('mod1')" id="nav-mod1" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-shield-halved w-4 text-center text-slate-400"></i>
+                        <span class="truncate">1. Regulations & BTC Sales</span>
+                    </div>
+                    <span id="status-mod1" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod2')" id="nav-mod2" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-tablets w-4 text-center text-slate-400"></i>
+                        <span class="truncate">2. Major OTC Drug Categories</span>
+                    </div>
+                    <span id="status-mod2" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">25m</span>
+                </button>
+
+                <button onclick="switchTab('mod3')" id="nav-mod3" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-comments w-4 text-center text-slate-400"></i>
+                        <span class="truncate">3. SCHOLAR-MAC & Triage</span>
+                    </div>
+                    <span id="status-mod3" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod4')" id="nav-mod4" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-triangle-exclamation w-4 text-center text-slate-400"></i>
+                        <span class="truncate">4. OTC Safety & High-Risk Groups</span>
+                    </div>
+                    <span id="status-mod4" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod5')" id="nav-mod5" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-calculator w-4 text-center text-slate-400"></i>
+                        <span class="truncate">5. Pediatric Math & Case Lab</span>
+                    </div>
+                    <span id="status-mod5" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod6')" id="nav-mod6" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-clipboard-check w-4 text-center text-slate-400"></i>
+                        <span class="truncate">6. Certification Practice Exam</span>
+                    </div>
+                    <span id="status-mod6" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">15m</span>
+                </button>
+            </nav>
+
+            <!-- Quick Reference Drawer Box -->
+            <div class="bg-slate-900 text-slate-200 rounded-xl p-4 shadow-sm text-xs space-y-2.5 border border-slate-800">
+                <div class="font-bold text-teal-400 uppercase tracking-wider flex items-center justify-between">
+                    <span><i class="fa-solid fa-lightbulb text-yellow-400 mr-1.5"></i> OTC Quick Reference</span>
+                </div>
+                <ul class="space-y-2 text-slate-300">
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">CMEA Daily Limit:</strong> $3.6\text{ g}$ base pseudoephedrine/purchaser/day.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">CMEA 30-Day Limit:</strong> $9.0\text{ g}$ retail purchase; $7.5\text{ g}$ mail-order limit.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Max APAP Daily Dose:</strong> $4000\text{ mg/day}$ ($3000\text{ mg/day}$ recommended).</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Reye's Syndrome:</strong> NEVER give Aspirin to children/teens with viral illness.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Decongestants:</strong> Avoid Pseudoephedrine/Phenylephrine in uncontrolled HTN.</span>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Workspace -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto custom-scrollbar min-h-[650px]">
+
+            <!-- ================= TAB: OVERVIEW ================= -->
+            <div id="tab-overview" class="tab-content space-y-6">
+                <div>
+                    <div class="inline-flex items-center space-x-2 bg-teal-100 text-teal-900 text-xs font-semibold px-3 py-1 rounded-full mb-3 border border-teal-200">
+                        <i class="fa-solid fa-graduation-cap text-teal-700"></i>
+                        <span>California Pharmacy Technician Curriculum</span>
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Day 17: Over-the-Counter (OTC) Medications</h1>
+                    <p class="mt-2 text-slate-600 text-sm leading-relaxed">
+                        Welcome to Day 17 of your pharmacy technician training program. Over-the-Counter (OTC) products and Behind-the-Counter (BTC) medications represent a vital component of self-care and community pharmacy operations. Today's curriculum covers the regulatory distinction between prescription, OTC, and BTC drugs, Federal CMEA sales restrictions for pseudoephedrine, major OTC drug categories, active ingredient overlap safety, technician scope of practice boundaries, the SCHOLAR-MAC information gathering framework, and weight-based pediatric dosing calculations.
+                    </p>
+                </div>
+
+                <!-- Detailed Syllabus Breakdown -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-pharmacy-600"></i>
+                        <span>2-Hour Training Schedule & Core Modules</span>
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 1 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Regulations & BTC Sales</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">FDA OTC Monograph vs. NDA, Drug Facts Label standards, and Behind-the-Counter (BTC) CMEA pseudoephedrine sales limits.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 2 (25 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Major OTC Drug Categories</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Analgesics/antipyretics, GI agents (antacids, H2RAs, PPIs), cough/cold/allergy products, topicals, and ophthalmic/otic items.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 3 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">SCHOLAR-MAC & Triage</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Technician scope boundaries, structured patient info gathering (SCHOLAR-MAC), and clinical pharmacist referral red flags.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 4 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">OTC Safety & High-Risk Groups</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Duplicate active ingredient warnings, acetaminophen toxicity, pediatric Reye's syndrome risk, geriatric Beers criteria, and disease contraindications.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 5 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Pediatric Math & Case Lab</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Weight-based dosing ($mg/kg$), concentration volume conversions, CMEA purchase verification math, and practical clinical screening.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 6 (15 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Certification Practice Exam</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">15-question comprehensive assessment testing OTC regulation, CMEA sales limits, active ingredient identification, and pediatric math.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Objectives -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Core Learning Competencies</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Regulatory Compliance:</strong> Apply FDA Drug Facts Label standards and enforce CMEA pseudoephedrine logbook and daily/monthly quantity limits.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Product Classification:</strong> Categorize major OTC drug classes by active ingredient, therapeutic mechanism, and self-care indication.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Scope & Triage:</strong> Utilize SCHOLAR-MAC to collect patient information while adhering to technician scope limitations by immediately referring clinical questions to a pharmacist.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Safety & Clinical Math:</strong> Identify duplicate active ingredients (acetaminophen hepatotoxicity risk) and perform accurate weight-based pediatric dose calculations.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Start Action Callout -->
+                <div class="p-4 bg-slate-900 rounded-xl text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <div class="font-bold text-sm">Ready to begin Module 1?</div>
+                        <div class="text-xs text-slate-300">Start with OTC Regulations, Drug Facts Labels & Behind-the-Counter Sales.</div>
+                    </div>
+                    <button onclick="switchTab('mod1')" class="px-5 py-2.5 bg-pharmacy-500 hover:bg-pharmacy-600 text-white rounded-lg font-bold text-xs transition flex items-center space-x-2 shrink-0">
+                        <span>Start Module 1</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 1 ================= -->
+            <div id="tab-mod1" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 1</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">OTC Regulation & Behind-the-Counter (BTC) Sales</h2>
+                    <p class="text-slate-600 text-sm mt-1">FDA OTC Drug Monographs, Drug Facts Label standards, and Combat Methamphetamine Epidemic Act (CMEA) enforcement.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Regulatory Framework for Over-the-Counter Drugs</h3>
+                    <p>
+                        The Food and Drug Administration (FDA) regulates OTC drugs to ensure they are safe and effective for self-administration without a prescription. OTC drugs are approved via two primary pathways: the <strong>OTC Drug Monograph Process</strong> (a "recipe book" of pre-approved ingredients, doses, and labeling) or a <strong>New Drug Application (NDA)</strong>.
+                    </p>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. The Standardized "Drug Facts" Label</h3>
+                    <p>Federal law mandates a uniform <strong>Drug Facts Label</strong> on all non-prescription medications to ensure patient safety and readability:</p>
+
+                    <div class="bg-slate-900 text-white p-4 rounded-xl text-xs space-y-2 font-mono my-4 border border-slate-800">
+                        <div class="text-center font-bold text-teal-300 text-sm border-b border-slate-700 pb-2 uppercase tracking-wide">
+                            Drug Facts (Standard Format)
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-slate-300 pt-2">
+                            <div><strong class="text-yellow-400">Active Ingredient(s):</strong> Purpose & amount per dosage unit.</div>
+                            <div><strong class="text-yellow-400">Uses:</strong> Indications treated or symptoms managed.</div>
+                            <div><strong class="text-yellow-400">Warnings:</strong> When not to use, drug interactions, side effects.</div>
+                            <div><strong class="text-yellow-400">Directions:</strong> Specific dosage, frequency, and duration by age/weight.</div>
+                            <div><strong class="text-yellow-400">Other Information:</strong> Storage guidelines, sodium/calcium content.</div>
+                            <div><strong class="text-yellow-400">Inactive Ingredients:</strong> Preservatives, colors, binders, flavorings.</div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">3. Behind-the-Counter (BTC) Drugs & CMEA Regulations</h3>
+                    <p>
+                        While the U.S. federal framework primarily recognizes prescription and non-prescription classes, a third functional category called <strong>Behind-the-Counter (BTC)</strong> exists for non-prescription medications subject to sales restrictions. The primary example is regulated under the <strong>Combat Methamphetamine Epidemic Act of 2005 (CMEA)</strong> for precursor chemicals: <em>Pseudoephedrine (PSE)</em>, <em>Ephedrine</em>, and <em>Phenylpropanolamine (PPA)</em>.
+                    </p>
+
+                    <div class="overflow-x-auto my-4 border border-slate-200 rounded-lg">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">CMEA Regulatory Provision</th>
+                                    <th class="p-2.5">Legal Requirement & Threshold Limit</th>
+                                    <th class="p-2.5">Technician Operational Duty</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Daily Retail Sales Limit</td>
+                                    <td class="p-2.5 text-red-700 font-bold">$3.6\text{ g}$ base chemical per purchaser per day</td>
+                                    <td class="p-2.5">Enforce strict maximum daily quantity per customer.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">30-Day Retail Limit</td>
+                                    <td class="p-2.5 text-red-700 font-bold">$9.0\text{ g}$ base chemical per 30-day period</td>
+                                    <td class="p-2.5">Verify electronic logbook for 30-day cumulative limit.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">30-Day Mail-Order Limit</td>
+                                    <td class="p-2.5 text-red-700 font-bold">$7.5\text{ g}$ base chemical per 30-day period</td>
+                                    <td class="p-2.5">Apply strict mail-order shipping quantity caps.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Storage & Access</td>
+                                    <td class="p-2.5">Behind counter or in locked cabinet</td>
+                                    <td class="p-2.5">Keep products inaccessible to direct customer access.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Logbook & Purchaser ID</td>
+                                    <td class="p-2.5">Government photo ID + signature + log entry</td>
+                                    <td class="p-2.5">Check valid photo ID, record name/address/date/time; retain log for <strong>2 years</strong>.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Interactive Module 1 Checkpoint -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-circle-question text-yellow-400"></i>
+                            <span>Interactive Checkpoint: CMEA Sales Verification</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-2"><strong>Scenario:</strong> A customer requests to buy Sudafed (Pseudoephedrine HCl) behind the counter. They present a valid state driver's license. What is the MAXIMUM amount of pseudoephedrine base this customer can legally purchase in a single retail day?</p>
+                        
+                        <div class="space-y-2 text-xs mt-3">
+                            <button onclick="checkM1Case(1)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                A. $9.0\text{ g}$ base chemical
+                            </button>
+                            <button onclick="checkM1Case(2)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                B. $3.6\text{ g}$ base chemical
+                            </button>
+                            <button onclick="checkM1Case(3)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                C. $7.5\text{ g}$ base chemical
+                            </button>
+                        </div>
+
+                        <div id="m1-case-feedback" class="mt-4 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('overview')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Overview</button>
+                    <button onclick="markModuleComplete('mod1'); switchTab('mod2')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Major OTC Categories</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 2 ================= -->
+            <div id="tab-mod2" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 2</span>
+                        <span>•</span>
+                        <span>25 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Major OTC Medication Categories & Active Ingredients</h2>
+                    <p class="text-slate-600 text-sm mt-1">Therapeutic breakdown of self-care agents across major body systems.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Analgesics & Antipyretics (Pain & Fever)</h3>
+                    <p>Analgesics are among the most frequently purchased OTC drugs. Technicians must understand the key distinctions between non-NSAID analgesics and NSAIDs:</p>
+
+                    <div class="overflow-x-auto my-4 border border-slate-200 rounded-lg">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">Active Ingredient</th>
+                                    <th class="p-2.5">Brand Example(s)</th>
+                                    <th class="p-2.5">Drug Class & Mechanism</th>
+                                    <th class="p-2.5">Key Safety Note / Limit</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Acetaminophen (APAP)</td>
+                                    <td class="p-2.5">Tylenol</td>
+                                    <td class="p-2.5">Non-NSAID Analgesic / Antipyretic; central COX inhibition.</td>
+                                    <td class="p-2.5 text-red-700 font-semibold">Max $4000\text{ mg/day}$ ($3000\text{ mg}$ suggested); Risk of severe liver damage (hepatotoxicity).</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Ibuprofen</td>
+                                    <td class="p-2.5">Advil, Motrin</td>
+                                    <td class="p-2.5">NSAID; non-selective COX-1 & COX-2 inhibitor.</td>
+                                    <td class="p-2.5">Take with food; risk of GI upset/ulcers & renal impairment. Max OTC $1200\text{ mg/day}$.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Naproxen Sodium</td>
+                                    <td class="p-2.5">Aleve</td>
+                                    <td class="p-2.5">Long-acting NSAID (dosed q8-12h).</td>
+                                    <td class="p-2.5">GI mucosal risk; avoid mixing with other NSAIDs.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Aspirin (Acetylsalicylic Acid)</td>
+                                    <td class="p-2.5">Bayer, Ecotrin</td>
+                                    <td class="p-2.5">Irreversible COX inhibitor; antiplatelet effect.</td>
+                                    <td class="p-2.5 text-red-700 font-semibold">Black Box: NEVER use in children $<19$ years with viral infection (Reye's Syndrome risk).</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Gastrointestinal Agents</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 my-4 text-xs">
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                            <span class="font-bold text-teal-800 block text-sm">Antacids</span>
+                            <span class="text-slate-600 block">Calcium carbonate (Tums), Magnesium hydroxide (Milk of Magnesia).</span>
+                            <span class="text-slate-500 text-[11px] block">Neutralizes stomach acid immediately. Short duration.</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                            <span class="font-bold text-teal-800 block text-sm">H2 Receptor Blockers</span>
+                            <span class="text-slate-600 block">Famotidine (Pepcid AC).</span>
+                            <span class="text-slate-500 text-[11px] block">Reduces acid production. Onset 30–45 mins; lasts 10–12 hours.</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                            <span class="font-bold text-teal-800 block text-sm">Proton Pump Inhibitors</span>
+                            <span class="text-slate-600 block">Omeprazole (Prilosec OTC), Esomeprazole (Nexium 24HR).</span>
+                            <span class="text-slate-500 text-[11px] block">Blocks acid pumps; taken daily for 14 days for frequent heartburn.</span>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">3. Allergy, Cold & Respiratory Products</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4 text-xs">
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                            <div class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-head-side-cough text-pharmacy-600"></i>
+                                <span>Antihistamines (1st vs 2nd Gen)</span>
+                            </div>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600">
+                                <li><strong>1st Generation (Sedating):</strong> Diphenhydramine (Benadryl), Chlorpheniramine. Causes significant drowsiness, anticholinergic side effects.</li>
+                                <li><strong>2nd Generation (Non-sedating):</strong> Loratadine (Claritin), Cetirizine (Zyrtec), Fexofenadine (Allegra). Preferred for daytime allergic rhinitis.</li>
+                            </ul>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                            <div class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-lungs text-pharmacy-600"></i>
+                                <span>Decongestants, Antitussives & Expectorants</span>
+                            </div>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600">
+                                <li><strong>Decongestants:</strong> Phenylephrine (PE) OTC, Pseudoephedrine (Sudafed) BTC. Vasoconstrictors—causes elevated blood pressure!</li>
+                                <li><strong>Antitussives (Cough Suppressant):</strong> Dextromethorphan (DM).</li>
+                                <li><strong>Expectorants (Mucus Thinner):</strong> Guaifenesin (Mucinex).</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Module 2 Quiz -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-vial text-yellow-400"></i>
+                            <span>Interactive OTC Classification Quiz</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Question:</strong> Which of the following OTC antihistamines is classified as a first-generation sedating antihistamine that commonly causes drowsiness?</p>
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod2Quiz(1)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">A. Loratadine (Claritin)</button>
+                            <button onclick="checkMod2Quiz(2)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">B. Diphenhydramine (Benadryl)</button>
+                            <button onclick="checkMod2Quiz(3)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">C. Fexofenadine (Allegra)</button>
+                        </div>
+                        <div id="mod2-quiz-feedback" class="mt-3 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod1')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Regulations & BTC</button>
+                    <button onclick="markModuleComplete('mod2'); switchTab('mod3')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: SCHOLAR-MAC & Triage</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 3 ================= -->
+            <div id="tab-mod3" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 3</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Technician Scope of Practice, SCHOLAR-MAC & Referral Triage</h2>
+                    <p class="text-slate-600 text-sm mt-1">Boundaries of technician communication, structured data gathering, and identifying critical referral red flags.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Technician Scope of Practice vs. Pharmacist Clinical Consultation</h3>
+                    <p>
+                        Under California state law and pharmacy regulations, <strong>pharmacy technicians are legally prohibited from providing clinical advice, recommending OTC drugs, or evaluating symptoms</strong>. However, technicians play a vital operational role by gathering intake information and directing the patient to the pharmacist.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 my-4 text-xs">
+                        <div class="p-3.5 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-lg">
+                            <div class="font-bold text-emerald-900"><i class="fa-solid fa-circle-check mr-1.5"></i> Permitted Technician Duties</div>
+                            <ul class="list-disc list-inside mt-1 text-slate-700 space-y-1">
+                                <li>Guide patients to the physical shelf location of an OTC item.</li>
+                                <li>Collect demographic, allergy, and current medication data.</li>
+                                <li>Read package directions or price aloud directly from the box.</li>
+                                <li>Refer all product selection or clinical questions immediately to the pharmacist.</li>
+                            </ul>
+                        </div>
+
+                        <div class="p-3.5 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                            <div class="font-bold text-red-900"><i class="fa-solid fa-circle-xmark mr-1.5"></i> Prohibited Technician Actions</div>
+                            <ul class="list-disc list-inside mt-1 text-slate-700 space-y-1">
+                                <li>Recommending a specific brand or active ingredient for symptoms.</li>
+                                <li>Assessing whether a product is safe for a patient's medical condition.</li>
+                                <li>Advising a patient to change prescribed doses or take off-label doses.</li>
+                                <li>Answering "Which product works best for my cough?" without pharmacist handoff.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. The SCHOLAR-MAC Information Gathering Framework</h3>
+                    <p>Technicians use the standardized <strong>SCHOLAR-MAC</strong> mnemonic to systematically collect information for the pharmacist evaluation:</p>
+
+                    <div class="overflow-x-auto my-4 border border-slate-200 rounded-lg">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">Letter</th>
+                                    <th class="p-2.5">Mnemonic Element</th>
+                                    <th class="p-2.5">Information to Gather from Patient</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 font-mono text-slate-700">
+                                <tr><td class="p-2 font-bold text-teal-700">S</td><td class="p-2 font-bold">Symptoms</td><td class="p-2 font-sans">What are the main symptoms the patient is experiencing?</td></tr>
+                                <tr><td class="p-2 font-bold text-teal-700">C</td><td class="p-2 font-bold">Characteristics</td><td class="p-2 font-sans">What do the symptoms feel like (e.g., sharp pain, dry cough, throbbing)?</td></tr>
+                                <tr><td class="p-2 font-bold text-teal-700">H</td><td class="p-2 font-bold">History</td><td class="p-2 font-sans">What has been done so far? Have they tried other OTC products?</td></tr>
+                                <tr><td class="p-2 font-bold text-teal-700">O</td><td class="p-2 font-bold">Onset</td><td class="p-2 font-sans">When did the symptoms start?</td></tr>
+                                <tr><td class="p-2 font-bold text-teal-700">L</td><td class="p-2 font-bold">Location</td><td class="p-2 font-sans">Where is the symptom located on or in the body?</td></tr>
+                                <tr><td class="p-2 font-bold text-teal-700">A</td><td class="p-2 font-bold">Aggravating Factors</td><td class="p-2 font-sans">What makes the symptoms worse?</td></tr>
+                                <tr><td class="p-2 font-bold text-teal-700">R</td><td class="p-2 font-bold">Relieving Factors</td><td class="p-2 font-sans">What makes the symptoms better?</td></tr>
+                                <tr class="bg-amber-50/50"><td class="p-2 font-bold text-amber-700">M</td><td class="p-2 font-bold">Medications</td><td class="p-2 font-sans">What prescription, OTC, and herbal products are currently taken?</td></tr>
+                                <tr class="bg-amber-50/50"><td class="p-2 font-bold text-amber-700">A</td><td class="p-2 font-bold">Allergies</td><td class="p-2 font-sans">Are there any known drug, food, or environmental allergies?</td></tr>
+                                <tr class="bg-amber-50/50"><td class="p-2 font-bold text-amber-700">C</td><td class="p-2 font-bold">Conditions</td><td class="p-2 font-sans">What underlying medical conditions exist (e.g., HTN, Diabetes, Asthma)?</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">3. Red Flag Triage Criteria (Immediate Pharmacist / ER Handoff)</h3>
+                    <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg text-xs text-red-950 space-y-1">
+                        <div class="font-bold text-red-900 text-sm"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i> High-Risk Symptoms Requiring Immediate Clinical Handoff:</div>
+                        <ul class="list-disc list-inside space-y-1 text-slate-800">
+                            <li>Chest pain, shortness of breath, or difficulty breathing.</li>
+                            <li>High fever in infants under 3 months of age ($> 100.4^\circ\text{F}$ or $38.0^\circ\text{C}$).</li>
+                            <li>Blood in stool, vomit, or sputum.</li>
+                            <li>Pregnant or breastfeeding patients seeking medication advice.</li>
+                            <li>Severe, sudden-onset visual changes or severe head trauma.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Interactive Module 3 Scenario -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-comments text-yellow-400"></i>
+                            <span>Interactive Scope of Practice Scenario</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Scenario:</strong> A patient walks up to the pharmacy counter holding two boxes of OTC cough syrup and asks you, "Which one of these is better for my high blood pressure?" How must you handle this interaction legally?</p>
+
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod3Scenario(1)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">1. Recommend the product that has a blue box because blue usually means safe.</button>
+                            <button onclick="checkMod3Scenario(2)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">2. Inform the patient that as a technician you cannot evaluate medical conditions, and immediately introduce them to the pharmacist for clinical consultation.</button>
+                            <button onclick="checkMod3Scenario(3)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">3. Tell the patient both cough syrups are completely safe for hypertension.</button>
+                        </div>
+
+                        <div id="mod3-feedback" class="mt-3 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod2')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Major OTC Categories</button>
+                    <button onclick="markModuleComplete('mod3'); switchTab('mod4')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: OTC Safety & High-Risk Groups</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 4 ================= -->
+            <div id="tab-mod4" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 4</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">OTC Safety Concerns, Overlapping Ingredients & High-Risk Groups</h2>
+                    <p class="text-slate-600 text-sm mt-1">Preventing accidental overdose, ingredient duplication, and adverse reactions in vulnerable populations.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Duplicate Active Ingredients & Acetaminophen Toxicity</h3>
+                    <p>
+                        A major hazard in OTC self-care is <strong>accidental duplication of active ingredients</strong>. Many combination OTC products (e.g., NyQuil, DayQuil, Excedrin, Percocet Rx) contain Acetaminophen (APAP). When patients take multiple combination products simultaneously, total daily APAP intake can exceed safe thresholds.
+                    </p>
+
+                    <div class="p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg text-xs space-y-2 text-amber-950 my-4">
+                        <div class="font-bold text-sm text-amber-900"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Acetaminophen Daily Maximum Thresholds:</div>
+                        <ul class="list-disc list-inside space-y-1 text-slate-800">
+                            <li><strong>Maximum Absolute Federal FDA Limit:</strong> $4000\text{ mg/day}$ (from all combined Rx and OTC sources).</li>
+                            <li><strong>Recommended Manufacturer / Clinical Limit:</strong> $3000\text{ mg/day}$ for long-term use or in patients with alcohol use / mild liver dysfunction.</li>
+                            <li><strong>Toxic Consequence:</strong> Severe, irreversible hepatic necrosis / liver failure.</li>
+                        </ul>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Vulnerable Populations & High-Risk Contraindications</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 my-4 text-xs">
+                        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                            <span class="font-bold text-slate-900 block text-sm">Pediatric Warnings</span>
+                            <span class="text-slate-600 block"><strong>Aspirin Risk:</strong> Reye's Syndrome (fatal encephalopathy & liver damage).</span>
+                            <span class="text-slate-500 text-[11px] block mt-1">Always use weight-based dosing ($mg/kg$) rather than age-based estimates.</span>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                            <span class="font-bold text-slate-900 block text-sm">Geriatric Warnings</span>
+                            <span class="text-slate-600 block"><strong>Beers Criteria OTC List:</strong> First-generation antihistamines (Diphenhydramine).</span>
+                            <span class="text-slate-500 text-[11px] block mt-1">Causes severe anticholinergic effects, confusion, urinary retention, and fall risk.</span>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                            <span class="font-bold text-slate-900 block text-sm">Disease Contraindications</span>
+                            <span class="text-slate-600 block"><strong>Hypertension (HTN):</strong> Decongestants (Pseudoephedrine, Phenylephrine).</span>
+                            <span class="text-slate-500 text-[11px] block mt-1">Causes systemic vasoconstriction and dangerous blood pressure spikes.</span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Safety Alert Check -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-triangle-exclamation text-yellow-400"></i>
+                            <span>Interactive OTC Safety Recall</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Safety Question:</strong> Why is it dangerous for a patient to take Tylenol Extra Strength ($500\text{ mg}$ APAP per tab) while simultaneously taking a severe cold liquid that contains $650\text{ mg}$ APAP per dose?</p>
+
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod4Recall(1)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">A. The combination causes immediate kidney stones within 24 hours.</button>
+                            <button onclick="checkMod4Recall(2)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">B. The patient risks exceeding the maximum $4000\text{ mg/day}$ acetaminophen limit, leading to fatal hepatotoxicity (liver damage).</button>
+                            <button onclick="checkMod4Recall(3)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">C. The active ingredients cancel each other out, making neither effective.</button>
+                        </div>
+
+                        <div id="mod4-recall-feedback" class="mt-4 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod3')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: SCHOLAR-MAC</button>
+                    <button onclick="markModuleComplete('mod4'); switchTab('mod5')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Pediatric Math & Case Lab</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 5 ================= -->
+            <div id="tab-mod5" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 5</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Clinical Calculations & OTC Case Lab</h2>
+                    <p class="text-slate-600 text-sm mt-1">Weight-based pediatric dose calculations, volume determinations, and CMEA purchase math.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Weight-Based Pediatric Dosage Formula</h3>
+                    <p>
+                        Pediatric OTC medications must be dosed according to patient weight in kilograms ($kg$), using the conversion factor $1\text{ kg} = 2.2\text{ lbs}$:
+                    </p>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl my-4 text-xs space-y-3">
+                        <div class="font-mono text-center text-teal-300 text-sm font-bold bg-slate-800 p-3 rounded border border-slate-700">
+                            $$\text{Weight (kg)} = \frac{\text{Weight (lbs)}}{2.2}$$
+                            $$\text{Dose (mg)} = \text{Weight (kg)} \times \text{Dose Rate (mg/kg)}$$
+                            $$\text{Volume (mL)} = \frac{\text{Dose (mg)} \times \text{Container Volume (mL)}}{\text{Container Mass (mg)}}$$
+                        </div>
+                        <div class="text-slate-300 text-[11px] leading-relaxed">
+                            <strong>Worked Sample Problem:</strong> A child weighs $33\text{ lbs}$. The recommended OTC Acetaminophen dose is $15\text{ mg/kg}$ per dose. Liquid Children's Tylenol concentration is $160\text{ mg} / 5\text{ mL}$. What volume in $\text{mL}$ should be administered per dose?
+                            <div class="font-mono text-emerald-400 mt-2 space-y-1">
+                                <div>Step 1 (Convert Weight): $33\text{ lbs} \div 2.2 = 15\text{ kg}$</div>
+                                <div>Step 2 (Calculate mg Dose): $15\text{ kg} \times 15\text{ mg/kg} = 225\text{ mg}$</div>
+                                <div>Step 3 (Calculate mL Volume): $\frac{225\text{ mg} \times 5\text{ mL}}{160\text{ mg}} = \frac{1125}{160} = 7.03\text{ mL} \approx 7\text{ mL}$</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. CMEA Quantity Math Verification</h3>
+                    <p>
+                        Calculating equivalent base weights for pseudoephedrine sales compliance:
+                    </p>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl my-4 text-xs space-y-3">
+                        <div class="text-slate-300 text-[11px] leading-relaxed">
+                            <strong>Sample CMEA Math:</strong> A customer wants to buy 2 boxes of Sudafed 24-Hour containing 10 tablets per box. Each tablet contains $240\text{ mg}$ of Pseudoephedrine HCl (equivalent to $196.6\text{ mg}$ base). Does this sale comply with the $3.6\text{ g/day}$ limit?
+                            <div class="font-mono text-emerald-400 mt-2 space-y-1">
+                                <div>Total Tablets = $2 \times 10 = 20\text{ tablets}$</div>
+                                <div>Total Base Mass = $20 \times 196.6\text{ mg} = 3932\text{ mg} = 3.932\text{ g}$ base chemical</div>
+                                <div>Result: <span class="text-red-400 font-bold">DENIED.</span> $3.932\text{ g}$ exceeds the legal daily limit of $3.6\text{ g}$.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Math Practice Lab -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-calculator text-yellow-400"></i>
+                            <span>Interactive Clinical Math Practice</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Math Lab Case:</strong> A child weighing $44\text{ lbs}$ is prescribed OTC Ibuprofen ($10\text{ mg/kg}$ per dose). Children's Ibuprofen suspension has a concentration of $100\text{ mg} / 5\text{ mL}$. How many $\text{mL}$ should be given for a single dose?</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs my-3">
+                            <button onclick="checkMathLab(1)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">A. 5.0 mL</button>
+                            <button onclick="checkMathLab(2)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">B. 10.0 mL</button>
+                            <button onclick="checkMathLab(3)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">C. 15.0 mL</button>
+                        </div>
+
+                        <div id="math-lab-feedback" class="p-3.5 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod4')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Safety Concerns</button>
+                    <button onclick="markModuleComplete('mod5'); switchTab('mod6')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Certification Exam</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 6 (FINAL EXAM) ================= -->
+            <div id="tab-mod6" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 6</span>
+                        <span>•</span>
+                        <span>15 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Day 17 Certification Practice Exam</h2>
+                    <p class="text-slate-600 text-sm mt-1">Evaluate your mastery of OTC regulations, CMEA pseudoephedrine limits, drug classifications, SCHOLAR-MAC, active ingredient safety, and pediatric math.</p>
+                </div>
+
+                <!-- Exam Start Intro -->
+                <div id="exam-start-box" class="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center space-y-4">
+                    <div class="w-16 h-16 bg-pharmacy-100 text-pharmacy-700 rounded-full flex items-center justify-center mx-auto text-2xl font-bold border border-pharmacy-200">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">15-Question Comprehensive Certification Exam</h3>
+                    <p class="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">Passing threshold is 80% (12/15 correct). Detailed rationale provided for every question upon completion.</p>
+                    <button onclick="startFinalExam()" class="px-6 py-3 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg font-bold text-xs transition shadow-md inline-flex items-center space-x-2">
+                        <span>Begin Assessment Exam</span>
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                </div>
+
+                <!-- Exam Container -->
+                <div id="exam-container" class="hidden space-y-6">
+                    <div id="quiz-questions-list" class="space-y-6"></div>
+
+                    <div class="pt-4 border-t border-slate-200 flex justify-end">
+                        <button onclick="submitFinalExam()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-lg transition flex items-center space-x-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Submit Assessment Exam</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Exam Results Box -->
+                <div id="exam-results-box" class="hidden p-6 rounded-xl border text-center space-y-4"></div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod5')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Pediatric Math</button>
+                    <button onclick="switchTab('overview')" class="px-4 py-2 bg-slate-800 text-white hover:bg-slate-900 rounded-lg text-xs font-semibold">Return to Overview</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Study Notes Modal Window -->
+    <div id="notesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 space-y-4 border border-slate-200">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                <div class="flex items-center space-x-2 text-slate-900 font-bold text-base">
+                    <i class="fa-solid fa-note-sticky text-yellow-500"></i>
+                    <span>Trainee Personal Study Notes</span>
+                </div>
+                <button onclick="toggleNotesModal()" class="text-slate-400 hover:text-slate-600 text-lg p-1">&times;</button>
+            </div>
+            
+            <p class="text-xs text-slate-500">Record customized notes, key formulas, or specific areas to review later. Notes are automatically saved in browser session.</p>
+            
+            <textarea id="studentNotesArea" rows="10" placeholder="Type key learnings, CMEA limits, APAP max doses, SCHOLAR-MAC steps, or OTC notes here..." class="w-full text-xs font-mono p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-pharmacy-500 leading-relaxed custom-scrollbar"></textarea>
+            
+            <div id="modalToast" class="hidden p-2 bg-emerald-100 text-emerald-800 text-xs rounded border border-emerald-300 font-semibold"></div>
+
+            <div class="flex items-center justify-between pt-2">
+                <div class="flex space-x-2">
+                    <button onclick="copyNotesToClipboard()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition flex items-center space-x-1">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Copy Notes</span>
+                    </button>
+                    <button onclick="clearNotes()" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-xs rounded-lg transition">
+                        Clear Notes
+                    </button>
+                </div>
+                <button onclick="saveNotes(); toggleNotesModal()" class="px-4 py-1.5 bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-bold text-xs rounded-lg transition">
+                    Save & Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let completedModules = new Set();
+        let secondsElapsed = 0;
+        let timerInterval = null;
+
+        // Exam Question Bank for Day 17: Over-the-Counter (OTC) Medications
+        const examQuestions = [
+            {
+                q: "1. Under the Combat Methamphetamine Epidemic Act of 2005 (CMEA), what is the maximum legal retail sales limit of pseudoephedrine base per purchaser in a single calendar day?",
+                options: [
+                    "A. 9.0 grams",
+                    "B. 3.6 grams",
+                    "C. 7.5 grams",
+                    "D. 10.0 grams"
+                ],
+                correct: 1,
+                rationale: "CMEA caps daily retail sales of pseudoephedrine base at 3.6 grams per purchaser per day."
+            },
+            {
+                q: "2. Under CMEA federal guidelines, how long must a pharmacy maintain written or electronic logbook records of pseudoephedrine transactions?",
+                options: [
+                    "A. 1 year",
+                    "B. 2 years",
+                    "C. 5 years",
+                    "D. 7 years"
+                ],
+                correct: 1,
+                rationale: "Federal law mandates retaining CMEA pseudoephedrine transaction logbooks for at least 2 years."
+            },
+            {
+                q: "3. What is the maximum recommended daily absolute limit of Acetaminophen (APAP) from all combined sources for a healthy adult?",
+                options: [
+                    "A. 2000 mg",
+                    "B. 3000 mg",
+                    "C. 4000 mg",
+                    "D. 6000 mg"
+                ],
+                correct: 2,
+                rationale: "The FDA absolute maximum daily limit for Acetaminophen is 4000 mg to prevent fatal liver damage (hepatotoxicity)."
+            },
+            {
+                q: "4. Why is Aspirin (acetylsalicylic acid) strictly contraindicated in children and teenagers under 19 years old presenting with fever or viral illness?",
+                options: [
+                    "A. Risk of severe Reye's Syndrome",
+                    "B. Risk of acute kidney stones",
+                    "C. Risk of sudden hypertension",
+                    "D. Risk of ototoxicity"
+                ],
+                correct: 0,
+                rationale: "Aspirin use in children during viral illnesses (chickenpox, influenza) is linked to Reye's Syndrome, a severe condition causing liver and brain damage."
+            },
+            {
+                q: "5. A patient asks a pharmacy technician, 'Which OTC cold medicine will not interact with my high blood pressure?' What is the technician's correct legal response?",
+                options: [
+                    "A. Recommend oral Phenylephrine because it is mild.",
+                    "B. Immediately refer the patient to the pharmacist for clinical consultation.",
+                    "C. Recommend standard Pseudoephedrine since it is behind the counter.",
+                    "D. Tell the patient all cold medicines raise blood pressure."
+                ],
+                correct: 1,
+                rationale: "Technicians cannot evaluate clinical drug-disease interactions. Decongestants can raise blood pressure, so clinical product selection must be referred to the pharmacist."
+            },
+            {
+                q: "6. In the SCHOLAR-MAC information gathering framework, what does the letter 'M' represent?",
+                options: [
+                    "A. Medical Insurance",
+                    "B. Medications currently taken (Rx, OTC, herbal)",
+                    "C. Method of Administration",
+                    "D. Manufacturer Name"
+                ],
+                correct: 1,
+                rationale: "In SCHOLAR-MAC, 'M' stands for Medications currently taken by the patient."
+            },
+            {
+                q: "7. Which of the following OTC antihistamines is classified as a 2nd generation non-sedating antihistamine preferred for daytime allergic rhinitis?",
+                options: [
+                    "A. Diphenhydramine (Benadryl)",
+                    "B. Chlorpheniramine",
+                    "C. Loratadine (Claritin)",
+                    "D. Doxylamine"
+                ],
+                correct: 2,
+                rationale: "Loratadine (Claritin) is a 2nd generation non-sedating antihistamine."
+            },
+            {
+                q: "8. What mandatory standardized label format is required by the FDA on all non-prescription OTC drug packaging?",
+                options: [
+                    "A. Prescription Auxiliary Label",
+                    "B. Drug Facts Label",
+                    "C. MedGuide Box",
+                    "D. Orange Book Evaluation Label"
+                ],
+                correct: 1,
+                rationale: "The FDA mandates the standardized 'Drug Facts Label' on all OTC medications."
+            },
+            {
+                q: "9. Calculate the single dose volume in mL of Children's Tylenol ($160\\text{ mg} / 5\\text{ mL}$) for a child weighing $22\\text{ lbs}$, dosed at $15\\text{ mg/kg}$.",
+                options: [
+                    "A. 2.5 mL",
+                    "B. 4.69 mL (approx 4.7 mL)",
+                    "C. 7.5 mL",
+                    "D. 10.0 mL"
+                ],
+                correct: 1,
+                rationale: "Weight $= 22 \\div 2.2 = 10\\text{ kg}$. Dose $= 10 \\times 15 = 150\\text{ mg}$. Volume $= (150 \\times 5) \\div 160 = 4.6875\\text{ mL} \\approx 4.7\\text{ mL}$."
+            },
+            {
+                q: "10. Which class of OTC gastrointestinal medications works by directly neutralizing stomach acid with rapid, short-acting relief?",
+                options: [
+                    "A. Proton Pump Inhibitors (PPIs)",
+                    "B. H2 Receptor Antagonists",
+                    "C. Antacids (e.g., Calcium Carbonate)",
+                    "D. Antidiarrheals"
+                ],
+                correct: 2,
+                rationale: "Antacids (such as Tums / Calcium Carbonate) directly neutralize stomach acid instantly upon ingestion."
+            },
+            {
+                q: "11. Why should elderly patients avoid frequent use of first-generation antihistamines like Diphenhydramine according to the Beers Criteria?",
+                options: [
+                    "A. High risk of severe drowsiness, confusion, urinary retention, and fall risk",
+                    "B. High risk of hyperkalemia",
+                    "C. High risk of acute hypoglycemia",
+                    "D. Severe liver enzyme induction"
+                ],
+                correct: 0,
+                rationale: "First-generation antihistamines have strong anticholinergic properties that cause sedation, confusion, urinary retention, and fall risk in older adults."
+            },
+            {
+                q: "12. What is the maximum 30-day retail purchase limit of pseudoephedrine base chemical per purchaser under the CMEA?",
+                options: [
+                    "A. 3.6 grams",
+                    "B. 7.5 grams",
+                    "C. 9.0 grams",
+                    "D. 12.0 grams"
+                ],
+                correct: 2,
+                rationale: "CMEA limits 30-day retail purchases to 9.0 grams of base chemical (mail-order is capped at 7.5 grams)."
+            },
+            {
+                q: "13. What OTC active ingredient is classified as a cough suppressant (antitussive)?",
+                options: [
+                    "A. Guaifenesin",
+                    "B. Dextromethorphan (DM)",
+                    "C. Phenylephrine",
+                    "D. Famotidine"
+                ],
+                correct: 1,
+                rationale: "Dextromethorphan (DM) acts on the cough center in the brain to suppress coughing."
+            },
+            {
+                q: "14. A mother arrives with an infant under 2 months of age having a fever of $102^\\circ\\text{F}$. What is the appropriate technician triage action?",
+                options: [
+                    "A. Calculate a half-dose of infant acetaminophen and hand it to her.",
+                    "B. Recommend infant ibuprofen immediately.",
+                    "C. Immediately refer the mother to the pharmacist / urgent care because high fever in young infants is a red flag.",
+                    "D. Tell her to wait 24 hours before taking action."
+                ],
+                correct: 2,
+                rationale: "Fever in infants under 3 months is a clinical red-flag situation requiring immediate evaluation by a pharmacist or emergency care provider."
+            },
+            {
+                q: "15. What active ingredient in OTC expectorants works by thinning respiratory mucosal secretions to make coughs more productive?",
+                options: [
+                    "A. Guaifenesin",
+                    "B. Diphenhydramine",
+                    "C. Loperamide",
+                    "D. Omeprazole"
+                ],
+                correct: 0,
+                rationale: "Guaifenesin is an expectorant that reduces mucus viscosity, aiding productive cough clearance."
+            }
+        ];
+
+        window.onload = function() {
+            startTimer();
+            loadSavedNotes();
+        };
+
+        // Session Timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const hrs = String(Math.floor(secondsElapsed / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((secondsElapsed % 3600) / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                document.getElementById('sessionTimer').innerText = `${hrs}:${mins}:${secs}`;
+            }, 1000);
+        }
+
+        // Student Name Handler
+        function updateStudentName() {
+            const name = document.getElementById('studentNameInput').value;
+            localStorage.setItem('day17_student_name', name);
+        }
+
+        // Navigation Tab Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-teal-50', 'text-teal-900', 'border', 'border-teal-200');
+                btn.classList.add('text-slate-600');
+            });
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-600');
+                activeBtn.classList.add('bg-teal-50', 'text-teal-900', 'border', 'border-teal-200');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Mark Module Complete
+        function markModuleComplete(modId) {
+            completedModules.add(modId);
+            const statusBadge = document.getElementById(`status-${modId}`);
+            if (statusBadge) {
+                statusBadge.innerHTML = '<i class="fa-solid fa-circle-check text-teal-600"></i> Done';
+                statusBadge.classList.remove('bg-slate-100', 'text-slate-500');
+                statusBadge.classList.add('bg-teal-100', 'text-teal-800');
+            }
+
+            const total = 6;
+            const count = completedModules.size;
+            document.getElementById('modulesCompletedCount').innerText = `${count} / ${total} Modules`;
+            const pct = Math.round((count / total) * 100);
+            document.getElementById('overallProgressBar').style.width = `${pct}%`;
+        }
+
+        // Module 1 Checkpoint Check
+        function checkM1Case(choice) {
+            const feedback = document.getElementById('m1-case-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Choice!</strong> Under CMEA regulations, retail sales of pseudoephedrine base chemical are capped at exactly $3.6\\text{ g}$ per purchaser per day.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Limit.</strong> $3.6\\text{ g}$ base is the legal maximum daily retail sales limit per customer ($9.0\\text{ g}$ is the 30-day limit).";
+            }
+        }
+
+        // Module 2 Quiz Check
+        function checkMod2Quiz(choice) {
+            const feedback = document.getElementById('mod2-quiz-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Classification!</strong> Diphenhydramine (Benadryl) is a 1st generation antihistamine that readily crosses the blood-brain barrier, causing significant sedation.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Choice.</strong> Diphenhydramine is the 1st generation sedating antihistamine. Loratadine and Fexofenadine are 2nd generation non-sedating agents.";
+            }
+        }
+
+        // Module 3 Scenario Check
+        function checkMod3Scenario(choice) {
+            const feedback = document.getElementById('mod3-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Scope Protocol!</strong> Technicians must never evaluate clinical drug interactions or recommend OTC items for underlying diseases like hypertension. Hand off to the pharmacist immediately.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Action.</strong> Technicians are legally prohibited from providing clinical advice regarding OTC choice in hypertension.";
+            }
+        }
+
+        // Module 4 Recall Check
+        function checkMod4Recall(choice) {
+            const feedback = document.getElementById('mod4-recall-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Safety Rationale!</strong> Taking multiple APAP-containing products causes cumulative dosage overload, risking acute liver failure (hepatotoxicity) if exceeding $4000\\text{ mg/day}$.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Rationale.</strong> The primary threat of overlapping acetaminophen products is exceeding daily dosage limits and causing liver necrosis.";
+            }
+        }
+
+        // Module 5 Math Lab Check
+        function checkMathLab(choice) {
+            const feedback = document.getElementById('math-lab-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Calculation!</strong> $44\\text{ lbs} \\div 2.2 = 20\\text{ kg}$. Dose $= 20\\text{ kg} \\times 10\\text{ mg/kg} = 200\\text{ mg}$. Volume $= \\frac{200\\text{ mg} \\times 5\\text{ mL}}{100\\text{ mg}} = 10.0\\text{ mL}$.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Calculation.</strong> Convert weight to kg ($44 \\div 2.2 = 20\\text{ kg}$), calculate dose ($20 \\times 10 = 200\\text{ mg}$), then convert to volume: $(200 \\times 5) \\div 100 = 10.0\\text{ mL}$.";
+            }
+        }
+
+        // Exam Methods
+        function startFinalExam() {
+            document.getElementById('exam-start-box').classList.add('hidden');
+            document.getElementById('exam-container').classList.remove('hidden');
+
+            const list = document.getElementById('quiz-questions-list');
+            list.innerHTML = '';
+
+            examQuestions.forEach((q, idx) => {
+                const qCard = document.createElement('div');
+                qCard.className = 'p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-3';
+                
+                let optionsHtml = '';
+                q.options.forEach((opt, optIdx) => {
+                    optionsHtml += `
+                        <label class="flex items-center space-x-3 p-2.5 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition text-xs text-slate-800">
+                            <input type="radio" name="exam_q_${idx}" value="${optIdx}" class="text-pharmacy-600 focus:ring-pharmacy-500">
+                            <span>${opt}</span>
+                        </label>
+                    `;
+                });
+
+                qCard.innerHTML = `
+                    <div class="font-bold text-slate-900 text-xs sm:text-sm">${q.q}</div>
+                    <div class="space-y-2">${optionsHtml}</div>
+                    <div id="rationale_q_${idx}" class="hidden p-3 rounded-lg text-xs mt-2"></div>
+                `;
+                list.appendChild(qCard);
+            });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function submitFinalExam() {
+            let score = 0;
+            examQuestions.forEach((q, idx) => {
+                const selected = document.querySelector(`input[name="exam_q_${idx}"]:checked`);
+                const rationaleDiv = document.getElementById(`rationale_q_${idx}`);
+                rationaleDiv.classList.remove('hidden', 'bg-red-100', 'bg-emerald-100', 'text-red-900', 'text-emerald-900');
+
+                if (selected && parseInt(selected.value) === q.correct) {
+                    score++;
+                    rationaleDiv.classList.add('bg-emerald-100', 'text-emerald-900', 'border', 'border-emerald-200');
+                    rationaleDiv.innerHTML = `<strong>Correct!</strong> ${q.rationale}`;
+                } else {
+                    rationaleDiv.classList.add('bg-red-100', 'text-red-900', 'border', 'border-red-200');
+                    rationaleDiv.innerHTML = `<strong>Incorrect.</strong> ${q.rationale}`;
+                }
+            });
+
+            const percent = Math.round((score / examQuestions.length) * 100);
+            document.getElementById('overallScoreDisplay').innerText = `${percent}%`;
+            
+            const resultsBox = document.getElementById('exam-results-box');
+            resultsBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'bg-red-50', 'border-red-200');
+
+            if (percent >= 80) {
+                resultsBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+                resultsBox.innerHTML = `
+                    <div class="text-3xl"><i class="fa-solid fa-circle-check text-emerald-600"></i></div>
+                    <h3 class="text-xl font-bold">Congratulations! You Passed Day 17 Exam!</h3>
+                    <p class="text-xs">Your Score: <strong>${score} / ${examQuestions.length} (${percent}%)</strong></p>
+                    <p class="text-xs text-emerald-700">You have demonstrated core competency in OTC regulations, CMEA pseudoephedrine sales compliance, SCHOLAR-MAC, active ingredient safety, and pediatric math calculations.</p>
+                `;
+                markModuleComplete('mod6');
+            } else {
+                resultsBox.classList.add('bg-red-50', 'border-red-300', 'text-red-900');
+                resultsBox.innerHTML = `
+                    <div class="text-3xl"><i class="fa-solid fa-triangle-exclamation text-red-600"></i></div>
+                    <h3 class="text-xl font-bold">Passing Score Not Met</h3>
+                    <p class="text-xs">Your Score: <strong>${score} / ${examQuestions.length} (${percent}%)</strong> (Passing threshold is 80%).</p>
+                    <p class="text-xs text-red-700">Please review the rationale notes above and retake the exam when ready.</p>
+                `;
+            }
+            resultsBox.scrollIntoView({ behavior: 'smooth' });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Personal Study Notes Modal Logic
+        function toggleNotesModal() {
+            const modal = document.getElementById('notesModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('modalToast');
+            toast.innerText = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        function saveNotes() {
+            const val = document.getElementById('studentNotesArea').value;
+            localStorage.setItem('day17_study_notes', val);
+            showToast("Notes saved successfully!");
+        }
+
+        function loadSavedNotes() {
+            const saved = localStorage.getItem('day17_study_notes');
+            if (saved) {
+                document.getElementById('studentNotesArea').value = saved;
+            }
+            const savedName = localStorage.getItem('day17_student_name');
+            if (savedName) {
+                document.getElementById('studentNameInput').value = savedName;
+            }
+        }
+
+        function clearNotes() {
+            document.getElementById('studentNotesArea').value = '';
+            localStorage.removeItem('day17_study_notes');
+            showToast("Study notes cleared.");
+        }
+
+        function copyNotesToClipboard() {
+            const notes = document.getElementById('studentNotesArea').value;
+            navigator.clipboard.writeText(notes).then(() => {
+                showToast("Notes copied to clipboard!");
+            }).catch(() => {
+                showToast("Failed to copy notes.");
+            });
+        }
+    </script>
+</body>
+</html>
