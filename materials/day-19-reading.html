@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 19: Medication Adherence and Compliance</title>
+
+    <!-- External Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- MathJax for rendering equations -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        pharmacy: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            main { border: none !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans antialiased text-slate-800 bg-slate-100 selection:bg-teal-500 selection:text-white">
+
+    <!-- Top Header & Global Status Bar -->
+    <header class="bg-slate-900 text-white shrink-0 border-b border-slate-800 no-print sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-teal-500 to-emerald-400 p-2 rounded-lg text-slate-900 font-bold text-lg leading-none shadow-md">
+                    <i class="fa-solid fa-calendar-check"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-teal-400 font-semibold uppercase tracking-wider">CA Pharmacy Tech Program</div>
+                    <div class="text-base font-bold text-white tracking-tight">Day 19: Medication Adherence and Compliance</div>
+                </div>
+            </div>
+
+            <!-- Timer & Session Stats -->
+            <div class="hidden md:flex items-center space-x-6">
+                <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                    <i class="fa-regular fa-clock text-teal-400"></i>
+                    <span class="text-xs text-slate-300">Time Spent:</span>
+                    <span id="sessionTimer" class="font-mono text-sm font-semibold text-emerald-400">00:00:00</span>
+                </div>
+
+                <div class="text-xs text-slate-400 flex items-center space-x-1">
+                    <i class="fa-solid fa-hourglass-half text-teal-400"></i>
+                    <span>Target: 120 Minutes</span>
+                </div>
+
+                <button onclick="toggleNotesModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-note-sticky text-yellow-400"></i>
+                    <span>Study Notes</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Global Progress Bar -->
+        <div class="w-full bg-slate-800 h-1.5 relative">
+            <div id="overallProgressBar" class="bg-gradient-to-r from-teal-500 to-emerald-400 h-1.5 transition-all duration-500" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <div class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6 overflow-hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full lg:w-80 shrink-0 space-y-4 no-print">
+            <!-- Student Profile Card -->
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center font-bold border border-teal-200 text-lg">
+                        <i class="fa-solid fa-user-nurse"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Trainee Session</div>
+                        <input type="text" id="studentNameInput" value="Pharmacy Student" onchange="updateStudentName()" class="font-semibold text-slate-800 text-sm bg-transparent border-b border-dashed border-slate-300 focus:outline-none focus:border-pharmacy-500 w-full" title="Click to edit name">
+                    </div>
+                </div>
+                <div class="space-y-2 text-xs text-slate-600">
+                    <div class="flex justify-between border-b border-slate-100 pb-1">
+                        <span>Modules Completed:</span>
+                        <span id="modulesCompletedCount" class="font-semibold text-slate-800">0 / 6 Modules</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Final Exam Score:</span>
+                        <span id="overallScoreDisplay" class="font-semibold text-pharmacy-600">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="bg-white rounded-xl shadow-sm border border-slate-200 p-2 space-y-1">
+                <div class="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Day 19 Curriculum</div>
+
+                <button onclick="switchTab('overview')" id="nav-overview" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between transition bg-teal-50 text-teal-900 border border-teal-200">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-compass w-4 text-center text-teal-600"></i>
+                        <span>Course Overview</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-teal-500"></i>
+                </button>
+
+                <button onclick="switchTab('mod1')" id="nav-mod1" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-user-check w-4 text-center text-slate-400"></i>
+                        <span class="truncate">1. Understanding Medication Adherence</span>
+                    </div>
+                    <span id="status-mod1" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod2')" id="nav-mod2" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-box-archive w-4 text-center text-slate-400"></i>
+                        <span class="truncate">2. Packaging & Labeling Solutions</span>
+                    </div>
+                    <span id="status-mod2" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">25m</span>
+                </button>
+
+                <button onclick="switchTab('mod3')" id="nav-mod3" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-clock-rotate-left w-4 text-center text-slate-400"></i>
+                        <span class="truncate">3. Regimens, Schedules & Math (PDC/MPR)</span>
+                    </div>
+                    <span id="status-mod3" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod4')" id="nav-mod4" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-toolbox w-4 text-center text-slate-400"></i>
+                        <span class="truncate">4. Adherence Tools & Digital Health</span>
+                    </div>
+                    <span id="status-mod4" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod5')" id="nav-mod5" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-comments w-4 text-center text-slate-400"></i>
+                        <span class="truncate">5. Role-Playing: Counseling & Support</span>
+                    </div>
+                    <span id="status-mod5" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod6')" id="nav-mod6" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-clipboard-check w-4 text-center text-slate-400"></i>
+                        <span class="truncate">6. Certification Practice Exam</span>
+                    </div>
+                    <span id="status-mod6" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">15m</span>
+                </button>
+            </nav>
+
+            <!-- Quick Reference Drawer Box -->
+            <div class="bg-slate-900 text-slate-200 rounded-xl p-4 shadow-sm text-xs space-y-2.5 border border-slate-800">
+                <div class="font-bold text-teal-400 uppercase tracking-wider flex items-center justify-between">
+                    <span><i class="fa-solid fa-lightbulb text-yellow-400 mr-1.5"></i> Adherence Quick Ref</span>
+                </div>
+                <ul class="space-y-2 text-slate-300">
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Adherence vs Compliance:</strong> Adherence reflects active patient collaboration; compliance implies passive obedience.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Target PDC/MPR Threshold:</strong> $\ge 80\%$ is required for optimal therapeutic outcomes and CMS Quality Stars.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">PDC Formula:</strong> $\text{PDC} = \frac{\text{Covered Days}}{\text{Period Days}} \times 100\%$</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Compliance Packaging:</strong> Blister packs, Med-Packs, and Strip packaging organize doses by time/day.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Med Sync (MedSync):</strong> Synchronizes all chronic refills to a single monthly pickup date.</span>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Workspace -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto custom-scrollbar min-h-[650px]">
+
+            <!-- ================= TAB: OVERVIEW ================= -->
+            <div id="tab-overview" class="tab-content space-y-6">
+                <div>
+                    <div class="inline-flex items-center space-x-2 bg-teal-100 text-teal-900 text-xs font-semibold px-3 py-1 rounded-full mb-3 border border-teal-200">
+                        <i class="fa-solid fa-graduation-cap text-teal-700"></i>
+                        <span>California Pharmacy Technician Curriculum</span>
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Day 19: Medication Adherence and Compliance</h1>
+                    <p class="mt-2 text-slate-600 text-sm leading-relaxed">
+                        Welcome to Day 19 of your pharmacy technician training program[cite: 1, 2]. Non-adherence to prescribed medication therapy is one of the leading causes of preventable hospitalizations, disease progression, and healthcare costs. Today's curriculum focuses on understanding the barriers to adherence, utilizing compliance packaging and labeling strategies, calculating adherence metrics (PDC and MPR), leveraging digital health tools and Medication Synchronization (MedSync), and conducting empathetic patient communication and pharmacist handoffs.
+                    </p>
+                </div>
+
+                <!-- Detailed Syllabus Breakdown -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-pharmacy-600"></i>
+                        <span>2-Hour Training Schedule & Core Modules</span>
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 1 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Understanding Medication Adherence</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Distinguishing adherence vs. compliance, identifying intentional and primary/secondary non-adherence barriers.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 2 (25 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Packaging & Labeling Solutions</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Specialized packaging (blister/bubble packs, pouch packaging) and auxiliary labeling techniques to simplify complex schedules.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 3 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Regimens, Schedules & Math</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Calculating Proportion of Days Covered (PDC) and Medication Possession Ratio (MPR) to quantify patient compliance.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 4 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Adherence Tools & Digital Health</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Medication Synchronization (MedSync), pill organizers, smart caps, and mobile reminder technologies.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 5 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Role-Playing: Counseling & Support</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Technician intake protocols, overcoming financial/cognitive barriers, and coordinating pharmacist MTM consultations.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 6 (15 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Certification Practice Exam</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">15-question comprehensive exam evaluating adherence formulas, packaging types, barrier identification, and patient support workflows.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Objectives -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Core Learning Competencies</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Adherence Concepts:</strong> Differentiate between adherence and compliance while categorizing financial, health literacy, and physical barriers.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Compliance Packaging:</strong> Recommend appropriate packaging modalities (unit-dose, multi-dose blister cards, strip pouches) to improve regimen accuracy.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Quantitative Adherence Math:</strong> Accurately calculate Proportion of Days Covered (PDC) and Medication Possession Ratio (MPR) using refill history data.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Workflow & MedSync Integration:</strong> Enroll patients into Medication Synchronization programs and triage non-adherence red flags to the pharmacist for MTM intervention.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Start Action Callout -->
+                <div class="p-4 bg-slate-900 rounded-xl text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <div class="font-bold text-sm">Ready to begin Module 1?</div>
+                        <div class="text-xs text-slate-300">Start with Understanding Medication Adherence vs. Compliance.</div>
+                    </div>
+                    <button onclick="switchTab('mod1')" class="px-5 py-2.5 bg-pharmacy-500 hover:bg-pharmacy-600 text-white rounded-lg font-bold text-xs transition flex items-center space-x-2 shrink-0">
+                        <span>Start Module 1</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 1 ================= -->
+            <div id="tab-mod1" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 1</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Understanding Medication Adherence and Compliance</h2>
+                    <p class="text-slate-600 text-sm mt-1">Key terminology, clinical significance, and identifying barriers to non-adherence.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Defining Adherence vs. Compliance</h3>
+                    <p>
+                        While often used interchangeably, healthcare professionals draw a vital distinction between <strong>compliance</strong> and <strong>adherence</strong>:
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4 text-xs">
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                            <div class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-clipboard-check text-teal-600"></i>
+                                <span>Medication Compliance</span>
+                            </div>
+                            <p class="text-slate-600">
+                                A traditional concept implying <strong>passive obedience</strong> where the patient follows the prescriber's orders. It frames non-conformance as patient failure or disobedience.
+                            </p>
+                        </div>
+
+                        <div class="p-4 bg-teal-50 border border-teal-200 rounded-lg space-y-2">
+                            <div class="font-bold text-teal-900 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-handshake-angle text-pharmacy-600"></i>
+                                <span>Medication Adherence</span>
+                            </div>
+                            <p class="text-slate-700">
+                                A modern, patient-centered approach defined as the extent to which a patient's behavior coincides with <strong>agreed-upon recommendations</strong> from a healthcare provider. It emphasizes shared decision-making.
+                            </p>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Categories & Barriers of Non-Adherence</h3>
+                    <p>
+                        Non-adherence can occur at various points in therapy and is divided into primary vs. secondary and intentional vs. unintentional categories:
+                    </p>
+
+                    <div class="overflow-x-auto my-4 border border-slate-200 rounded-lg">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">Non-Adherence Type</th>
+                                    <th class="p-2.5">Definition / Cause</th>
+                                    <th class="p-2.5">Clinical Example</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Primary Non-Adherence</td>
+                                    <td class="p-2.5">Prescription is written but never filled or picked up at the pharmacy.</td>
+                                    <td class="p-2.5">Patient abandons new statin prescription at pickup due to unexpected high copay.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Secondary Non-Adherence</td>
+                                    <td class="p-2.5">Prescription is filled, but medication is not taken as prescribed (skipped doses, wrong timing, early discontinuation).</td>
+                                    <td class="p-2.5">Patient takes antihypertensive every other day instead of daily to extend the supply.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Unintentional Non-Adherence</td>
+                                    <td class="p-2.5">Patient wants to adhere but is prevented by forgetfulness, cognitive impairment, complex regimens, or physical limitations.</td>
+                                    <td class="p-2.5">An elderly patient with arthritis cannot open child-resistant safety caps or forgets midday dose.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Intentional Non-Adherence</td>
+                                    <td class="p-2.5">Patient deliberately chooses not to take medication due to side effect fears, denial of illness, or personal beliefs.</td>
+                                    <td class="p-2.5">Patient stops taking blood pressure medication because "I feel fine and don't like side effects."</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Interactive Module 1 Checkpoint -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-circle-question text-yellow-400"></i>
+                            <span>Interactive Checkpoint: Identifying Adherence Barriers</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-2"><strong>Scenario:</strong> A patient leaves a new antibiotic prescription unclaimed on the pharmacy ready-shelf for 14 days because they could not afford the $120 out-of-pocket cost. How is this non-adherence classified?</p>
+                        
+                        <div class="space-y-2 text-xs mt-3">
+                            <button onclick="checkM1Case(1)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                A. Secondary Unintentional Non-Adherence
+                            </button>
+                            <button onclick="checkM1Case(2)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                B. Primary Non-Adherence due to Financial/Cost Barriers
+                            </button>
+                            <button onclick="checkM1Case(3)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                C. Intentional Cognitive Non-Adherence
+                            </button>
+                        </div>
+
+                        <div id="m1-case-feedback" class="mt-4 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('overview')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Overview</button>
+                    <button onclick="markModuleComplete('mod1'); switchTab('mod2')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Packaging & Labeling</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 2 ================= -->
+            <div id="tab-mod2" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 2</span>
+                        <span>•</span>
+                        <span>25 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Specialized Packaging & Clear Labeling Solutions</h2>
+                    <p class="text-slate-600 text-sm mt-1">Compliance packaging, calendar cards, strip packaging, and auxiliary label strategies.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Types of Compliance Packaging</h3>
+                    <p>Standard amber prescription vials can be overwhelming for patients taking complex multi-drug regimens. Specialized packaging simplifies administration:</p>
+
+                    <div class="overflow-x-auto my-4 border border-slate-200 rounded-lg">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">Packaging Type</th>
+                                    <th class="p-2.5">Description & Design</th>
+                                    <th class="p-2.5">Ideal Patient Population</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Blister / Bubble Packs (Bingo Cards)</td>
+                                    <td class="p-2.5">Single-medication unit-dose cards organized by day (e.g., 28-day or 30-day card). Push-through foil backing.</td>
+                                    <td class="p-2.5">Long-term care facilities, patients needing visual confirmation of daily doses taken.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Multi-Dose Med-Packs (DisPill)</td>
+                                    <td class="p-2.5">Blister packs containing multiple medications combined into time-of-day slots (Morning, Noon, Evening, Bedtime).</td>
+                                    <td class="p-2.5">Polypharmacy patients taking $> 4$ maintenance medications daily.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Pouch / Strip Packaging</td>
+                                    <td class="p-2.5">Automated continuous plastic packets printed with patient name, date, time, and medication list in chronological order.</td>
+                                    <td class="p-2.5">Active patients, travelers, and home-health patients needing portable pre-sorted doses.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Non-Child Resistant Caps (Easy-Open)</td>
+                                    <td class="p-2.5">Standard snap-caps or easy-open tops replacing push-and-turn child-resistant closures. Requires signed waiver.</td>
+                                    <td class="p-2.5 font-semibold text-teal-800">Elderly patients or individuals with severe rheumatoid arthritis or tremors.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Patient-Centered Labeling Practices</h3>
+                    <p>
+                        Ambiguous label directions lead to dosing errors. Technicians must ensure instructions are explicit, plain-language, and easy to follow:
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 my-4 text-xs">
+                        <div class="p-3.5 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                            <div class="font-bold text-red-900"><i class="fa-solid fa-circle-xmark mr-1.5"></i> Ambiguous Labeling (Poor Adherence)</div>
+                            <ul class="list-disc list-inside space-y-1 text-slate-700 mt-1">
+                                <li>"Take two tablets twice daily as directed."</li>
+                                <li>"Take with meals."</li>
+                                <li>"Take every 6 hours."</li>
+                            </ul>
+                        </div>
+
+                        <div class="p-3.5 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-lg">
+                            <div class="font-bold text-emerald-900"><i class="fa-solid fa-circle-check mr-1.5"></i> Explicit Plain-Language Labeling (High Adherence)</div>
+                            <ul class="list-disc list-inside space-y-1 text-slate-700 mt-1">
+                                <li>"Take 2 tablets in the morning (8 AM) and 2 tablets in the evening (8 PM)."</li>
+                                <li>"Take 1 tablet by mouth 30 minutes before breakfast."</li>
+                                <li>"Use auxiliary label: Finish all of this medication unless directed by doctor."</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Module 2 Quiz -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-box text-yellow-400"></i>
+                            <span>Interactive Packaging Selection Quiz</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Question:</strong> An elderly patient taking 7 different daily maintenance medications frequently gets confused about which pill to take at breakfast vs. bedtime. What is the most effective packaging intervention?</p>
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod2Quiz(1)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">A. Give the patient 7 individual amber vials with standard child-resistant caps.</button>
+                            <button onclick="checkMod2Quiz(2)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">B. Package medications into a Multi-Dose Med-Pack (or strip pouch) organized by time of day (Morning, Bedtime).</button>
+                            <button onclick="checkMod2Quiz(3)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">C. Tell the patient to pour all pills into a single jar every morning.</button>
+                        </div>
+                        <div id="mod2-quiz-feedback" class="mt-3 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod1')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Understanding Adherence</button>
+                    <button onclick="markModuleComplete('mod2'); switchTab('mod3')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Regimens & Adherence Math</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 3 ================= -->
+            <div id="tab-mod3" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 3</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Medication Regimens, Schedules & Adherence Calculations</h2>
+                    <p class="text-slate-600 text-sm mt-1">Calculating Proportion of Days Covered (PDC) and Medication Possession Ratio (MPR).</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Measuring Adherence: PDC vs. MPR</h3>
+                    <p>
+                        In retail, clinical, and managed care settings, adherence is quantified mathematically to monitor health outcomes and CMS Star Ratings. Two main metrics are used:
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4 text-xs">
+                        <div class="p-4 bg-slate-900 text-white rounded-xl space-y-2 font-mono">
+                            <div class="text-teal-300 font-bold border-b border-slate-700 pb-1">Proportion of Days Covered (PDC)</div>
+                            <div class="text-center py-2 text-sm">$$\text{PDC} = \frac{\text{Total Covered Days in Period}}{\text{Total Days in Period}} \times 100\%$$</div>
+                            <div class="text-slate-300 text-[11px]">The preferred CMS standard. Adjusts for overlapping fills and measures actual days medication was available to the patient. Target: $\ge 80\%$.</div>
+                        </div>
+
+                        <div class="p-4 bg-slate-900 text-white rounded-xl space-y-2 font-mono">
+                            <div class="text-teal-300 font-bold border-b border-slate-700 pb-1">Medication Possession Ratio (MPR)</div>
+                            <div class="text-center py-2 text-sm">$$\text{MPR} = \frac{\sum (\text{Days Supply of Fills})}{\text{Total Days in Study Period}} \times 100\%$$</div>
+                            <div class="text-slate-300 text-[11px]">Calculates total days supply dispensed divided by time frame. Can artificially overestimate adherence ($> 100\%$) if filled early. Target: $\ge 80\%$.</div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Worked Example: PDC Calculation</h3>
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
+                        <div class="font-bold text-slate-900 text-sm">Step-by-Step PDC Problem:</div>
+                        <p class="text-slate-700">A patient is tracked over a 90-day evaluation period for Metformin $1000\text{ mg}$. Their refill record shows:</p>
+                        <ul class="list-disc list-inside space-y-1 text-slate-600 font-mono">
+                            <li>Fill 1 (Day 1): 30-day supply dispensed (Covers Days 1–30)</li>
+                            <li>Fill 2 (Day 45): 30-day supply dispensed (Covers Days 45–74; 15-day gap between Day 31–44)</li>
+                            <li>Fill 3 (Day 75): 30-day supply dispensed (Covers Days 75–90; remaining 14 days carry into next period)</li>
+                        </ul>
+                        <div class="p-3 bg-teal-900 text-white rounded-lg font-mono space-y-1 mt-2">
+                            <div>Total Days Covered = $30 \text{ (Fill 1)} + 30 \text{ (Fill 2)} + 16 \text{ (Days 75--90)} = 76 \text{ Days}$</div>
+                            <div>PDC Formula = $\frac{76}{90} \times 100\% = 84.44\%$</div>
+                            <div class="text-emerald-300 font-bold">Conclusion: PDC = 84.4% ($\ge 80\%$ target met; patient is considered adherent).</div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Math Scenario -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-calculator text-yellow-400"></i>
+                            <span>Interactive Practice Problem: Calculate PDC</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Problem:</strong> Over a 180-day period, a hypertension patient was dispensed three 30-day refills for Lisinopril, covering a total of 120 unique days. What is the patient's PDC, and are they adherent ($\ge 80\%$)?</p>
+
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod3Scenario(1)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">1. PDC = $66.7\%$; Patient is Non-Adherent ($< 80\%$).</button>
+                            <button onclick="checkMod3Scenario(2)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">2. PDC = $80.0\%$; Patient is Adherent.</button>
+                            <button onclick="checkMod3Scenario(3)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">3. PDC = $90.0\%$; Patient is Adherent.</button>
+                        </div>
+
+                        <div id="mod3-feedback" class="mt-3 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod2')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Packaging & Labeling</button>
+                    <button onclick="markModuleComplete('mod3'); switchTab('mod4')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Adherence Tools & Digital Health</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 4 ================= -->
+            <div id="tab-mod4" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 4</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Medication Adherence Tools & Digital Health Solutions</h2>
+                    <p class="text-slate-600 text-sm mt-1">Medication Synchronization (MedSync), automated reminder systems, and smart health tools.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Medication Synchronization (MedSync) Programs</h3>
+                    <p>
+                        <strong>Medication Synchronization (MedSync)</strong> is a pharmacy workflow process where all of a patient's chronic maintenance medications are aligned to refill on the exact same day each month.
+                    </p>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl my-4 text-xs space-y-3 font-mono">
+                        <div class="text-teal-300 font-bold border-b border-slate-700 pb-1 text-sm">Benefits of MedSync Workflow</div>
+                        <div class="space-y-1 text-slate-300">
+                            <div>• <strong>Single Monthly Pickup:</strong> Eliminates multiple trips to the pharmacy.</div>
+                            <div>• <strong>Proactive Alignment ("Short Fills"):</strong> Uses partial 7-day or 10-day fills to align all renewal dates to a single target date.</div>
+                            <div>• <strong>Monthly Pre-Consultation Call:</strong> Pharmacy staff contacts patient 7 days prior to sync date to confirm changes, hospitalizations, or dose adjustments.</div>
+                            <div>• <strong>Increased PDC Scores:</strong> Dramatically boosts patient adherence rates above $85\%$.</div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Adherence Technologies & Devices</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 my-4 text-xs">
+                        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                            <span class="font-bold text-slate-900 block text-sm">Pill Organizers (7-Day / 14-Day)</span>
+                            <span class="text-slate-600 block">Manual daily/time-segmented compartments (AM/PM).</span>
+                            <span class="text-slate-500 text-[11px] block mt-1">Inexpensive tool for independent patients; requires manual loading.</span>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                            <span class="font-bold text-slate-900 block text-sm">Smart Pill Caps & Dispensers</span>
+                            <span class="text-slate-600 block">Digital caps with timers or cellular alerts.</span>
+                            <span class="text-slate-500 text-[11px] block mt-1">Tracks bottle opening timestamps and sounds alarms if doses are missed.</span>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                            <span class="font-bold text-slate-900 block text-sm">Automated Refill & SMS Reminders</span>
+                            <span class="text-slate-600 block">Pharmacy software text message alerts.</span>
+                            <span class="text-slate-500 text-[11px] block mt-1">Notifies patients when refills are due or ready for pick-up.</span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Safety Recall Check -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-arrows-rotate text-yellow-400"></i>
+                            <span>Interactive MedSync Recall Check</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Question:</strong> When enrolling a patient into a MedSync program, two of their maintenance prescriptions run out on Day 10, while two others run out on Day 30. What technique is used to align all prescriptions to Day 30?</p>
+
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod4Recall(1)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">A. Tell the patient to stop taking the first two medications for 20 days.</button>
+                            <button onclick="checkMod4Recall(2)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">B. Process a partial/short fill (20-day supply) for the first two medications so all four sync on Day 30.</button>
+                            <button onclick="checkMod4Recall(3)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">C. Double the dose of the first two medications.</button>
+                        </div>
+
+                        <div id="mod4-recall-feedback" class="mt-4 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod3')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Regimens & Math</button>
+                    <button onclick="markModuleComplete('mod4'); switchTab('mod5')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Role-Playing & Communication</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 5 ================= -->
+            <div id="tab-mod5" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 5</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Role-Playing: Patient Counseling Support & Pharmacist Triage</h2>
+                    <p class="text-slate-600 text-sm mt-1">Technician communication workflows, uncovering non-adherence causes, and MTM handoffs.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Technician Role in Adherence Communication</h3>
+                    <p>
+                        Pharmacy technicians are on the front lines of patient interaction. While technicians cannot provide clinical counseling (a duty reserved for licensed pharmacists), technicians play a critical role in identifying non-adherence flags and facilitating support.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 my-4 text-xs">
+                        <div class="p-3.5 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-lg">
+                            <div class="font-bold text-emerald-900"><i class="fa-solid fa-circle-check mr-1.5"></i> Technician Support Scope</div>
+                            <ul class="list-disc list-inside mt-1 text-slate-700 space-y-1">
+                                <li>Identify overdue refills in the software during intake or pickup.</li>
+                                <li>Ask open-ended, non-judgmental questions regarding barrier causes (cost, transportation, refills).</li>
+                                <li>Offer financial assistance resources (copay cards, manufacturer assistance, 90-day supply conversion).</li>
+                                <li>Coordinate non-child resistant cap requests and compliance packaging enrollment.</li>
+                            </ul>
+                        </div>
+
+                        <div class="p-3.5 bg-amber-50 border-l-4 border-amber-500 rounded-r-lg">
+                            <div class="font-bold text-amber-900"><i class="fa-solid fa-user-doctor mr-1.5"></i> Immediate Pharmacist Triage Flags</div>
+                            <ul class="list-disc list-inside mt-1 text-slate-700 space-y-1">
+                                <li>Patient reports stopping medication due to troublesome side effects.</li>
+                                <li>Patient expresses confusion over complex dosing regimens.</li>
+                                <li>Patient expresses doubt about medication efficacy ("It's not working").</li>
+                                <li>Referral for Medication Therapy Management (MTM) consultation.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Role-Play Simulation -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-comments text-yellow-400"></i>
+                            <span>Interactive Practice Simulation: Overdue Refill Encounter</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Simulation Lab:</strong> A regular patient comes to pick up a blood pressure refill that is 45 days overdue. When asked if they have been taking it, the patient confides: "I only take it when I get a headache because the pills make me dizzy." What is the technician's correct protocol?</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs my-3">
+                            <button onclick="checkMathLab(1)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">A. Scold the patient for skipping doses and hand them the bottle.</button>
+                            <button onclick="checkMathLab(2)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">B. Empathetically acknowledge the concern and immediately hand off the consultation to the pharmacist to address side effects and proper dosing.</button>
+                            <button onclick="checkMathLab(3)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">C. Tell the patient to cut the tablets in half independently.</button>
+                        </div>
+
+                        <div id="math-lab-feedback" class="p-3.5 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod4')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Adherence Tools</button>
+                    <button onclick="markModuleComplete('mod5'); switchTab('mod6')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Certification Exam</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 6 (FINAL EXAM) ================= -->
+            <div id="tab-mod6" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 6</span>
+                        <span>•</span>
+                        <span>15 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Day 19 Certification Practice Exam</h2>
+                    <p class="text-slate-600 text-sm mt-1">Evaluate your mastery of medication adherence definitions, compliance packaging, PDC/MPR calculations, MedSync workflows, and patient support triage.</p>
+                </div>
+
+                <!-- Exam Start Intro -->
+                <div id="exam-start-box" class="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center space-y-4">
+                    <div class="w-16 h-16 bg-pharmacy-100 text-pharmacy-700 rounded-full flex items-center justify-center mx-auto text-2xl font-bold border border-pharmacy-200">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">15-Question Comprehensive Certification Exam</h3>
+                    <p class="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">Passing threshold is 80% (12/15 correct). Detailed rationale provided for every question upon completion.</p>
+                    <button onclick="startFinalExam()" class="px-6 py-3 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg font-bold text-xs transition shadow-md inline-flex items-center space-x-2">
+                        <span>Begin Assessment Exam</span>
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                </div>
+
+                <!-- Exam Container -->
+                <div id="exam-container" class="hidden space-y-6">
+                    <div id="quiz-questions-list" class="space-y-6"></div>
+
+                    <div class="pt-4 border-t border-slate-200 flex justify-end">
+                        <button onclick="submitFinalExam()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-lg transition flex items-center space-x-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Submit Assessment Exam</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Exam Results Box -->
+                <div id="exam-results-box" class="hidden p-6 rounded-xl border text-center space-y-4"></div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod5')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Counseling & Support</button>
+                    <button onclick="switchTab('overview')" class="px-4 py-2 bg-slate-800 text-white hover:bg-slate-900 rounded-lg text-xs font-semibold">Return to Overview</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Study Notes Modal Window -->
+    <div id="notesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 space-y-4 border border-slate-200">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                <div class="flex items-center space-x-2 text-slate-900 font-bold text-base">
+                    <i class="fa-solid fa-note-sticky text-yellow-500"></i>
+                    <span>Trainee Personal Study Notes</span>
+                </div>
+                <button onclick="toggleNotesModal()" class="text-slate-400 hover:text-slate-600 text-lg p-1">&times;</button>
+            </div>
+            
+            <p class="text-xs text-slate-500">Record customized notes, key formulas, or specific areas to review later. Notes are automatically saved in browser session.</p>
+            
+            <textarea id="studentNotesArea" rows="10" placeholder="Type key learnings, PDC/MPR formulas, compliance packaging types, or MedSync notes here..." class="w-full text-xs font-mono p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-pharmacy-500 leading-relaxed custom-scrollbar"></textarea>
+            
+            <div id="modalToast" class="hidden p-2 bg-emerald-100 text-emerald-800 text-xs rounded border border-emerald-300 font-semibold"></div>
+
+            <div class="flex items-center justify-between pt-2">
+                <div class="flex space-x-2">
+                    <button onclick="copyNotesToClipboard()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition flex items-center space-x-1">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Copy Notes</span>
+                    </button>
+                    <button onclick="clearNotes()" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-xs rounded-lg transition">
+                        Clear Notes
+                    </button>
+                </div>
+                <button onclick="saveNotes(); toggleNotesModal()" class="px-4 py-1.5 bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-bold text-xs rounded-lg transition">
+                    Save & Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let completedModules = new Set();
+        let secondsElapsed = 0;
+        let timerInterval = null;
+
+        // Exam Question Bank for Day 19: Medication Adherence and Compliance
+        const examQuestions = [
+            {
+                q: "1. What is the fundamental difference between medication compliance and medication adherence?",
+                options: [
+                    "A. Compliance implies passive obedience to orders, whereas adherence reflects active patient agreement and collaboration.",
+                    "B. Compliance applies only to OTC drugs, while adherence applies to Rx drugs.",
+                    "C. Adherence is measured in grams, compliance in milliliters.",
+                    "D. There is no difference; they are exact synonyms in medical practice."
+                ],
+                correct: 0,
+                rationale: "Adherence is a patient-centered concept where the patient collaborates in health decisions, whereas compliance implies passive obedience."
+            },
+            {
+                q: "2. A patient receives a prescription for a statin but never picks it up from the pharmacy due to high cost. This is an example of:",
+                options: [
+                    "A. Secondary Intentional Non-Adherence",
+                    "B. Primary Non-Adherence",
+                    "C. Pharmacokinetic Drug Synergy",
+                    "D. Adverse Drug Event"
+                ],
+                correct: 1,
+                rationale: "Primary non-adherence occurs when a prescribed medication is never filled or picked up at the pharmacy."
+            },
+            {
+                q: "3. What standard benchmark threshold percentage for Proportion of Days Covered (PDC) is considered 'adherent' in quality measures?",
+                options: [
+                    "A. 50%",
+                    "B. 65%",
+                    "C. 80%",
+                    "D. 100% strictly"
+                ],
+                correct: 2,
+                rationale: "A PDC or MPR threshold of 80% or greater is standard in clinical practice and CMS Medicare Star Ratings to define therapeutic adherence."
+            },
+            {
+                q: "4. What is the formula for calculating Proportion of Days Covered (PDC)?",
+                options: [
+                    "A. (Total Covered Days in Period / Total Days in Period) * 100%",
+                    "B. (Total Quantity Dispensed / Dose) * 30",
+                    "C. (Cost of Drug / Days Supply) * 100",
+                    "D. (Number of Refills Remaining / Total Refills) * 100%"
+                ],
+                correct: 0,
+                rationale: "PDC = (Total Covered Days in Evaluation Period / Total Days in Evaluation Period) * 100%."
+            },
+            {
+                q: "5. A patient over a 100-day evaluation period had medication available on 85 days. What is their PDC percentage?",
+                options: [
+                    "A. 70%",
+                    "B. 85%",
+                    "C. 90%",
+                    "D. 100%"
+                ],
+                correct: 1,
+                rationale: "(85 days covered / 100 days total) * 100% = 85%."
+            },
+            {
+                q: "6. Which packaging option is best suited for a polypharmacy patient who takes multiple medications at different times of day (Morning, Noon, Bedtime)?",
+                options: [
+                    "A. Standard amber vials with push-and-turn child-resistant caps",
+                    "B. Multi-Dose Med-Packs (or strip pouch packaging) sorted by time of day",
+                    "C. Bulk 1000-count stock bottles",
+                    "D. Glass dropper bottles"
+                ],
+                correct: 1,
+                rationale: "Multi-dose Med-Packs or strip pouches organize multiple medications into single time-of-day slots, reducing dosing confusion."
+            },
+            {
+                q: "7. What is Medication Synchronization (MedSync)?",
+                options: [
+                    "A. A process where all of a patient's chronic refills are aligned to be dispensed on the same day each month.",
+                    "B. Changing all oral drugs to intravenous formulations.",
+                    "C. Crushing all medications into liquid suspensions.",
+                    "D. Giving patients all 12 months of refills at once."
+                ],
+                correct: 0,
+                rationale: "MedSync synchronizes multiple maintenance refills to a single monthly pickup date, improving convenience and adherence."
+            },
+            {
+                q: "8. What technique is used during MedSync enrollment to align medications that run out on different days?",
+                options: [
+                    "A. Doubling the daily dose",
+                    "B. Processing a partial or short fill (e.g., 10-day supply)",
+                    "C. Discontinuing the out-of-sync drug",
+                    "D. Waiting 6 months to refill"
+                ],
+                correct: 1,
+                rationale: "Short fills / partial fills bring all prescription fill dates into alignment for the target monthly pickup date."
+            },
+            {
+                q: "9. An elderly patient with severe rheumatoid arthritis struggles to open their prescription vials. What solution can the pharmacy provide?",
+                options: [
+                    "A. Tell the patient to use pliers.",
+                    "B. Place non-child-resistant (easy-open) caps on their vials upon patient request and signed waiver.",
+                    "C. Refuse to fill the prescription.",
+                    "D. Omit the prescription label."
+                ],
+                correct: 1,
+                rationale: "Patients or prescribers can request non-child-resistant caps for physical limitations like severe arthritis."
+            },
+            {
+                q: "10. An example of UNINTENTIONAL non-adherence is:",
+                options: [
+                    "A. Patient stops taking a statin because they do not believe high cholesterol is real.",
+                    "B. Patient forgets to take their afternoon dose due to a hectic work schedule.",
+                    "C. Patient throws away pills because of mild nausea.",
+                    "D. Patient intentionally reduces dose to save money."
+                ],
+                correct: 1,
+                rationale: "Unintentional non-adherence occurs when a patient intends to follow therapy but fails due to forgetfulness or routine disruption."
+            },
+            {
+                q: "11. An example of INTENTIONAL non-adherence is:",
+                options: [
+                    "A. Patient cannot read fine print on bottle due to low vision.",
+                    "B. Patient intentionally skips taking an antihypertensive because it causes side effects.",
+                    "C. Patient misplaces bottle while moving.",
+                    "D. Patient cannot open safety cap."
+                ],
+                correct: 1,
+                rationale: "Intentional non-adherence is a deliberate decision by the patient to stop or alter therapy."
+            },
+            {
+                q: "12. What is the pharmacy technician's correct role when a patient mentions experiencing bothersome side effects from a maintenance drug?",
+                options: [
+                    "A. Advise the patient to stop taking the drug immediately.",
+                    "B. Tell the patient side effects are normal and ignore them.",
+                    "C. Refer the patient to the pharmacist for clinical consultation and side effect management.",
+                    "D. Change the drug to a different agent in the computer."
+                ],
+                correct: 2,
+                rationale: "Technicians must triage clinical side effect concerns to the pharmacist for counseling and prescriber follow-up."
+            },
+            {
+                q: "13. Why is explicit plain-language directions (e.g., 'Take 1 tablet in the morning at 8 AM') preferred over 'Take one tablet daily as directed'?",
+                options: [
+                    "A. Plain language reduces misunderstanding and improves daily routine adherence.",
+                    "B. Plain language uses less ink on the printer.",
+                    "C. Plain language is legally mandatory for controlled drugs only.",
+                    "D. Plain language lowers medication drug cost."
+                ],
+                correct: 0,
+                rationale: "Explicit timing instructions remove ambiguity, enabling patients to integrate dosing into daily schedules."
+            },
+            {
+                q: "14. A patient taking 5 maintenance drugs has an MPR calculation of 115% for one drug over 6 months. What does an MPR > 100% indicate?",
+                options: [
+                    "A. The patient is under-utilizing medication.",
+                    "B. The patient refilled their medication early multiple times, overestimating possession.",
+                    "C. The medication has expired.",
+                    "D. The formula is invalid."
+                ],
+                correct: 1,
+                rationale: "MPR overestimates adherence when refills are obtained early, resulting in percentages above 100%."
+            },
+            {
+                q: "15. What proactive step should pharmacy staff take 7 days prior to a MedSync patient's scheduled pickup date?",
+                options: [
+                    "A. Call the patient to confirm current regimen, check for therapy changes, and verify refill needs.",
+                    "B. Bill insurance without checking.",
+                    "C. Cancel all remaining refills.",
+                    "D. Mail the drugs without notification."
+                ],
+                correct: 0,
+                rationale: "Pre-consultation calls ensure no unnecessary drugs are filled and verify recent doctor/hospital therapy changes."
+            }
+        ];
+
+        window.onload = function() {
+            startTimer();
+            loadSavedNotes();
+        };
+
+        // Session Timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const hrs = String(Math.floor(secondsElapsed / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((secondsElapsed % 3600) / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                document.getElementById('sessionTimer').innerText = `${hrs}:${mins}:${secs}`;
+            }, 1000);
+        }
+
+        // Student Name Handler
+        function updateStudentName() {
+            const name = document.getElementById('studentNameInput').value;
+            localStorage.setItem('day19_student_name', name);
+        }
+
+        // Navigation Tab Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-teal-50', 'text-teal-900', 'border', 'border-teal-200');
+                btn.classList.add('text-slate-600');
+            });
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-600');
+                activeBtn.classList.add('bg-teal-50', 'text-teal-900', 'border', 'border-teal-200');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Mark Module Complete
+        function markModuleComplete(modId) {
+            completedModules.add(modId);
+            const statusBadge = document.getElementById(`status-${modId}`);
+            if (statusBadge) {
+                statusBadge.innerHTML = '<i class="fa-solid fa-circle-check text-teal-600"></i> Done';
+                statusBadge.classList.remove('bg-slate-100', 'text-slate-500');
+                statusBadge.classList.add('bg-teal-100', 'text-teal-800');
+            }
+
+            const total = 6;
+            const count = completedModules.size;
+            document.getElementById('modulesCompletedCount').innerText = `${count} / ${total} Modules`;
+            const pct = Math.round((count / total) * 100);
+            document.getElementById('overallProgressBar').style.width = `${pct}%`;
+        }
+
+        // Module 1 Checkpoint Check
+        function checkM1Case(choice) {
+            const feedback = document.getElementById('m1-case-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Classification!</strong> Primary non-adherence occurs when a new prescription is written but never filled/picked up due to cost or other barriers.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Classification.</strong> Leaving an uncollected prescription at the pharmacy due to high copay is Primary Non-Adherence.";
+            }
+        }
+
+        // Module 2 Quiz Check
+        function checkMod2Quiz(choice) {
+            const feedback = document.getElementById('mod2-quiz-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Selection!</strong> Multi-dose Med-Packs combine complex maintenance regimens into pre-sorted time slots (AM/PM), drastically reducing administration errors.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Selection.</strong> Multi-dose compliance packaging (Med-Packs/strip pouches) is specifically designed for complex polypharmacy regimens.";
+            }
+        }
+
+        // Module 3 Scenario Check
+        function checkMod3Scenario(choice) {
+            const feedback = document.getElementById('mod3-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 1) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Math!</strong> PDC = $\\frac{120}{180} \\times 100\\% = 66.67\\%$. Since $66.7\\% < 80\\%$, the patient is non-adherent.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Calculation.</strong> $\\frac{120 \\text{ days}}{180 \\text{ days}} = 0.6667$ or $66.7\\%$, which is below the $80\\%$ benchmark.";
+            }
+        }
+
+        // Module 4 Recall Check
+        function checkMod4Recall(choice) {
+            const feedback = document.getElementById('mod4-recall-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct MedSync Workflow!</strong> A partial or short fill brings out-of-sync medications into date alignment so all chronic drugs sync on the same monthly pickup day.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Action.</strong> Pharmacies perform short/partial fills to bridge the gap and align refill dates.";
+            }
+        }
+
+        // Module 5 Lab Check
+        function checkMathLab(choice) {
+            const feedback = document.getElementById('math-lab-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Protocol!</strong> Side effects and improper PRN taking of daily BP meds are clinical issues requiring immediate pharmacist consultation.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Violation of Scope.</strong> Technicians must hand off side effect concerns and dosing adjustments to the pharmacist.";
+            }
+        }
+
+        // Exam Methods
+        function startFinalExam() {
+            document.getElementById('exam-start-box').classList.add('hidden');
+            document.getElementById('exam-container').classList.remove('hidden');
+
+            const list = document.getElementById('quiz-questions-list');
+            list.innerHTML = '';
+
+            examQuestions.forEach((q, idx) => {
+                const qCard = document.createElement('div');
+                qCard.className = 'p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-3';
+                
+                let optionsHtml = '';
+                q.options.forEach((opt, optIdx) => {
+                    optionsHtml += `
+                        <label class="flex items-center space-x-3 p-2.5 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition text-xs text-slate-800">
+                            <input type="radio" name="exam_q_${idx}" value="${optIdx}" class="text-pharmacy-600 focus:ring-pharmacy-500">
+                            <span>${opt}</span>
+                        </label>
+                    `;
+                });
+
+                qCard.innerHTML = `
+                    <div class="font-bold text-slate-900 text-xs sm:text-sm">${q.q}</div>
+                    <div class="space-y-2">${optionsHtml}</div>
+                    <div id="rationale_q_${idx}" class="hidden p-3 rounded-lg text-xs mt-2"></div>
+                `;
+                list.appendChild(qCard);
+            });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function submitFinalExam() {
+            let score = 0;
+            examQuestions.forEach((q, idx) => {
+                const selected = document.querySelector(`input[name="exam_q_${idx}"]:checked`);
+                const rationaleDiv = document.getElementById(`rationale_q_${idx}`);
+                rationaleDiv.classList.remove('hidden', 'bg-red-100', 'bg-emerald-100', 'text-red-900', 'text-emerald-900');
+
+                if (selected && parseInt(selected.value) === q.correct) {
+                    score++;
+                    rationaleDiv.classList.add('bg-emerald-100', 'text-emerald-900', 'border', 'border-emerald-200');
+                    rationaleDiv.innerHTML = `<strong>Correct!</strong> ${q.rationale}`;
+                } else {
+                    rationaleDiv.classList.add('bg-red-100', 'text-red-900', 'border', 'border-red-200');
+                    rationaleDiv.innerHTML = `<strong>Incorrect.</strong> ${q.rationale}`;
+                }
+            });
+
+            const percent = Math.round((score / examQuestions.length) * 100);
+            document.getElementById('overallScoreDisplay').innerText = `${percent}%`;
+            
+            const resultsBox = document.getElementById('exam-results-box');
+            resultsBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'bg-red-50', 'border-red-200');
+
+            if (percent >= 80) {
+                resultsBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+                resultsBox.innerHTML = `
+                    <div class="text-3xl"><i class="fa-solid fa-circle-check text-emerald-600"></i></div>
+                    <h3 class="text-xl font-bold">Congratulations! You Passed Day 19 Exam!</h3>
+                    <p class="text-xs">Your Score: <strong>${score} / ${examQuestions.length} (${percent}%)</strong></p>
+                    <p class="text-xs text-emerald-700">You have demonstrated core competency in adherence concepts, compliance packaging, PDC/MPR calculations, MedSync workflows, and patient support triage.</p>
+                `;
+                markModuleComplete('mod6');
+            } else {
+                resultsBox.classList.add('bg-red-50', 'border-red-300', 'text-red-900');
+                resultsBox.innerHTML = `
+                    <div class="text-3xl"><i class="fa-solid fa-triangle-exclamation text-red-600"></i></div>
+                    <h3 class="text-xl font-bold">Passing Score Not Met</h3>
+                    <p class="text-xs">Your Score: <strong>${score} / ${examQuestions.length} (${percent}%)</strong> (Passing threshold is 80%).</p>
+                    <p class="text-xs text-red-700">Please review the rationale notes above and retake the exam when ready.</p>
+                `;
+            }
+            resultsBox.scrollIntoView({ behavior: 'smooth' });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Personal Study Notes Modal Logic
+        function toggleNotesModal() {
+            const modal = document.getElementById('notesModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('modalToast');
+            toast.innerText = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        function saveNotes() {
+            const val = document.getElementById('studentNotesArea').value;
+            localStorage.setItem('day19_study_notes', val);
+            showToast("Notes saved successfully!");
+        }
+
+        function loadSavedNotes() {
+            const saved = localStorage.getItem('day19_study_notes');
+            if (saved) {
+                document.getElementById('studentNotesArea').value = saved;
+            }
+            const savedName = localStorage.getItem('day19_student_name');
+            if (savedName) {
+                document.getElementById('studentNameInput').value = savedName;
+            }
+        }
+
+        function clearNotes() {
+            document.getElementById('studentNotesArea').value = '';
+            localStorage.removeItem('day19_study_notes');
+            showToast("Study notes cleared.");
+        }
+
+        function copyNotesToClipboard() {
+            const notes = document.getElementById('studentNotesArea').value;
+            navigator.clipboard.writeText(notes).then(() => {
+                showToast("Notes copied to clipboard!");
+            }).catch(() => {
+                showToast("Failed to copy notes.");
+            });
+        }
+    </script>
+</body>
+</html>
