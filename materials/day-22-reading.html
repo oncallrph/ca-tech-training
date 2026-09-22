@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 22: Pharmacy Technology and Automation</title>
+    
+    <!-- External Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- MathJax for rendering equations -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        pharmacy: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            main { border: none !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-800 flex flex-col bg-slate-100 antialiased">
+
+    <!-- Top Header & Global Status Bar -->
+    <header class="bg-slate-900 text-white shrink-0 border-b border-slate-800 no-print sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-teal-500 to-emerald-400 p-2 rounded-lg text-slate-900 font-bold text-lg leading-none shadow-md">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-teal-400 font-semibold uppercase tracking-wider">CA Pharmacy Tech Program</div>
+                    <div class="text-base font-bold text-white tracking-tight">Day 22: Pharmacy Technology & Automation</div>
+                </div>
+            </div>
+
+            <!-- Timer & Session Stats -->
+            <div class="hidden md:flex items-center space-x-6">
+                <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                    <i class="fa-regular fa-clock text-teal-400"></i>
+                    <span class="text-xs text-slate-300">Time Spent:</span>
+                    <span id="sessionTimer" class="font-mono text-sm font-semibold text-emerald-400">00:00:00</span>
+                </div>
+
+                <div class="text-xs text-slate-400 flex items-center space-x-1">
+                    <i class="fa-solid fa-hourglass-half text-teal-400"></i>
+                    <span>Target: 120 Minutes</span>
+                </div>
+
+                <button onclick="toggleNotesModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-note-sticky text-yellow-400"></i>
+                    <span>Study Notes</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Global Progress Bar -->
+        <div class="w-full bg-slate-800 h-1.5 relative">
+            <div id="overallProgressBar" class="bg-gradient-to-r from-teal-500 to-emerald-400 h-1.5 transition-all duration-500" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <div class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6 overflow-hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full lg:w-80 shrink-0 space-y-4 no-print">
+            <!-- Student Profile Card -->
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center font-bold border border-teal-200 text-lg">
+                        <i class="fa-solid fa-user-gear"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Trainee Session</div>
+                        <input type="text" id="studentNameInput" value="Pharmacy Student" onchange="updateStudentName()" class="font-semibold text-slate-800 text-sm bg-transparent border-b border-dashed border-slate-300 focus:outline-none focus:border-pharmacy-500 w-full" title="Click to edit name">
+                    </div>
+                </div>
+                <div class="space-y-2 text-xs text-slate-600">
+                    <div class="flex justify-between border-b border-slate-100 pb-1">
+                        <span>Modules Completed:</span>
+                        <span id="modulesCompletedCount" class="font-semibold text-slate-800">0 / 6 Modules</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Final Exam Score:</span>
+                        <span id="overallScoreDisplay" class="font-semibold text-pharmacy-600">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="bg-white rounded-xl shadow-sm border border-slate-200 p-2 space-y-1">
+                <div class="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Day 22 Curriculum</div>
+
+                <button onclick="switchTab('overview')" id="nav-overview" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between transition bg-teal-50 text-teal-900 border border-teal-200">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-compass w-4 text-center text-teal-600"></i>
+                        <span>Course Overview</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-teal-500"></i>
+                </button>
+
+                <button onclick="switchTab('mod1')" id="nav-mod1" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-microchip w-4 text-center text-slate-400"></i>
+                        <span class="truncate">1. Role of Technology in Pharmacy</span>
+                    </div>
+                    <span id="status-mod1" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod2')" id="nav-mod2" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-server w-4 text-center text-slate-400"></i>
+                        <span class="truncate">2. Automated Medication Dispensing</span>
+                    </div>
+                    <span id="status-mod2" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">25m</span>
+                </button>
+
+                <button onclick="switchTab('mod3')" id="nav-mod3" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-laptop-medical w-4 text-center text-slate-400"></i>
+                        <span class="truncate">3. Pharmacy Software & EHRs</span>
+                    </div>
+                    <span id="status-mod3" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod4')" id="nav-mod4" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-barcode w-4 text-center text-slate-400"></i>
+                        <span class="truncate">4. Barcode Verification & BCMA</span>
+                    </div>
+                    <span id="status-mod4" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod5')" id="nav-mod5" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-calculator w-4 text-center text-slate-400"></i>
+                        <span class="truncate">5. Automation Math & Case Lab</span>
+                    </div>
+                    <span id="status-mod5" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod6')" id="nav-mod6" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-clipboard-check w-4 text-center text-slate-400"></i>
+                        <span class="truncate">6. Certification Practice Exam</span>
+                    </div>
+                    <span id="status-mod6" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">15m</span>
+                </button>
+            </nav>
+
+            <!-- Quick Reference Drawer Box -->
+            <div class="bg-slate-900 text-slate-200 rounded-xl p-4 shadow-sm text-xs space-y-2.5 border border-slate-800">
+                <div class="font-bold text-teal-400 uppercase tracking-wider flex items-center justify-between">
+                    <span><i class="fa-solid fa-lightbulb text-yellow-400 mr-1.5"></i> Tech Quick Reference</span>
+                </div>
+                <ul class="space-y-2 text-slate-300">
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">ADC:</strong> Automated Dispensing Cabinet (e.g., Pyxis, Omnicell) in clinical units.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">BCMA:</strong> Barcode Medication Administration (scans patient wristband + drug barcode).</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">CPOE:</strong> Computerized Provider Order Entry (directly routes physician orders).</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">NCPDP SCRIPT:</strong> Standard protocol for electronic prescription transmission.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">HL7 Standard:</strong> Messaging framework for sharing data between EHR and Pharmacy software.</span>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Workspace -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto custom-scrollbar min-h-[650px]">
+
+            <!-- ================= TAB: OVERVIEW ================= -->
+            <div id="tab-overview" class="tab-content space-y-6">
+                <div>
+                    <div class="inline-flex items-center space-x-2 bg-teal-100 text-teal-900 text-xs font-semibold px-3 py-1 rounded-full mb-3 border border-teal-200">
+                        <i class="fa-solid fa-graduation-cap text-teal-700"></i>
+                        <span>California Pharmacy Technician Curriculum</span>
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Day 22: Pharmacy Technology and Automation</h1>
+                    <p class="mt-2 text-slate-600 text-sm leading-relaxed">
+                        Welcome to Day 22 of your pharmacy technician training program. Modern health systems and community pharmacies rely heavily on automated technologies to prevent medication errors, streamline workflow efficiency, manage complex drug inventories, and ensure patient safety. Today's curriculum focuses on automated dispensing systems (ADCs), pharmacy management software, Electronic Health Records (EHRs), Computerized Provider Order Entry (CPOE), barcode verification, and automation performance metrics.
+                    </p>
+                </div>
+
+                <!-- Detailed Syllabus Breakdown -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-pharmacy-600"></i>
+                        <span>2-Hour Training Schedule & Core Modules</span>
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 1 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Role of Technology in Pharmacy</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Evolution of technology, CPOE, e-prescribing standards, Central Fill robotics, and technology-assisted verification.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 2 (25 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Automated Medication Dispensing Systems</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Automated Dispensing Cabinets (ADCs: Pyxis, Omnicell), counting machines (Baker cells, ScriptPro), and profiled vs. non-profiled modes.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 3 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Pharmacy Software & EHRs</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Interoperability, Health Level 7 (HL7), NCPDP SCRIPT standards, Electronic Health Records (EHRs), and Clinical Decision Support (CDSS).</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 4 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Barcode Verification & BCMA</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">GS1 and 2D DataMatrix barcodes, Barcode Medication Administration (BCMA) at bedside, and the Five Rights of Medication Safety.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 5 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Automation Math & Case Lab</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Throughput calculations, automation error rate percentage metrics, machine calibration inventory variances, and troubleshooting scenarios.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 6 (15 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Certification Practice Exam</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">15-question comprehensive assessment evaluating technical proficiency in pharmacy systems, barcodes, ADCs, and automation safety.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Objectives -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Core Learning Competencies</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Automation Operations:</strong> Differentiate operations between outpatient counting robots and institutional Automated Dispensing Cabinets (ADCs).</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Interoperability & Data Standards:</strong> Master data transfer protocols including NCPDP SCRIPT for e-prescribing and HL7 for EHR integration.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Barcode Safety & BCMA:</strong> Apply barcode scanning workflows at prescription entry, filling, and bedside administration to ensure the Five Rights.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Technical Calculations & Safety:</strong> Compute filling throughput, automation error rate percentages, and follow override safeguards in health systems.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Start Action Callout -->
+                <div class="p-4 bg-slate-900 rounded-xl text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <div class="font-bold text-sm">Ready to begin Module 1?</div>
+                        <div class="text-xs text-slate-300">Start with the Role of Technology in Pharmacy & CPOE workflows.</div>
+                    </div>
+                    <button onclick="switchTab('mod1')" class="px-5 py-2.5 bg-pharmacy-500 hover:bg-pharmacy-600 text-white rounded-lg font-bold text-xs transition flex items-center space-x-2 shrink-0">
+                        <span>Start Module 1</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 1 ================= -->
+            <div id="tab-mod1" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 1</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Role of Technology in Modern Pharmacy Practice</h2>
+                    <p class="text-slate-600 text-sm mt-1">Computerized order entry, central fill systems, e-prescribing, telepharmacy, and technological risk mitigation.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Strategic Evolution of Pharmacy Technology</h3>
+                    <p>Technology in pharmacy practice has transformed from manual paper handling to integrated digital ecosystems designed to eliminate human transcription errors, accelerate prescription turnaround, and optimize inventory tracking.</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4 text-xs">
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">Computerized Provider Order Entry (CPOE)</div>
+                            <div class="text-slate-600 mt-1">Direct electronic entry of medication orders by prescribers into hospital or clinic systems, eliminating illegible handwriting errors.</div>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-blue-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">E-Prescribing (eRx)</div>
+                            <div class="text-slate-600 mt-1">Transmission of prescription orders directly from outpatient prescribers to retail pharmacy management systems using secure standard protocols.</div>
+                        </div>
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-amber-500 rounded-r-lg">
+                            <div class="font-bold text-slate-900">Central Fill & Robotics</div>
+                            <div class="text-slate-500 mt-1">Off-site high-volume automated facilities that count, package, and label routine refill orders for retail network delivery.</div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Benefits vs. Technology-Induced Risks</h3>
+                    <p>While automation substantially improves efficiency, technicians must remain vigilant regarding technology-induced error modes:</p>
+
+                    <div class="overflow-x-auto my-4 border border-slate-200 rounded-lg">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">Technology Domain</th>
+                                    <th class="p-2.5">Primary Clinical Benefit</th>
+                                    <th class="p-2.5">Potential Risk / Vigilance Area</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-teal-700">E-Prescribing (eRx)</td>
+                                    <td class="p-2.5">Eliminates handwriting misinterpretation and verbal phone misheard names.</td>
+                                    <td class="p-2.5">Wrong patient selection drop-down errors or incorrect drug strength selection.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-blue-700">Clinical Decision Support (CDSS)</td>
+                                    <td class="p-2.5">Flags drug interactions, allergies, and incorrect dosing limits instantly.</td>
+                                    <td class="p-2.5">"Alert Fatigue"—staff overriding critical alerts due to excessive non-critical popups.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-purple-700">Automated Cell Fillers</td>
+                                    <td class="p-2.5">Counts thousands of solid oral doses rapidly with high precision.</td>
+                                    <td class="p-2.5">Cross-contamination from pill dust or loading incorrect stock into counting cells.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-emerald-700">Telepharmacy</td>
+                                    <td class="p-2.5">Expands pharmaceutical care to rural or underserved remote locations.</td>
+                                    <td class="p-2.5">Network latency, camera clarity limits, and strict remote supervision compliance.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Interactive Module 1 Checkpoint -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-circle-question text-yellow-400"></i>
+                            <span>Interactive Checkpoint: Technological Risk Screening</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-2"><strong>Scenario:</strong> During busy pharmacy operations, a technician observes staff quickly clicking "Override" on every pop-up alert displayed on the CPOE/EHR screen without reading them. What clinical hazard does this behavior best represent?</p>
+                        
+                        <div class="space-y-2 text-xs mt-3">
+                            <button onclick="checkM1Case(1)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                A. Hardware processing latency
+                            </button>
+                            <button onclick="checkM1Case(2)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                B. Alert Fatigue, which can lead to ignoring a critical drug interaction or life-threatening allergy warning
+                            </button>
+                            <button onclick="checkM1Case(3)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                C. Automated cell miscalibration
+                            </button>
+                        </div>
+
+                        <div id="m1-case-feedback" class="mt-4 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('overview')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Overview</button>
+                    <button onclick="markModuleComplete('mod1'); switchTab('mod2')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Automated Dispensing Systems</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 2 ================= -->
+            <div id="tab-mod2" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 2</span>
+                        <span>•</span>
+                        <span>25 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Automated Medication Dispensing Systems</h2>
+                    <p class="text-slate-600 text-sm mt-1">Institutional Automated Dispensing Cabinets (ADCs), retail counting robotics, matrix vs. single-pocket drawers, and security modes.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Automated Dispensing Cabinets (ADCs) in Hospitals</h3>
+                    <p>Automated Dispensing Cabinets (such as <strong>Pyxis MedStation</strong> or <strong>Omnicell</strong>) are computerized drug storage units located on hospital nursing units that decentralize drug distribution and enable immediate medication availability.</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4 text-xs">
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                            <div class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-lock text-pharmacy-600"></i>
+                                <span>Profiled vs. Non-Profiled ADC Mode</span>
+                            </div>
+                            <ul class="list-disc list-inside space-y-1.5 text-slate-600">
+                                <li><strong>Profiled Mode (Standard):</strong> The ADC interface links to the hospital pharmacy system. Nurses can only open medication pockets for orders that a pharmacist has reviewed and verified.</li>
+                                <li><strong>Non-Profiled / Override Mode:</strong> Used exclusively during emergencies (e.g., Cardiac Arrest / Code Blue). Allows nurses to pull medications before pharmacist review. Requires immediate retrospective review.</li>
+                            </ul>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                            <div class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-cubes text-pharmacy-600"></i>
+                                <span>Drawer Security Types</span>
+                            </div>
+                            <ul class="list-disc list-inside space-y-1.5 text-slate-600">
+                                <li><strong>Matrix Drawers:</strong> Open drawer exposing multiple drug bins simultaneously. Higher risk of mis-selection. Used for low-risk bulk items.</li>
+                                <li><strong>Single-Lidded / Carousel Drawers:</strong> Unlocks only one specific bin containing the single requested medication. Mandatory for controlled substances and high-alert drugs.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Community & Outpatient Robotic Systems</h3>
+                    <p>Retail and outpatient high-volume pharmacies utilize counting robotics (e.g., <strong>ScriptPro</strong>, <strong>Parata Max</strong>, <strong>Kirby Lester</strong>) to accelerate dispensing:</p>
+
+                    <div class="overflow-x-auto my-4 border border-slate-200 rounded-lg">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">System Technology</th>
+                                    <th class="p-2.5">Operational Mechanism</th>
+                                    <th class="p-2.5">Technician Maintenance Duties</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-semibold text-slate-900">Tabletop Optical Counters (Kirby Lester)</td>
+                                    <td class="p-2.5">Uses infrared beam sensors to count pills as they pass through a funnel hopper.</td>
+                                    <td class="p-2.5">Clean sensor windows with isopropyl alcohol wipes regularly to remove pill dust.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-semibold text-slate-900">Dedicated Cell Robotic Dispensers (ScriptPro/Parata)</td>
+                                    <td class="p-2.5">Calibrated cell drives count, drop into vial, label, and present ready vial for inspection.</td>
+                                    <td class="p-2.5">Replenish stock cells with correct NDC, verify lot/expiry numbers, perform routine calibration checks.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Interactive Module 2 Quiz -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-vial text-yellow-400"></i>
+                            <span>Interactive ADC Security Challenge</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Question:</strong> Which operating mode of an Automated Dispensing Cabinet (ADC) allows a nurse to access high-alert emergency medications prior to pharmacist review, and what safety protocol is required afterward?</p>
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod2Quiz(1)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">A. Matrix mode; no post-review is required.</button>
+                            <button onclick="checkMod2Quiz(2)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">B. Override / Non-Profiled mode; requires retrospective review and documentation by the pharmacist.</button>
+                            <button onclick="checkMod2Quiz(3)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">C. Profiled mode; requires dual nurse signature on all non-controlled drugs.</button>
+                        </div>
+                        <div id="mod2-quiz-feedback" class="mt-3 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod1')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Role of Technology</button>
+                    <button onclick="markModuleComplete('mod2'); switchTab('mod3')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Pharmacy Software & EHRs</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 3 ================= -->
+            <div id="tab-mod3" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 3</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Pharmacy Software Standards, EHRs & Data Interoperability</h2>
+                    <p class="text-slate-600 text-sm mt-1">Interoperability standards (NCPDP SCRIPT, HL7), electronic health records, electronic prior authorization, and billing data exchange.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Electronic Data Interchange (EDI) Protocols</h3>
+                    <p>For electronic health records (EHRs) and retail pharmacy systems to communicate seamlessly, standard messaging protocols are mandated by state and federal regulations:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 my-4 text-xs">
+                        <div class="p-3 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <span class="font-bold text-slate-900 font-mono text-sm block">NCPDP SCRIPT Standard</span>
+                            <span class="text-slate-600">The National Council for Prescription Drug Programs standard used for electronic prescribing between physician software and community pharmacies (transmits new rx, renewals, cancellations, and fill status).</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <span class="font-bold text-slate-900 font-mono text-sm block">HL7 (Health Level Seven)</span>
+                            <span class="text-slate-600">The primary international data messaging framework used inside hospital networks to exchange patient demographics, admission/discharge updates, and medication orders between the hospital EHR and Pharmacy Management System.</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <span class="font-bold text-slate-900 font-mono text-sm block">NCPDP Telecommunication Standard</span>
+                            <span class="text-slate-600">The standard format used for real-time electronic third-party billing claim adjudication between pharmacy software and Pharmacy Benefit Managers (PBMs).</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg">
+                            <span class="font-bold text-slate-900 font-mono text-sm block">ePA (Electronic Prior Authorization)</span>
+                            <span class="text-slate-600">System integrated into pharmacy software that automatically routes prior authorization requests to prescribers and payers electronically to reduce delays.</span>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Essential Fields in Pharmacy Software Entry</h3>
+                    <p>During data entry, technicians must ensure exact field mapping from electronic prescription messages:</p>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl my-4 text-xs space-y-3">
+                        <div class="font-mono text-center text-teal-300 text-sm font-bold bg-slate-800 p-3 rounded border border-slate-700">
+                            Electronic Prescription Mapping Workflow
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-slate-200 text-[11px]">
+                            <div class="bg-slate-800 p-2.5 rounded border border-slate-700">
+                                <strong class="text-yellow-400">Patient Identifiers:</strong> Full Legal Name, DOB, Address, Gender, and Drug Allergies.
+                            </div>
+                            <div class="bg-slate-800 p-2.5 rounded border border-slate-700">
+                                <strong class="text-yellow-400">Prescriber Identifiers:</strong> Name, NPI Number, DEA Number (for controlled substances), Practice Address.
+                            </div>
+                            <div class="bg-slate-800 p-2.5 rounded border border-slate-700">
+                                <strong class="text-yellow-400">Drug Product Data:</strong> Exact NDC, Drug Name, Strength, Dosage Form, and Package Quantity.
+                            </div>
+                            <div class="bg-slate-800 p-2.5 rounded border border-slate-700">
+                                <strong class="text-yellow-400">SIG & Refill Data:</strong> Structured Directions for use, Refills remaining, DAW Code, and Days' Supply calculation.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Data Standard Scenario -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-network-wired text-yellow-400"></i>
+                            <span>Interactive Data Exchange Scenario</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Scenario:</strong> A community pharmacy receives an electronic prescription transmission directly from a clinic's electronic medical record system. What standardized data transmission protocol governs this e-prescribing exchange?</p>
+
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod3Scenario(1)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">1. HIPAA Title II Encryption Standard only</button>
+                            <button onclick="checkMod3Scenario(2)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">2. NCPDP SCRIPT Standard</button>
+                            <button onclick="checkMod3Scenario(3)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">3. Barcode Matrix Code Standard</button>
+                        </div>
+
+                        <div id="mod3-feedback" class="mt-3 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod2')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Automated Dispensing</button>
+                    <button onclick="markModuleComplete('mod3'); switchTab('mod4')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Barcode Verification & BCMA</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 4 ================= -->
+            <div id="tab-mod4" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 4</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Medication Barcode Verification & Barcode Administration (BCMA)</h2>
+                    <p class="text-slate-600 text-sm mt-1">GS1 2D barcodes, National Drug Code (NDC) scanning verification, Barcode Medication Administration (BCMA), and the Five Rights of Medication Administration.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Barcode Verification Workflows in Pharmacy Dispensing</h3>
+                    <p>FDA regulations mandate linear UPC or 2D GS1 DataMatrix barcodes on all prescription drug manufacturer packaging to eliminate stock selection errors:</p>
+
+                    <div class="overflow-x-auto my-4 border border-slate-200 rounded-lg">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">Barcode Technology</th>
+                                    <th class="p-2.5">Embedded Information</th>
+                                    <th class="p-2.5">Pharmacy Safety Checkpoint</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-teal-700">Linear Barcode (1D UPC)</td>
+                                    <td class="p-2.5">Encodes the 10-digit or 11-digit National Drug Code (NDC).</td>
+                                    <td class="p-2.5">Scanned at prescription filling station to match hard-copy/system NDC.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-blue-700">2D DataMatrix (GS1 Standard)</td>
+                                    <td class="p-2.5">Encodes NDC, Lot Number, Expiration Date, and Serial Number.</td>
+                                    <td class="p-2.5">Scanned during receiving, unit-dose repackaging, and compounding tracking.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Barcode Medication Administration (BCMA) at Bedside</h3>
+                    <p>In institutional hospital settings, nurses utilize <strong>BCMA technology</strong> prior to administering any drug to a patient to verify the <strong>Five Rights of Medication Administration</strong>:</p>
+
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg text-xs space-y-2 text-amber-950">
+                        <div class="font-bold text-sm text-amber-900"><i class="fa-solid fa-shield-halved mr-1.5"></i> The 5 Rights Verified via BCMA Scanning:</div>
+                        <ul class="list-disc list-inside space-y-1 text-slate-800">
+                            <li><strong>Right Patient:</strong> Scanned from patient's wristband barcode.</li>
+                            <li><strong>Right Medication:</strong> Scanned from the unit-dose drug packet barcode.</li>
+                            <li><strong>Right Dose:</strong> Verified against the electronic Medication Administration Record (eMAR).</li>
+                            <li><strong>Right Route:</strong> Verified against prescriber order in eMAR.</li>
+                            <li><strong>Right Time:</strong> System confirms scheduled administration window.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Interactive Safety Alert Check -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-barcode text-yellow-400"></i>
+                            <span>Interactive BCMA Safety Checkpoint</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Scenario:</strong> While stocking unit-dose packages into an automated cabinet, the scanner alerts "NDC Mismatch! Hard Stop." What is the immediate required action by the technician?</p>
+
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod4Recall(1)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">A. Press "Bypass Scan" and place the medication in the pocket anyway.</button>
+                            <button onclick="checkMod4Recall(2)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">B. Stop immediately, isolate the medication container, and verify the physical label NDC against the order NDC before proceeding.</button>
+                            <button onclick="checkMod4Recall(3)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">C. Relabel the box with a generic thermal sticker without checking manufacturer credentials.</button>
+                        </div>
+
+                        <div id="mod4-recall-feedback" class="mt-4 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod3')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Pharmacy Software</button>
+                    <button onclick="markModuleComplete('mod4'); switchTab('mod5')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Automation Math & Case Lab</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 5 ================= -->
+            <div id="tab-mod5" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 5</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Automation Calculations, Throughput Metrics & Technical Case Lab</h2>
+                    <p class="text-slate-600 text-sm mt-1">Filling throughput rate, automation error rate percentages, downtime inventory reconciliation, and system troubleshooting.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Filling Throughput Rate Formula</h3>
+                    <p>Throughput rate measures system efficiency in completed filled prescriptions per hour:</p>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl my-4 text-xs space-y-3">
+                        <div class="font-mono text-center text-teal-300 text-sm font-bold bg-slate-800 p-3 rounded border border-slate-700">
+                            \(\text{Throughput (prescriptions/hr)} = \frac{\text{Total Prescriptions Dispensed}}{\text{Total Operational Hours}}\)
+                        </div>
+                        <div class="text-slate-300 text-[11px] leading-relaxed">
+                            <strong>Sample Calculation:</strong> A retail counting robot dispenses $480$ prescriptions over a $6\text{-hour}$ shift. What is the throughput rate?
+                            <div class="font-mono text-emerald-400 mt-1">
+                                \(\text{Throughput} = \frac{480 \text{ prescriptions}}{6 \text{ hours}} = 80 \text{ prescriptions/hour}\)
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Automation Error Rate Percentage Formula</h3>
+                    <p>Quality assurance programs track miscounts or jams to compute error percentages:</p>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl my-4 text-xs space-y-3">
+                        <div class="font-mono text-center text-teal-300 text-sm font-bold bg-slate-800 p-3 rounded border border-slate-700">
+                            \(\text{Automation Error Rate (\%)} = \left( \frac{\text{Number of Automation Errors}}{\text{Total Batched Orders}} \right) \times 100\%\)
+                        </div>
+                        <div class="text-slate-300 text-[11px] leading-relaxed">
+                            <strong>Sample Calculation:</strong> An automated cell dispenser filled $2,500$ orders this month. Quality audit found $5$ counting discrepancies. What is the error rate percentage?
+                            <div class="font-mono text-emerald-400 mt-1">
+                                \(\text{Error Rate} = \left( \frac{5}{2500} \right) \times 100\% = 0.002 \times 100\% = 0.2\%\)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Math Practice Lab -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-calculator text-yellow-400"></i>
+                            <span>Interactive Automation Math Lab</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Math Case:</strong> A central fill robotic system fills $1,200$ prescriptions during an $8\text{-hour}$ operating shift. Out of these, $6$ prescriptions experienced optical scanner misreads that required manual intervention. Calculate the throughput rate (prescriptions/hour) AND the error rate percentage!</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs my-3">
+                            <button onclick="checkMathLab(1)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">A. Throughput: 100 rx/hr; Error Rate: 1.0%</button>
+                            <button onclick="checkMathLab(2)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">B. Throughput: 150 rx/hr; Error Rate: 0.5%</button>
+                            <button onclick="checkMathLab(3)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">C. Throughput: 120 rx/hr; Error Rate: 0.25%</button>
+                        </div>
+
+                        <div id="math-lab-feedback" class="p-3.5 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod4')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Barcode Verification</button>
+                    <button onclick="markModuleComplete('mod5'); switchTab('mod6')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Certification Exam</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 6 (FINAL EXAM) ================= -->
+            <div id="tab-mod6" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 6</span>
+                        <span>•</span>
+                        <span>15 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Day 22 Certification Practice Exam</h2>
+                    <p class="text-slate-600 text-sm mt-1">Evaluate your mastery of pharmacy technology, automated dispensing cabinets, software standards (NCPDP, HL7), barcode verification (BCMA), CPOE, and automation throughput calculations.</p>
+                </div>
+
+                <!-- Exam Start Intro -->
+                <div id="exam-start-box" class="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center space-y-4">
+                    <div class="w-16 h-16 bg-pharmacy-100 text-pharmacy-700 rounded-full flex items-center justify-center mx-auto text-2xl font-bold border border-pharmacy-200">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">15-Question Comprehensive Certification Exam</h3>
+                    <p class="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">Passing threshold is 80% (12/15 correct). Detailed rationale provided for every question upon completion.</p>
+                    <button onclick="startFinalExam()" class="px-6 py-3 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg font-bold text-xs transition shadow-md inline-flex items-center space-x-2">
+                        <span>Begin Assessment Exam</span>
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                </div>
+
+                <!-- Exam Container -->
+                <div id="exam-container" class="hidden space-y-6">
+                    <div id="quiz-questions-list" class="space-y-6"></div>
+
+                    <div class="pt-4 border-t border-slate-200 flex justify-end">
+                        <button onclick="submitFinalExam()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-lg transition flex items-center space-x-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Submit Assessment Exam</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Exam Results Box -->
+                <div id="exam-results-box" class="hidden p-6 rounded-xl border text-center space-y-4"></div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod5')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Automation Math</button>
+                    <button onclick="switchTab('overview')" class="px-4 py-2 bg-slate-800 text-white hover:bg-slate-900 rounded-lg text-xs font-semibold">Return to Overview</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Study Notes Modal Window -->
+    <div id="notesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 space-y-4 border border-slate-200">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                <div class="flex items-center space-x-2 text-slate-900 font-bold text-base">
+                    <i class="fa-solid fa-note-sticky text-yellow-500"></i>
+                    <span>Trainee Personal Study Notes</span>
+                </div>
+                <button onclick="toggleNotesModal()" class="text-slate-400 hover:text-slate-600 text-lg p-1">&times;</button>
+            </div>
+            
+            <p class="text-xs text-slate-500">Record customized notes, key software protocols, ADC override safety rules, or math formulas here. Notes save automatically in browser session storage.</p>
+            
+            <textarea id="studentNotesArea" rows="10" placeholder="Type key learnings, Pyxis/Omnicell protocols, BCMA 5 Rights, or NCPDP data exchange standards here..." class="w-full text-xs font-mono p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-pharmacy-500 leading-relaxed custom-scrollbar"></textarea>
+            
+            <div id="modalToast" class="hidden p-2 bg-emerald-100 text-emerald-800 text-xs rounded border border-emerald-300 font-semibold"></div>
+
+            <div class="flex items-center justify-between pt-2">
+                <div class="flex space-x-2">
+                    <button onclick="copyNotesToClipboard()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition flex items-center space-x-1">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Copy Notes</span>
+                    </button>
+                    <button onclick="clearNotes()" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-xs rounded-lg transition">
+                        Clear Notes
+                    </button>
+                </div>
+                <button onclick="saveNotes(); toggleNotesModal()" class="px-4 py-1.5 bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-bold text-xs rounded-lg transition">
+                    Save & Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let completedModules = new Set();
+        let secondsElapsed = 0;
+        let timerInterval = null;
+
+        // Exam Question Bank for Day 22: Pharmacy Technology and Automation
+        const examQuestions = [
+            {
+                q: "1. Which technology system allows prescribers to enter medication orders directly into a health system software network, eliminating illegible handwriting errors?",
+                options: [
+                    "A. Barcode Medication Administration (BCMA)",
+                    "B. Computerized Provider Order Entry (CPOE)",
+                    "C. Automated Replenishment Drawer (ARD)",
+                    "D. Central Fill Auxiliary Unit"
+                ],
+                correct: 1,
+                rationale: "Computerized Provider Order Entry (CPOE) allows physicians to electronically input orders, preventing illegibility and transcription errors."
+            },
+            {
+                q: "2. What decentralized medication storage machine is situated in hospital nursing units to provide immediate automated drug access?",
+                options: [
+                    "A. Automated Dispensing Cabinet (ADC, e.g., Pyxis, Omnicell)",
+                    "B. Laminar Airflow Workbench",
+                    "C. Tabletop Optical Counter",
+                    "D. Horizontal Pass-Through Refrigerator"
+                ],
+                correct: 0,
+                rationale: "ADCs (Pyxis, Omnicell) store medications on nursing floors and release specific doses upon order authorization."
+            },
+            {
+                q: "3. What standard data transmission protocol is used for electronic prescribing between outpatient clinic software and retail pharmacy management systems?",
+                options: [
+                    "A. HL7 Order Protocol",
+                    "B. NCPDP SCRIPT Standard",
+                    "C. USP Chapter <800>",
+                    "D. FDA Green Book Protocol"
+                ],
+                correct: 1,
+                rationale: "NCPDP SCRIPT is the national standard format governing electronic prescription transmission."
+            },
+            {
+                q: "4. In hospital inpatient practice, what barcode technology is scanned at the patient's bedside to verify the Five Rights of Medication Administration?",
+                options: [
+                    "A. Barcode Medication Administration (BCMA)",
+                    "B. Computerized Provider Order Entry (CPOE)",
+                    "C. Centralized Inventory Matrix (CIM)",
+                    "D. Electronic Prior Authorization (ePA)"
+                ],
+                correct: 0,
+                rationale: "BCMA matches the patient's wristband barcode to the medication unit-dose barcode prior to administration."
+            },
+            {
+                q: "5. What data messaging standard is used internally across health system networks to share patient demographics and medical records between EHRs and pharmacy software?",
+                options: [
+                    "A. Health Level Seven (HL7)",
+                    "B. NCPDP Telecommunication Standard",
+                    "C. DEA Form 222 EDI",
+                    "D. Combat Methamphetamine Epidemic Act Protocol"
+                ],
+                correct: 0,
+                rationale: "HL7 is the universal messaging framework for sharing clinical data across hospital electronic health record systems."
+            },
+            {
+                q: "6. When an Automated Dispensing Cabinet (ADC) is operated in 'Override' or non-profiled mode during a medical emergency, what safety protocol is mandatory?",
+                options: [
+                    "A. Medications can be pulled without subsequent record keeping.",
+                    "B. Retrospective review and reconciliation must be performed by a pharmacist promptly following the emergency.",
+                    "C. The drawer permanently locks until the pharmacy director inspects it.",
+                    "D. All controlled substances are automatically destroyed."
+                ],
+                correct: 1,
+                rationale: "Emergency overrides bypass upfront pharmacist review, requiring mandatory retrospective clinical review immediately afterward."
+            },
+            {
+                q: "7. Which drawer type in an Automated Dispensing Cabinet provides the highest security by opening only a single lidded compartment for high-risk medications?",
+                options: [
+                    "A. Open Matrix Drawer",
+                    "B. Single-Lidded / Carousel Pocket Drawer",
+                    "C. Bulk Shelf Bin",
+                    "D. Passive Gravity Chute"
+                ],
+                correct: 1,
+                rationale: "Single-lidded / pocket drawers restrict access to one specific drug bin, preventing mis-selection of high-alert or controlled substances."
+            },
+            {
+                q: "8. What frequent human risk occurs when pharmacy staff continuously encounter excessive non-critical software warning pop-ups and begin overriding them automatically?",
+                options: [
+                    "A. Optical Sensor Latency",
+                    "B. Alert Fatigue",
+                    "C. Hardware Calibration Drift",
+                    "D. Network Packet Loss"
+                ],
+                correct: 1,
+                rationale: "Alert Fatigue causes users to desensitize to pop-up alerts, increasing the risk of missing critical drug-drug interaction or allergy warnings."
+            },
+            {
+                q: "9. Calculate the filling throughput rate for an automated robotic dispenser that completes $600$ prescriptions during a $5\text{-hour}$ shift.",
+                options: [
+                    "A. 100 rx/hr",
+                    "B. 120 rx/hr",
+                    "C. 150 rx/hr",
+                    "D. 200 rx/hr"
+                ],
+                correct: 1,
+                rationale: "$\text{Throughput} = \\frac{600 \\text{ prescriptions}}{5 \\text{ hours}} = 120 \\text{ rx/hour}$."
+            },
+            {
+                q: "10. What type of barcode standard multidimensionally encodes the NDC, lot number, expiration date, and unique serial number in a small square pattern?",
+                options: [
+                    "A. Linear UPC Barcode",
+                    "B. 2D DataMatrix (GS1 Standard)",
+                    "C. Code 39 Barcode",
+                    "D. Postal Code Bar"
+                ],
+                correct: 1,
+                rationale: "2D DataMatrix barcodes store comprehensive product metadata including lot number, expiration date, and serial number."
+            },
+            {
+                q: "11. Routine maintenance of tabletop optical counting machines (e.g., Kirby Lester) by pharmacy technicians requires cleaning which component to prevent miscounts?",
+                options: [
+                    "A. Thermal printer head with lubricant oil",
+                    "B. Optical infrared sensor glass windows with alcohol wipes",
+                    "C. Internal motherboard circuits with water",
+                    "D. Rubber drive belt with acetone"
+                ],
+                correct: 1,
+                rationale: "Pill dust accumulating on optical sensor glass windows interferes with infrared light beams, requiring regular cleaning with isopropyl alcohol."
+            },
+            {
+                q: "12. An automated counting system processed $4,000$ tablet fills and experienced $10$ counting errors during monthly audit checks. What is the automation error rate percentage?",
+                options: [
+                    "A. 0.25%",
+                    "B. 0.50%",
+                    "C. 1.00%",
+                    "D. 2.50%"
+                ],
+                correct: 0,
+                rationale: "$\\text{Error Rate} = \\left( \\frac{10}{4000} \\right) \\times 100\\% = 0.0025 \\times 100\\% = 0.25\\%$."
+            },
+            {
+                q: "13. What software functionality in community pharmacy systems facilitates immediate electronic submission of drug claims to insurance payers (PBMs) for coverage verification?",
+                options: [
+                    "A. Real-Time Adjudication",
+                    "B. Retrospective Audit Logging",
+                    "C. Batch File Archiving",
+                    "D. Telepharmacy Camera Mirroring"
+                ],
+                correct: 0,
+                rationale: "Real-time adjudication sends claim data electronically to PBMs for instant approval, copay calculation, and co-insurance response."
+            },
+            {
+                q: "14. Which of the following is NOT one of the traditional Five Rights of Medication Administration verified during BCMA bedside scanning?",
+                options: [
+                    "A. Right Patient",
+                    "B. Right Medication",
+                    "C. Right Pharmacy Wholesaler",
+                    "D. Right Route"
+                ],
+                correct: 2,
+                rationale: "The Five Rights are Right Patient, Right Drug, Right Dose, Right Route, and Right Time. Wholesaler selection is an inventory function."
+            },
+            {
+                q: "15. What primary task must a pharmacy technician execute when refilling automated cells in a counting robot to maintain system safety?",
+                options: [
+                    "A. Scan both the cell barcode and the manufacturer bottle barcode to verify NDC match.",
+                    "B. Mix pills from different manufacturers into the same cell if strengths are equal.",
+                    "C. Override all expiration date warnings to save time.",
+                    "D. Disable the optical counting sensors."
+                ],
+                correct: 0,
+                rationale: "Scanning both cell and stock bottle barcodes verifies exact NDC compatibility before pouring tablets into the robot cell."
+            }
+        ];
+
+        window.onload = function() {
+            startTimer();
+            loadSavedNotes();
+        };
+
+        // Session Timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const hrs = String(Math.floor(secondsElapsed / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((secondsElapsed % 3600) / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                document.getElementById('sessionTimer').innerText = `${hrs}:${mins}:${secs}`;
+            }, 1000);
+        }
+
+        // Student Name Handler
+        function updateStudentName() {
+            const name = document.getElementById('studentNameInput').value;
+            localStorage.setItem('day22_student_name', name);
+        }
+
+        // Navigation Tab Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-teal-50', 'text-teal-900', 'border', 'border-teal-200');
+                btn.classList.add('text-slate-600');
+            });
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-600');
+                activeBtn.classList.add('bg-teal-50', 'text-teal-900', 'border', 'border-teal-200');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Mark Module Complete
+        function markModuleComplete(modId) {
+            completedModules.add(modId);
+            const statusBadge = document.getElementById(`status-${modId}`);
+            if (statusBadge) {
+                statusBadge.innerHTML = '<i class="fa-solid fa-circle-check text-teal-600"></i> Done';
+                statusBadge.classList.remove('bg-slate-100', 'text-slate-500');
+                statusBadge.classList.add('bg-teal-100', 'text-teal-800');
+            }
+
+            const total = 6;
+            const count = completedModules.size;
+            document.getElementById('modulesCompletedCount').innerText = `${count} / ${total} Modules`;
+            const pct = Math.round((count / total) * 100);
+            document.getElementById('overallProgressBar').style.width = `${pct}%`;
+        }
+
+        // Module 1 Checkpoint Check
+        function checkM1Case(choice) {
+            const feedback = document.getElementById('m1-case-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Identification!</strong> Alert Fatigue occurs when excessive non-critical popups cause staff to desensitize and bypass critical warnings without reading them.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Selection.</strong> Automatically bypassing pop-up warnings represents Alert Fatigue.";
+            }
+        }
+
+        // Module 2 Quiz Check
+        function checkMod2Quiz(choice) {
+            const feedback = document.getElementById('mod2-quiz-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Protocol!</strong> Emergency Override / Non-Profiled mode allows drug removal during emergencies, but mandates retrospective pharmacist verification.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Choice.</strong> Emergency access uses Override mode, which requires immediate retrospective review after the event.";
+            }
+        }
+
+        // Module 3 Audit Check
+        function checkMod3Scenario(choice) {
+            const feedback = document.getElementById('mod3-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Protocol!</strong> The NCPDP SCRIPT standard governs e-prescribing communication between prescriber software and community pharmacies.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Protocol.</strong> E-prescribing exchanges utilize the NCPDP SCRIPT standard.";
+            }
+        }
+
+        // Module 4 Recall Check
+        function checkMod4Recall(choice) {
+            const feedback = document.getElementById('mod4-recall-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Safety Action!</strong> Never bypass an NDC scan mismatch. Stop immediately, isolate the product, and re-verify product packaging and order details.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Safety Action.</strong> Scanner hard stops indicate a potential wrong drug selection; bypassing scanning destroys safety checks.";
+            }
+        }
+
+        // Module 5 Math Lab Check
+        function checkMathLab(choice) {
+            const feedback = document.getElementById('math-lab-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Calculation!</strong> Throughput $= \\frac{1200}{8} = 150 \\text{ rx/hr}$. Error Rate $= \\left( \\frac{6}{1200} \\right) \\times 100\\% = 0.005 \\times 100\\% = 0.5\\%$.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Calculation.</strong> Throughput $= \\frac{1200}{8} = 150 \\text{ rx/hr}$. Error Rate $= \\left( \\frac{6}{1200} \\right) \\times 100\\% = 0.5\\%$.";
+            }
+        }
+
+        // Exam Methods
+        function startFinalExam() {
+            document.getElementById('exam-start-box').classList.add('hidden');
+            document.getElementById('exam-container').classList.remove('hidden');
+
+            const list = document.getElementById('quiz-questions-list');
+            list.innerHTML = '';
+
+            examQuestions.forEach((q, idx) => {
+                const qCard = document.createElement('div');
+                qCard.className = 'p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-3';
+                
+                let optionsHtml = '';
+                q.options.forEach((opt, optIdx) => {
+                    optionsHtml += `
+                        <label class="flex items-center space-x-3 p-2.5 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition text-xs text-slate-800">
+                            <input type="radio" name="exam_q_${idx}" value="${optIdx}" class="text-pharmacy-600 focus:ring-pharmacy-500">
+                            <span>${opt}</span>
+                        </label>
+                    `;
+                });
+
+                qCard.innerHTML = `
+                    <div class="font-bold text-slate-900 text-xs sm:text-sm">${q.q}</div>
+                    <div class="space-y-2">${optionsHtml}</div>
+                    <div id="rationale_q_${idx}" class="hidden p-3 rounded-lg text-xs mt-2"></div>
+                `;
+                list.appendChild(qCard);
+            });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function submitFinalExam() {
+            let score = 0;
+            examQuestions.forEach((q, idx) => {
+                const selected = document.querySelector(`input[name="exam_q_${idx}"]:checked`);
+                const rationaleDiv = document.getElementById(`rationale_q_${idx}`);
+                rationaleDiv.classList.remove('hidden', 'bg-red-100', 'bg-emerald-100', 'text-red-900', 'text-emerald-900');
+
+                if (selected && parseInt(selected.value) === q.correct) {
+                    score++;
+                    rationaleDiv.classList.add('bg-emerald-100', 'text-emerald-900', 'border', 'border-emerald-200');
+                    rationaleDiv.innerHTML = `<strong>Correct!</strong> ${q.rationale}`;
+                } else {
+                    rationaleDiv.classList.add('bg-red-100', 'text-red-900', 'border', 'border-red-200');
+                    rationaleDiv.innerHTML = `<strong>Incorrect.</strong> ${q.rationale}`;
+                }
+            });
+
+            const percent = Math.round((score / examQuestions.length) * 100);
+            document.getElementById('overallScoreDisplay').innerText = `${percent}%`;
+            
+            const resultsBox = document.getElementById('exam-results-box');
+            resultsBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'bg-red-50', 'border-red-200');
+
+            if (percent >= 80) {
+                resultsBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+                resultsBox.innerHTML = `
+                    <div class="text-3xl"><i class="fa-solid fa-circle-check text-emerald-600"></i></div>
+                    <h3 class="text-xl font-bold">Congratulations! You Passed Day 22 Exam!</h3>
+                    <p class="text-xs">Your Score: <strong>${score} / ${examQuestions.length} (${percent}%)</strong></p>
+                    <p class="text-xs text-emerald-700">You have demonstrated core competency in pharmacy technology, automated dispensing cabinets, software standards (NCPDP, HL7), barcode verification (BCMA), CPOE, and throughput math.</p>
+                `;
+                markModuleComplete('mod6');
+            } else {
+                resultsBox.classList.add('bg-red-50', 'border-red-300', 'text-red-900');
+                resultsBox.innerHTML = `
+                    <div class="text-3xl"><i class="fa-solid fa-triangle-exclamation text-red-600"></i></div>
+                    <h3 class="text-xl font-bold">Passing Score Not Met</h3>
+                    <p class="text-xs">Your Score: <strong>${score} / ${examQuestions.length} (${percent}%)</strong> (Passing threshold is 80%).</p>
+                    <p class="text-xs text-red-700">Please review the rationale notes above and retake the exam when ready.</p>
+                `;
+            }
+            resultsBox.scrollIntoView({ behavior: 'smooth' });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Personal Study Notes Modal Logic
+        function toggleNotesModal() {
+            const modal = document.getElementById('notesModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('modalToast');
+            toast.innerText = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        function saveNotes() {
+            const val = document.getElementById('studentNotesArea').value;
+            localStorage.setItem('day22_study_notes', val);
+            showToast("Notes saved successfully!");
+        }
+
+        function loadSavedNotes() {
+            const saved = localStorage.getItem('day22_study_notes');
+            if (saved) {
+                document.getElementById('studentNotesArea').value = saved;
+            }
+            const savedName = localStorage.getItem('day22_student_name');
+            if (savedName) {
+                document.getElementById('studentNameInput').value = savedName;
+            }
+        }
+
+        function clearNotes() {
+            document.getElementById('studentNotesArea').value = '';
+            localStorage.removeItem('day22_study_notes');
+            showToast("Study notes cleared.");
+        }
+
+        function copyNotesToClipboard() {
+            const notes = document.getElementById('studentNotesArea').value;
+            navigator.clipboard.writeText(notes).then(() => {
+                showToast("Notes copied to clipboard!");
+            }).catch(() => {
+                showToast("Failed to copy notes.");
+            });
+        }
+    </script>
+</body>
+</html>
+```
+
+The interactive `day-22-reading.html` learning document for **Pharmacy Technology and Automation** has been generated.

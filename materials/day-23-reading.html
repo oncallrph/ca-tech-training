@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 23: Pharmacy Workflow and Customer Service</title>
+    
+    <!-- External Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- MathJax for rendering equations -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        pharmacy: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            main { border: none !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-800 flex flex-col bg-slate-100 antialiased">
+
+    <!-- Top Header & Global Status Bar -->
+    <header class="bg-slate-900 text-white shrink-0 border-b border-slate-800 no-print sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-teal-500 to-emerald-400 p-2 rounded-lg text-slate-900 font-bold text-lg leading-none shadow-md">
+                    <i class="fa-solid fa-users-gear"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-teal-400 font-semibold uppercase tracking-wider">CA Pharmacy Tech Program</div>
+                    <div class="text-base font-bold text-white tracking-tight">Day 23: Pharmacy Workflow & Customer Service</div>
+                </div>
+            </div>
+
+            <!-- Timer & Session Stats -->
+            <div class="hidden md:flex items-center space-x-6">
+                <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                    <i class="fa-regular fa-clock text-teal-400"></i>
+                    <span class="text-xs text-slate-300">Time Spent:</span>
+                    <span id="sessionTimer" class="font-mono text-sm font-semibold text-emerald-400">00:00:00</span>
+                </div>
+
+                <div class="text-xs text-slate-400 flex items-center space-x-1">
+                    <i class="fa-solid fa-hourglass-half text-teal-400"></i>
+                    <span>Target: 120 Minutes</span>
+                </div>
+
+                <button onclick="toggleNotesModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-note-sticky text-yellow-400"></i>
+                    <span>Study Notes</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Global Progress Bar -->
+        <div class="w-full bg-slate-800 h-1.5 relative">
+            <div id="overallProgressBar" class="bg-gradient-to-r from-teal-500 to-emerald-400 h-1.5 transition-all duration-500" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <div class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6 overflow-hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full lg:w-80 shrink-0 space-y-4 no-print">
+            <!-- Student Profile Card -->
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center font-bold border border-teal-200 text-lg">
+                        <i class="fa-solid fa-user-nurse"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Trainee Session</div>
+                        <input type="text" id="studentNameInput" value="Pharmacy Student" onchange="updateStudentName()" class="font-semibold text-slate-800 text-sm bg-transparent border-b border-dashed border-slate-300 focus:outline-none focus:border-pharmacy-500 w-full" title="Click to edit name">
+                    </div>
+                </div>
+                <div class="space-y-2 text-xs text-slate-600">
+                    <div class="flex justify-between border-b border-slate-100 pb-1">
+                        <span>Modules Completed:</span>
+                        <span id="modulesCompletedCount" class="font-semibold text-slate-800">0 / 6 Modules</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Final Exam Score:</span>
+                        <span id="overallScoreDisplay" class="font-semibold text-pharmacy-600">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="bg-white rounded-xl shadow-sm border border-slate-200 p-2 space-y-1">
+                <div class="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Day 23 Curriculum</div>
+
+                <button onclick="switchTab('overview')" id="nav-overview" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between transition bg-teal-50 text-teal-900 border border-teal-200">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-compass w-4 text-center text-teal-600"></i>
+                        <span>Course Overview</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-teal-500"></i>
+                </button>
+
+                <button onclick="switchTab('mod1')" id="nav-mod1" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-diagram-project w-4 text-center text-slate-400"></i>
+                        <span class="truncate">1. Pharmacy Station Workflow</span>
+                    </div>
+                    <span id="status-mod1" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod2')" id="nav-mod2" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-handshake-angle w-4 text-center text-slate-400"></i>
+                        <span class="truncate">2. Excellence in Customer Service</span>
+                    </div>
+                    <span id="status-mod2" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">25m</span>
+                </button>
+
+                <button onclick="switchTab('mod3')" id="nav-mod3" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-user-doctor w-4 text-center text-slate-400"></i>
+                        <span class="truncate">3. Counseling & Tech Boundaries</span>
+                    </div>
+                    <span id="status-mod3" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod4')" id="nav-mod4" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-comments-dollar w-4 text-center text-slate-400"></i>
+                        <span class="truncate">4. Conflict Resolution & LAST</span>
+                    </div>
+                    <span id="status-mod4" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod5')" id="nav-mod5" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-calculator w-4 text-center text-slate-400"></i>
+                        <span class="truncate">5. Workflow Math & Capacity Lab</span>
+                    </div>
+                    <span id="status-mod5" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">20m</span>
+                </button>
+
+                <button onclick="switchTab('mod6')" id="nav-mod6" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium flex items-center justify-between transition text-slate-600 hover:bg-slate-50">
+                    <div class="flex items-center space-x-3 truncate">
+                        <i class="fa-solid fa-clipboard-check w-4 text-center text-slate-400"></i>
+                        <span class="truncate">6. Certification Practice Exam</span>
+                    </div>
+                    <span id="status-mod6" class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono shrink-0">15m</span>
+                </button>
+            </nav>
+
+            <!-- Quick Reference Drawer Box -->
+            <div class="bg-slate-900 text-slate-200 rounded-xl p-4 shadow-sm text-xs space-y-2.5 border border-slate-800">
+                <div class="font-bold text-teal-400 uppercase tracking-wider flex items-center justify-between">
+                    <span><i class="fa-solid fa-lightbulb text-yellow-400 mr-1.5"></i> Workflow & Counseling Rules</span>
+                </div>
+                <ul class="space-y-2 text-slate-300">
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">OBRA '90 Mandate:</strong> Pharmacists must offer patient counseling for new or modified prescriptions.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Tech Scope Limit:</strong> Techs CANNOT provide clinical counseling, advice on side effects, or drug recommendations.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">LAST Strategy:</strong> Listen, Apologize, Solve, Thank for de-escalating customer conflicts.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">Workflow Queue:</strong> Drop-off $\rightarrow$ Data Entry $\rightarrow$ Adjudication $\rightarrow$ Filling $\rightarrow$ Verification $\rightarrow$ Will Call.</span>
+                    </li>
+                    <li class="flex items-start space-x-1.5">
+                        <i class="fa-solid fa-check text-teal-400 mt-0.5 shrink-0"></i>
+                        <span><strong class="text-white">HIPAA at Pick-up:</strong> Verify 2 patient identifiers (e.g., Full Name + DOB) before releasing medications.</span>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Workspace -->
+        <main class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto custom-scrollbar min-h-[650px]">
+
+            <!-- ================= TAB: OVERVIEW ================= -->
+            <div id="tab-overview" class="tab-content space-y-6">
+                <div>
+                    <div class="inline-flex items-center space-x-2 bg-teal-100 text-teal-900 text-xs font-semibold px-3 py-1 rounded-full mb-3 border border-teal-200">
+                        <i class="fa-solid fa-graduation-cap text-teal-700"></i>
+                        <span>California Pharmacy Technician Curriculum</span>
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Day 23: Pharmacy Workflow and Customer Service</h1>
+                    <p class="mt-2 text-slate-600 text-sm leading-relaxed">
+                        Welcome to Day 23 of your pharmacy technician training program. Operational efficiency and exceptional customer service are the backbones of safe, high-performing pharmacy practice. Today's module covers the multi-station pharmacy workflow model, professional patient interaction techniques, legal boundaries surrounding medication counseling (OBRA '90 standards), de-escalation of challenging situations, and operational workflow calculations.
+                    </p>
+                </div>
+
+                <!-- Detailed Syllabus Breakdown -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-pharmacy-600"></i>
+                        <span>2-Hour Training Schedule & Core Modules</span>
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 1 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Pharmacy Station Workflow</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Station dynamics: Drop-off, Data Entry, Adjudication, Filling, Final Verification, and Will Call pick-up management.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 2 (25 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Excellence in Customer Service</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Communication channels, verbal/non-verbal empathy, telephone etiquette, privacy protection during counter transactions.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 3 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Counseling & Scope Boundaries</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">OBRA '90 consultation regulations, distinguishing technician duties vs. mandatory pharmacist clinical counseling.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 4 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Conflict Resolution & LAST Method</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">De-escalation protocols, managing frustrated patients, insurance delays, stock shortages, and applying the LAST framework.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 5 (20 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Workflow Math & Capacity Lab</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">Throughput rate calculations, queue delay estimations, wait-time predictions, and staffing efficiency metrics.</div>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200 rounded-lg space-y-1 shadow-2xs">
+                            <div class="font-bold text-pharmacy-700">Module 6 (15 Minutes)</div>
+                            <div class="text-slate-800 font-semibold">Certification Practice Exam</div>
+                            <div class="text-slate-500 text-[11px] leading-snug">15-question comprehensive assessment on workflow stages, patient interaction ethics, counseling laws, and operational math.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Objectives -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Core Learning Competencies</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Workflow Optimization:</strong> Navigate prescription queue stages efficiently while minimizing bottleneck points and maintaining accuracy.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Patient Engagement:</strong> Apply professional communication, active listening, and privacy preservation at intake and pick-up counters.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>Counseling Compliance:</strong> Enforce OBRA '90 consultation standards and recognize legal boundaries restricting technician clinical advice.</span>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-teal-50/70 border border-teal-100 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-pharmacy-600 mt-0.5 text-sm"></i>
+                            <span class="text-slate-700"><strong>De-escalation & Math:</strong> De-escalate hostile interactions using LAST steps and calculate operational queue throughput rates.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Start Action Callout -->
+                <div class="p-4 bg-slate-900 rounded-xl text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <div class="font-bold text-sm">Ready to begin Module 1?</div>
+                        <div class="text-xs text-slate-300">Start with Pharmacy Station Workflow & Queue Dynamics.</div>
+                    </div>
+                    <button onclick="switchTab('mod1')" class="px-5 py-2.5 bg-pharmacy-500 hover:bg-pharmacy-600 text-white rounded-lg font-bold text-xs transition flex items-center space-x-2 shrink-0">
+                        <span>Start Module 1</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 1 ================= -->
+            <div id="tab-mod1" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 1</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Pharmacy Station Workflow & Queue Management</h2>
+                    <p class="text-slate-600 text-sm mt-1">Understanding sequential prescription flow, station-by-station responsibilities, and preventing operational bottlenecks.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Sequential Prescription Flow Model</h3>
+                    <p>In retail and health-system outpatient pharmacies, prescription processing moves through a strict, linear pipeline to ensure safety, traceability, and speed:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 my-4 text-xs">
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg shadow-2xs">
+                            <div class="font-bold text-slate-900 flex items-center space-x-2">
+                                <span class="w-5 h-5 bg-teal-500 text-white rounded-full text-center font-mono text-xs leading-5">1</span>
+                                <span>Drop-Off / Intake</span>
+                            </div>
+                            <div class="text-slate-600 mt-2">Receiving paper/e-prescriptions, verifying 2 patient identifiers, scanning documents, and assessing promised turnaround time.</div>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-teal-500 rounded-r-lg shadow-2xs">
+                            <div class="font-bold text-slate-900 flex items-center space-x-2">
+                                <span class="w-5 h-5 bg-teal-500 text-white rounded-full text-center font-mono text-xs leading-5">2</span>
+                                <span>Data Entry & Billing</span>
+                            </div>
+                            <div class="text-slate-600 mt-2">Transcribing prescriber, drug, sig, quantity, refills, and submitting third-party insurance adjudication (resolving rejections).</div>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-amber-500 rounded-r-lg shadow-2xs">
+                            <div class="font-bold text-slate-900 flex items-center space-x-2">
+                                <span class="w-5 h-5 bg-amber-500 text-white rounded-full text-center font-mono text-xs leading-5">3</span>
+                                <span>Pharmacist DUR Check</span>
+                            </div>
+                            <div class="text-slate-600 mt-2">Drug Utilization Review (DUR): Pharmacist checks clinical appropriateness, allergies, interactions, and dosage safety.</div>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-blue-500 rounded-r-lg shadow-2xs">
+                            <div class="font-bold text-slate-900 flex items-center space-x-2">
+                                <span class="w-5 h-5 bg-blue-500 text-white rounded-full text-center font-mono text-xs leading-5">4</span>
+                                <span>Filling / Dispensing</span>
+                            </div>
+                            <div class="text-slate-600 mt-2">Selecting stock bottle using NDC barcode match, counting/measuring, packaging in vial, and affixing prescription label.</div>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-indigo-500 rounded-r-lg shadow-2xs">
+                            <div class="font-bold text-slate-900 flex items-center space-x-2">
+                                <span class="w-5 h-5 bg-indigo-500 text-white rounded-full text-center font-mono text-xs leading-5">5</span>
+                                <span>Pharmacist Verification</span>
+                            </div>
+                            <div class="text-slate-600 mt-2">Final safety check: Pharmacist verifies physical product, label accuracy, stock bottle, and hard-copy image.</div>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 border-l-4 border-emerald-500 rounded-r-lg shadow-2xs">
+                            <div class="font-bold text-slate-900 flex items-center space-x-2">
+                                <span class="w-5 h-5 bg-emerald-500 text-white rounded-full text-center font-mono text-xs leading-5">6</span>
+                                <span>Will Call / Pick-Up</span>
+                            </div>
+                            <div class="text-slate-600 mt-2">Storing completed order in bin system, customer check-out, identity confirmation, payment, and offering pharmacist counseling.</div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Preventing Bottlenecks & Managing Workflow Queues</h3>
+                    <p>A workflow bottleneck occurs when prescriptions accumulate at one station faster than they can be processed. Common causes and corrective actions include:</p>
+
+                    <div class="overflow-x-auto my-4 border border-slate-200 rounded-lg">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">Workflow Queue / Station</th>
+                                    <th class="p-2.5">Primary Root Cause of Bottleneck</th>
+                                    <th class="p-2.5">Technician Mitigation Strategy</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Data Entry / Adjudication</td>
+                                    <td class="p-2.5">Insurance claim rejections (prior authorization, refill too soon, invalid ID).</td>
+                                    <td class="p-2.5">Flag rejected claims immediately; move to resolution queue without stopping input of clean orders.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Filling Station</td>
+                                    <td class="p-2.5">Disorganized stock, unreturned inventory bottles, missing supplies.</td>
+                                    <td class="p-2.5">Maintain continuous shelf return discipline; keep top fast-mover medications accessible.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Pick-Up / Will Call</td>
+                                    <td class="p-2.5">Long counter lines, misplaced completed prescription bags.</td>
+                                    <td class="p-2.5">Use barcode bin verification systems; perform regular return-to-stock maintenance for uncollected bags ($> 14$ days).</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Interactive Module 1 Checkpoint -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-circle-question text-yellow-400"></i>
+                            <span>Interactive Case Checkpoint: Station Management</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-2"><strong>Scenario:</strong> You are working the Data Entry station when a complex prescription generates a third-party rejection requiring a Prior Authorization (PA). Ten new drop-off prescriptions are waiting in queue behind it. What is the most effective workflow action?</p>
+                        
+                        <div class="space-y-2 text-xs mt-3">
+                            <button onclick="checkM1Case(1)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                A. Stop all data entry work for the rest of the day until you resolve the prior authorization with the prescriber.
+                            </button>
+                            <button onclick="checkM1Case(2)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                B. Move the rejected claim into the exception/resolution queue, notify the patient/prescriber, and immediately continue processing the remaining clean queue.
+                            </button>
+                            <button onclick="checkM1Case(3)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition border border-slate-700">
+                                C. Delete the prescription from the computer software system to keep the queue metric clear.
+                            </button>
+                        </div>
+
+                        <div id="m1-case-feedback" class="mt-4 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('overview')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Overview</button>
+                    <button onclick="markModuleComplete('mod1'); switchTab('mod2')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Customer Service</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 2 ================= -->
+            <div id="tab-mod2" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 2</span>
+                        <span>•</span>
+                        <span>25 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Excellence in Customer Service & Professional Communication</h2>
+                    <p class="text-slate-600 text-sm mt-1">Communication channels, active listening, HIPAA privacy standards during transactions, and telephone etiquette.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Core Pillars of Professional Pharmacy Communication</h3>
+                    <p>Patients visiting a pharmacy are often ill, stressed, or under financial strain. Technicians must combine technical accuracy with compassionate communication:</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4 text-xs">
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                            <div class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-comments text-pharmacy-600"></i>
+                                <span>Verbal & Non-Verbal Skills</span>
+                            </div>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600">
+                                <li><strong>Active Listening:</strong> Maintain eye contact, nod, and paraphrase concerns without interrupting.</li>
+                                <li><strong>Tone of Voice:</strong> Speak clearly, calmly, and at a moderate volume to maintain a reassuring atmosphere.</li>
+                                <li><strong>Body Language:</strong> Open posture, uncrossed arms, and attentive eye contact convey willingness to help.</li>
+                            </ul>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                            <div class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-shield-halved text-pharmacy-600"></i>
+                                <span>HIPAA Counter Privacy</span>
+                            </div>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600">
+                                <li><strong>Low-Volume Speaking:</strong> Avoid calling out drug names, conditions, or full SSNs loudly across the counter.</li>
+                                <li><strong>Screen Shielding:</strong> Position computer monitors away from public line-of-sight.</li>
+                                <li><strong>Verification:</strong> Always verify two unique identifiers (e.g., Full Legal Name + Date of Birth) before dispensing.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Professional Telephone Etiquette</h3>
+                    <p>Telephone interactions create a critical first impression of the pharmacy's clinical professionalism:</p>
+
+                    <div class="bg-teal-50 border-l-4 border-teal-500 p-4 rounded-r-lg text-xs space-y-2 text-teal-950">
+                        <div class="font-bold text-sm text-teal-900"><i class="fa-solid fa-phone mr-1.5"></i> Standard Telephone Greeting Protocol:</div>
+                        <ol class="list-decimal list-inside space-y-1 text-slate-800">
+                            <li><strong>Pharmacy Name & Department:</strong> "Thank you for calling South Coast Mission Pharmacy..."</li>
+                            <li><strong>Self-Introduction & Role:</strong> "This is Alex, registered pharmacy technician..."</li>
+                            <li><strong>Offer Assistance:</strong> "How may I help you today?"</li>
+                            <li><strong>Triage & Holding:</strong> Always ask permission before placing a caller on hold ("May I put you on a brief hold while I look up your refill?"), and limit holds to under 60 seconds without checking back.</li>
+                        </ol>
+                    </div>
+
+                    <!-- Interactive Module 2 Quiz -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-vial text-yellow-400"></i>
+                            <span>Interactive Customer Service Challenge</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Question:</strong> A patient approaches the pickup counter in a busy waiting room. To comply with HIPAA privacy standards while verifying the patient's identity, what should the technician do?</p>
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod2Quiz(1)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">A. Announce the patient's full name and medication name loudly so everyone in line knows who is being served.</button>
+                            <button onclick="checkMod2Quiz(2)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">B. Quietly ask the patient to state or confirm their full legal name and date of birth in a lowered voice.</button>
+                            <button onclick="checkMod2Quiz(3)" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">C. Hand over the prescription bag without asking any identity verification questions to speed up the counter line.</button>
+                        </div>
+                        <div id="mod2-quiz-feedback" class="mt-3 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod1')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Workflow</button>
+                    <button onclick="markModuleComplete('mod2'); switchTab('mod3')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Counseling Rules</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 3 ================= -->
+            <div id="tab-mod3" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 3</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Medication Counseling & Scope of Practice Boundaries</h2>
+                    <p class="text-slate-600 text-sm mt-1">OBRA '90 legal mandates, distinguishing technician duties from mandatory pharmacist clinical consultation.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. The Omnibus Budget Reconciliation Act of 1990 (OBRA '90)</h3>
+                    <p>OBRA '90 revolutionized outpatient pharmacy practice by mandating that pharmacists perform a <strong>Drug Utilization Review (DUR)</strong> and offer <strong>patient counseling</strong> for Medicaid recipients, which state boards (including California) expanded to cover all patients:</p>
+
+                    <div class="overflow-x-auto my-4 border border-slate-200 rounded-lg">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">Key OBRA '90 Area</th>
+                                    <th class="p-2.5">Legal Standard & Requirement</th>
+                                    <th class="p-2.5">Technician's Administrative Duty</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Mandatory Offer to Counsel</td>
+                                    <td class="p-2.5">An offer for pharmacist consultation must be made on all new prescriptions or changed dosages.</td>
+                                    <td class="p-2.5">Ask the patient: "Do you have any questions for the pharmacist today?" and route them to the pharmacist if yes.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Patient Profile Maintenance</td>
+                                    <td class="p-2.5">Must maintain record of name, address, age, gender, allergies, drug reactions, and history.</td>
+                                    <td class="p-2.5">Accurately record patient demographic, allergy, and insurance updates in the computer system.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-900">Prospective DUR</td>
+                                    <td class="p-2.5">Screening for therapeutic duplication, drug-disease contraindications, interactions, dosage errors.</td>
+                                    <td class="p-2.5">Alert the pharmacist whenever system clinical DUR warning pop-ups trigger.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Scope of Practice: Tech vs. Pharmacist Duties</h3>
+                    <p>Strict boundaries exist between administrative execution (technician) and clinical evaluation/counseling (pharmacist):</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4 text-xs">
+                        <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-lg space-y-2">
+                            <div class="font-bold text-emerald-900 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                                <span>Permissible Technician Duties</span>
+                            </div>
+                            <ul class="list-disc list-inside space-y-1 text-slate-700">
+                                <li>Entering prescriptions and billing insurance claims.</li>
+                                <li>Counting tablets, placing labels on vials.</li>
+                                <li>Asking if the patient has questions for the pharmacist.</li>
+                                <li>Checking out completed orders at the register.</li>
+                                <li>Providing price quotes and restocking shelf inventory.</li>
+                            </ul>
+                        </div>
+
+                        <div class="p-4 bg-red-50 border border-red-200 rounded-lg space-y-2">
+                            <div class="font-bold text-red-900 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-circle-xmark text-red-600"></i>
+                                <span>Strictly Prohibited for Technicians</span>
+                            </div>
+                            <ul class="list-disc list-inside space-y-1 text-slate-700">
+                                <li>Explaining how to take a medication or describing side effects.</li>
+                                <li>Recommending OTC medications for patient symptoms.</li>
+                                <li>Interpreting clinical lab results or dosage appropriateness.</li>
+                                <li>Evaluating potential drug-drug or food-drug interactions.</li>
+                                <li>Overriding clinical DUR alerts without pharmacist review.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Module 3 Scenario -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-triangle-exclamation text-yellow-400"></i>
+                            <span>Interactive Scope of Practice Audit</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Scenario:</strong> A customer at the counter picks up a bottle of Amoxicillin and asks: "Should I take this antibiotic with food, and what should I do if I get a rash?" What is the required technician response?</p>
+
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod3Scenario(1)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">1. Read the auxiliary sticker on the bottle out loud and tell them rashes are normal.</button>
+                            <button onclick="checkMod3Scenario(2)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">2. Politely inform the patient that clinical administration and side effect advice must be provided by the pharmacist, and immediately hand the consultation over.</button>
+                            <button onclick="checkMod3Scenario(3)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">3. Google the answers on your personal smartphone and summarize the search result for the patient.</button>
+                        </div>
+
+                        <div id="mod3-feedback" class="mt-3 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod2')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Customer Service</button>
+                    <button onclick="markModuleComplete('mod3'); switchTab('mod4')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Conflict Resolution</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 4 ================= -->
+            <div id="tab-mod4" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 4</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Managing Difficult Customers & Conflict Resolution (LAST Method)</h2>
+                    <p class="text-slate-600 text-sm mt-1">De-escalation tactics, managing long wait times, stock shortages, insurance rejections, and the LAST framework.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. The LAST Framework for Conflict Resolution</h3>
+                    <p>When dealing with upset or anxious patients, technicians should apply the structured <strong>LAST</strong> de-escalation framework:</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 my-4 text-xs">
+                        <div class="p-3.5 bg-slate-50 border-t-4 border-teal-500 rounded-b-lg text-center shadow-2xs">
+                            <div class="text-xl font-extrabold text-teal-600 font-mono">L</div>
+                            <div class="font-bold text-slate-900 mt-1">Listen</div>
+                            <div class="text-slate-600 mt-1 text-[11px]">Give full attention without interrupting. Allow the patient to vent their frustration.</div>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 border-t-4 border-blue-500 rounded-b-lg text-center shadow-2xs">
+                            <div class="text-xl font-extrabold text-blue-600 font-mono">A</div>
+                            <div class="font-bold text-slate-900 mt-1">Apologize</div>
+                            <div class="text-slate-600 mt-1 text-[11px]">Offer a sincere empathy statement ("I apologize for the delay and frustration this caused.").</div>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 border-t-4 border-amber-500 rounded-b-lg text-center shadow-2xs">
+                            <div class="text-xl font-extrabold text-amber-600 font-mono">S</div>
+                            <div class="font-bold text-slate-900 mt-1">Solve</div>
+                            <div class="text-slate-600 mt-1 text-[11px]">Offer concrete solutions (e.g., partial fill, calling insurance, expediting queue).</div>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 border-t-4 border-emerald-500 rounded-b-lg text-center shadow-2xs">
+                            <div class="text-xl font-extrabold text-emerald-600 font-mono">T</div>
+                            <div class="font-bold text-slate-900 mt-1">Thank</div>
+                            <div class="text-slate-600 mt-1 text-[11px]">Thank the patient for their patience and understanding while you resolve the issue.</div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Handling Common Pharmacy Conflict Scenarios</h3>
+                    <p>Practical strategies for resolving high-frequency pharmacy counter disputes:</p>
+
+                    <div class="overflow-x-auto my-4 border border-slate-200 rounded-lg">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">Conflict Scenario</th>
+                                    <th class="p-2.5">Root Cause</th>
+                                    <th class="p-2.5">Professional Action & Communication</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-red-700">High Copay / Insurance Rejection</td>
+                                    <td class="p-2.5">Deductible, prior auth, or non-formulations.</td>
+                                    <td class="p-2.5">Explain that insurance sets the price; check for discount programs or suggest pharmacist formulary alternatives.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-amber-700">Out-of-Stock Medication</td>
+                                    <td class="p-2.5">Supply chain delay or unexpected demand surge.</td>
+                                    <td class="p-2.5">Offer partial fill (if allowed), check sister store inventory, or place emergency order for next morning delivery.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-blue-700">Prescription Not Ready / Unscheduled</td>
+                                    <td class="p-2.5">Patient arrived earlier than promised time.</td>
+                                    <td class="p-2.5">Acknowledge the wait, expedite order in queue, give a realistic updated time, and invite patient to sit comfortably.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Interactive Safety Alert Check -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-comments-dollar text-yellow-400"></i>
+                            <span>Interactive De-escalation Challenge</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Scenario:</strong> An angry customer demands immediate service because their prescription copay is $150 instead of their usual $15. What step should you take first?</p>
+
+                        <div class="space-y-2 text-xs">
+                            <button onclick="checkMod4Recall(1)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">A. Argue with the customer and tell them it is entirely their insurance company's fault.</button>
+                            <button onclick="checkMod4Recall(2)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">B. Apply LAST: Listen actively, offer an empathetic apology for the frustration, investigate the claim details (e.g., deductible or tier change), and thank them for their patience.</button>
+                            <button onclick="checkMod4Recall(3)" class="w-full text-left p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg">C. Immediately call security to remove the customer from the store.</button>
+                        </div>
+
+                        <div id="mod4-recall-feedback" class="mt-4 p-3 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod3')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Counseling Rules</button>
+                    <button onclick="markModuleComplete('mod4'); switchTab('mod5')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Workflow Math & Case Lab</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 5 ================= -->
+            <div id="tab-mod5" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 5</span>
+                        <span>•</span>
+                        <span>20 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Workflow Capacity Calculations & Operational Case Lab</h2>
+                    <p class="text-slate-600 text-sm mt-1">Throughput rate, queue delay estimations, wait time formulas, and staffing efficiency metrics.</p>
+                </div>
+
+                <div class="prose prose-slate max-w-none text-sm space-y-4 text-slate-700 leading-relaxed">
+                    <h3 class="text-base font-bold text-slate-800">1. Prescription Throughput Rate (\(TR\)) Formula</h3>
+                    <p>Throughput rate measures the total number of prescriptions processed through a station or whole pharmacy per hour:</p>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl my-4 text-xs space-y-3">
+                        <div class="font-mono text-center text-teal-300 text-sm font-bold bg-slate-800 p-3 rounded border border-slate-700">
+                            \(TR \text{ (Rx/hr)} = \frac{\text{Total Prescriptions Completed}}{\text{Total Hours Worked}}\)
+                        </div>
+                        <div class="text-slate-300 text-[11px] leading-relaxed">
+                            <strong>Sample Problem:</strong> A filling technician fills 180 prescriptions during a 6-hour shift. Calculate the technician's hourly throughput rate ($TR$).
+                            <div class="font-mono text-emerald-400 mt-1">
+                                \(TR = \frac{180\text{ Rx}}{6\text{ hours}} = 30\text{ Rx/hour}\)
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-800 mt-6">2. Queue Wait Time Estimation Formula</h3>
+                    <p>Predicting estimated patient wait time based on queue length and processing capacity prevents customer dissatisfaction:</p>
+
+                    <div class="p-4 bg-slate-900 text-white rounded-xl my-4 text-xs space-y-3">
+                        <div class="font-mono text-center text-teal-300 text-sm font-bold bg-slate-800 p-3 rounded border border-slate-700">
+                            \(\text{Estimated Wait Time (min)} = \frac{\text{Prescriptions in Backlog Queue}}{\text{Team Filling Rate (Rx/min)}}\)
+                        </div>
+                        <div class="text-slate-300 text-[11px] leading-relaxed">
+                            <strong>Sample Problem:</strong> There are 15 prescriptions waiting in the filling queue. The pharmacy filling station processes 0.5 prescriptions per minute ($30\text{ Rx/hr}$). What estimated wait time should be quoted to a waiting patient?
+                            <div class="font-mono text-emerald-400 mt-1">
+                                \(\text{Wait Time} = \frac{15\text{ Rx}}{0.5\text{ Rx/min}} = 30\text{ minutes}\)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Math Practice Lab -->
+                    <div class="bg-slate-900 text-white rounded-xl p-5 my-6 border border-slate-800">
+                        <div class="flex items-center space-x-2 text-teal-400 font-bold text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-calculator text-yellow-400"></i>
+                            <span>Interactive Workflow Math Practice</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-3"><strong>Math Lab Case:</strong> A pharmacy has a backlog of 24 prescriptions waiting at the data entry station. If a technician enters 0.8 prescriptions per minute ($48\text{ Rx/hr}$), how many minutes will it take to clear the queue?</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs my-3">
+                            <button onclick="checkMathLab(1)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">A. 15 minutes</button>
+                            <button onclick="checkMathLab(2)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">B. 30 minutes</button>
+                            <button onclick="checkMathLab(3)" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg font-semibold transition text-left">C. 45 minutes</button>
+                        </div>
+
+                        <div id="math-lab-feedback" class="p-3.5 rounded-lg text-xs hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod4')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Conflict Resolution</button>
+                    <button onclick="markModuleComplete('mod5'); switchTab('mod6')" class="px-4 py-2 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <span>Complete & Next: Certification Exam</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= TAB: MODULE 6 (FINAL EXAM) ================= -->
+            <div id="tab-mod6" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-200 pb-4">
+                    <div class="flex items-center space-x-2 text-xs font-bold text-pharmacy-600 uppercase tracking-wider">
+                        <span>Module 6</span>
+                        <span>•</span>
+                        <span>15 Minutes Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mt-1">Day 23 Certification Practice Exam</h2>
+                    <p class="text-slate-600 text-sm mt-1">Evaluate your mastery of pharmacy workflow stages, customer service ethics, OBRA '90 counseling laws, conflict resolution (LAST), and queue calculations.</p>
+                </div>
+
+                <!-- Exam Start Intro -->
+                <div id="exam-start-box" class="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center space-y-4">
+                    <div class="w-16 h-16 bg-pharmacy-100 text-pharmacy-700 rounded-full flex items-center justify-center mx-auto text-2xl font-bold border border-pharmacy-200">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">15-Question Comprehensive Certification Exam</h3>
+                    <p class="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">Passing threshold is 80% (12/15 correct). Detailed rationale provided for every question upon completion.</p>
+                    <button onclick="startFinalExam()" class="px-6 py-3 bg-pharmacy-600 hover:bg-pharmacy-700 text-white rounded-lg font-bold text-xs transition shadow-md inline-flex items-center space-x-2">
+                        <span>Begin Assessment Exam</span>
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                </div>
+
+                <!-- Exam Container -->
+                <div id="exam-container" class="hidden space-y-6">
+                    <div id="quiz-questions-list" class="space-y-6"></div>
+
+                    <div class="pt-4 border-t border-slate-200 flex justify-end">
+                        <button onclick="submitFinalExam()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-lg transition flex items-center space-x-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Submit Assessment Exam</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Exam Results Box -->
+                <div id="exam-results-box" class="hidden p-6 rounded-xl border text-center space-y-4"></div>
+
+                <!-- Navigation Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button onclick="switchTab('mod5')" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">Previous: Workflow Math</button>
+                    <button onclick="switchTab('overview')" class="px-4 py-2 bg-slate-800 text-white hover:bg-slate-900 rounded-lg text-xs font-semibold">Return to Overview</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Study Notes Modal Window -->
+    <div id="notesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 space-y-4 border border-slate-200">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                <div class="flex items-center space-x-2 text-slate-900 font-bold text-base">
+                    <i class="fa-solid fa-note-sticky text-yellow-500"></i>
+                    <span>Trainee Personal Study Notes</span>
+                </div>
+                <button onclick="toggleNotesModal()" class="text-slate-400 hover:text-slate-600 text-lg p-1">&times;</button>
+            </div>
+            
+            <p class="text-xs text-slate-500">Record customized notes, key formulas, or specific areas to review later. Notes are automatically saved in browser session.</p>
+            
+            <textarea id="studentNotesArea" rows="10" placeholder="Type key learnings, OBRA '90 rules, LAST method steps, or workflow notes here..." class="w-full text-xs font-mono p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-pharmacy-500 leading-relaxed custom-scrollbar"></textarea>
+            
+            <div id="modalToast" class="hidden p-2 bg-emerald-100 text-emerald-800 text-xs rounded border border-emerald-300 font-semibold"></div>
+
+            <div class="flex items-center justify-between pt-2">
+                <div class="flex space-x-2">
+                    <button onclick="copyNotesToClipboard()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition flex items-center space-x-1">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Copy Notes</span>
+                    </button>
+                    <button onclick="clearNotes()" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-xs rounded-lg transition">
+                        Clear Notes
+                    </button>
+                </div>
+                <button onclick="saveNotes(); toggleNotesModal()" class="px-4 py-1.5 bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-bold text-xs rounded-lg transition">
+                    Save & Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let completedModules = new Set();
+        let secondsElapsed = 0;
+        let timerInterval = null;
+
+        // Exam Question Bank for Day 23: Pharmacy Workflow & Customer Service
+        const examQuestions = [
+            {
+                q: "1. What federal law first mandated that pharmacists offer medication counseling to patients receiving new prescriptions?",
+                options: [
+                    "A. Health Insurance Portability and Accountability Act (HIPAA)",
+                    "B. Omnibus Budget Reconciliation Act of 1990 (OBRA '90)",
+                    "C. Controlled Substances Act (CSA)",
+                    "D. Food, Drug, and Cosmetic Act (FD&C Act)"
+                ],
+                correct: 1,
+                rationale: "OBRA '90 established the mandatory offer for pharmacist consultation and prospective drug utilization review (DUR)."
+            },
+            {
+                q: "2. Which of the following tasks falls within the legal scope of practice for a pharmacy technician?",
+                options: [
+                    "A. Advising a patient on potential drug side effects",
+                    "B. Recommending an over-the-counter cough syrup for a pediatric patient",
+                    "C. Entering prescription data and submitting third-party billing claims",
+                    "D. Evaluating a clinical DUR drug interaction warning"
+                ],
+                correct: 2,
+                rationale: "Entering prescription data and insurance billing are core technical administrative duties. Clinical advice, OTC recommendations, and DUR evaluations require a pharmacist."
+            },
+            {
+                q: "3. In the LAST framework for resolving patient conflicts, what does the letter 'A' stand for?",
+                options: [
+                    "A. Action",
+                    "B. Apologize",
+                    "C. Assess",
+                    "D. Argue"
+                ],
+                correct: 1,
+                rationale: "LAST stands for Listen, Apologize (sincere empathy statement), Solve, and Thank."
+            },
+            {
+                q: "4. When verifying a patient's identity at the Will Call pickup counter, how many unique patient identifiers must be confirmed?",
+                options: [
+                    "A. At least 1",
+                    "B. At least 2",
+                    "C. Exactly 3",
+                    "D. None if you recognize their face"
+                ],
+                correct: 1,
+                rationale: "Patient safety and HIPAA guidelines require verifying at least 2 unique identifiers (e.g., Full Legal Name and Date of Birth)."
+            },
+            {
+                q: "5. What sequential workflow station immediately follows Pharmacist DUR / Data Verification in a standard pharmacy system?",
+                options: [
+                    "A. Intake / Drop-off",
+                    "B. Dispensing / Filling",
+                    "C. Will Call Pickup",
+                    "D. Rejection Resolution"
+                ],
+                correct: 1,
+                rationale: "Once data entry and clinical DUR are verified by the software/pharmacist, the prescription moves to the Filling/Dispensing station."
+            },
+            {
+                q: "6. A patient asks the technician: 'Is it safe for me to take ibuprofen with my new blood pressure medicine?' How should the technician respond?",
+                options: [
+                    "A. 'Yes, ibuprofen is over-the-counter so it is completely safe.'",
+                    "B. 'No, you should never take any pain relievers.'",
+                    "C. 'Let me refer your question directly to the pharmacist for a clinical interaction review.'",
+                    "D. 'I will check Google for you real quick.'"
+                ],
+                correct: 2,
+                rationale: "Evaluating drug-drug interactions and providing clinical safety advice must be handled directly by the licensed pharmacist."
+            },
+            {
+                q: "7. A technician fills 120 prescriptions over a 4-hour filling shift. What is the technician's hourly throughput rate ($TR$)?",
+                options: [
+                    "A. 20 Rx/hr",
+                    "B. 30 Rx/hr",
+                    "C. 40 Rx/hr",
+                    "D. 60 Rx/hr"
+                ],
+                correct: 1,
+                rationale: "Formula: $TR = \\frac{120\\text{ Rx}}{4\\text{ hrs}} = 30\\text{ Rx/hour}$."
+            },
+            {
+                q: "8. What action should a technician take when receiving a phone call from a prescriber wishing to dictate a new oral prescription?",
+                options: [
+                    "A. Transcribe the oral prescription onto a notepad and sign it",
+                    "B. Transfer the call immediately to the pharmacist to receive the verbal order",
+                    "C. Tell the doctor that oral prescriptions are illegal in California",
+                    "D. Place the caller on hold indefinitely"
+                ],
+                correct: 1,
+                rationale: "In California, receiving new oral verbal prescription orders from a prescriber must be performed by a pharmacist (or pharmacy intern)."
+            },
+            {
+                q: "9. To protect patient privacy under HIPAA during counter transactions, a technician should avoid doing which of the following?",
+                options: [
+                    "A. Asking the patient to state their date of birth quietly",
+                    "B. Calling out the full drug name and medical condition loudly across the waiting room",
+                    "C. Turning computer screens away from customer line-of-sight",
+                    "D. Shredding documents containing PHI in designated bins"
+                ],
+                correct: 1,
+                rationale: "Loudly announcing Protected Health Information (PHI), such as drug names or medical conditions, violates HIPAA privacy standards."
+            },
+            {
+                q: "10. There are 20 prescriptions in the filling queue. If the filling station operates at $0.5\\text{ Rx/minute}$, what is the estimated wait time for the queue?",
+                options: [
+                    "A. 10 minutes",
+                    "B. 20 minutes",
+                    "C. 40 minutes",
+                    "D. 60 minutes"
+                ],
+                correct: 2,
+                rationale: "Formula: $\\text{Wait Time} = \\frac{20\\text{ Rx}}{0.5\\text{ Rx/min}} = 40\\text{ minutes}$."
+            },
+            {
+                q: "11. What is the primary purpose of maintaining an active exception or resolution queue at the Data Entry station?",
+                options: [
+                    "A. To permanently hide problematic insurance claims",
+                    "B. To isolate rejected claims for investigation without halting processing of clean prescriptions",
+                    "C. To automatically cancel patient refills",
+                    "D. To avoid reporting errors to the pharmacist"
+                ],
+                correct: 1,
+                rationale: "An exception queue prevents problematic claims from blocking the main workflow pipeline while technician staff resolve the issue."
+            },
+            {
+                q: "12. When a caller is placed on hold, best practice guidelines dictate that the technician should check back with the caller at least every:",
+                options: [
+                    "A. 30 to 60 seconds",
+                    "B. 5 minutes",
+                    "C. 10 minutes",
+                    "D. Only when the pharmacist is ready"
+                ],
+                correct: 0,
+                rationale: "To maintain customer service standards, technicians should check back every 30-60 seconds to provide progress updates."
+            },
+            {
+                q: "13. What should a technician do if an uncollected prescription remains in the Will Call bin after 14 days?",
+                options: [
+                    "A. Throw the prescription in the trash bin",
+                    "B. Return the medication to stock following proper reverse distribution / inventory protocols and credit the third-party payer",
+                    "C. Mail the medication to the patient's home without asking",
+                    "D. Leave it in Will Call indefinitely"
+                ],
+                correct: 1,
+                rationale: "Uncollected prescriptions (>14 days) are returned to stock according to policy, and the insurance claim is reversed."
+            },
+            {
+                q: "14. A patient is upset about an insurance copay increase. Which response demonstrates effective de-escalation?",
+                options: [
+                    "A. 'It's not our fault, take it up with your insurance company.'",
+                    "B. 'I understand why this surprise copay increase is frustrating. Let me look at the insurance claim details to see if we can find a solution.'",
+                    "C. 'If you can't pay, please step out of line.'",
+                    "D. 'You are making a scene over a small amount of money.'"
+                ],
+                correct: 1,
+                rationale: "Validating patient feelings with empathy and offering to investigate the claim adheres to the LAST de-escalation framework."
+            },
+            {
+                q: "15. What is the main legal requirement regarding the 'Offer to Counsel' when a patient picks up a refill prescription?",
+                options: [
+                    "A. Counseling is illegal for refills",
+                    "B. The offer to counsel must still be extended according to state pharmacy board guidelines",
+                    "C. The technician must re-enter all clinical notes",
+                    "D. Refills require written permission from the doctor every time"
+                ],
+                correct: 1,
+                rationale: "Under state rules and OBRA principles, the offer to counsel must be made available for refill prescriptions as well as new prescriptions."
+            }
+        ];
+
+        window.onload = function() {
+            startTimer();
+            loadSavedNotes();
+        };
+
+        // Session Timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const hrs = String(Math.floor(secondsElapsed / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((secondsElapsed % 3600) / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                document.getElementById('sessionTimer').innerText = `${hrs}:${mins}:${secs}`;
+            }, 1000);
+        }
+
+        // Student Name Handler
+        function updateStudentName() {
+            const name = document.getElementById('studentNameInput').value;
+            localStorage.setItem('day23_student_name', name);
+        }
+
+        // Navigation Tab Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-teal-50', 'text-teal-900', 'border', 'border-teal-200');
+                btn.classList.add('text-slate-600');
+            });
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-600');
+                activeBtn.classList.add('bg-teal-50', 'text-teal-900', 'border', 'border-teal-200');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Mark Module Complete
+        function markModuleComplete(modId) {
+            completedModules.add(modId);
+            const statusBadge = document.getElementById(`status-${modId}`);
+            if (statusBadge) {
+                statusBadge.innerHTML = '<i class="fa-solid fa-circle-check text-teal-600"></i> Done';
+                statusBadge.classList.remove('bg-slate-100', 'text-slate-500');
+                statusBadge.classList.add('bg-teal-100', 'text-teal-800');
+            }
+
+            const total = 6;
+            const count = completedModules.size;
+            document.getElementById('modulesCompletedCount').innerText = `${count} / ${total} Modules`;
+            const pct = Math.round((count / total) * 100);
+            document.getElementById('overallProgressBar').style.width = `${pct}%`;
+        }
+
+        // Module 1 Checkpoint Check
+        function checkM1Case(choice) {
+            const feedback = document.getElementById('m1-case-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Workflow Choice!</strong> Moving rejected claims to an exception/resolution queue keeps the primary data entry station moving smoothly.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Workflow Action.</strong> Stopping all work or deleting orders disrupts queue metrics and patient care. Use the exception queue model.";
+            }
+        }
+
+        // Module 2 Quiz Check
+        function checkMod2Quiz(choice) {
+            const feedback = document.getElementById('mod2-quiz-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Privacy Practice!</strong> Confirming 2 identifiers in a lowered voice maintains HIPAA compliance and ensures patient verification.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Choice.</strong> Announcing medical details violates HIPAA, while skipping verification risks dispensing errors.";
+            }
+        }
+
+        // Module 3 Audit Check
+        function checkMod3Scenario(choice) {
+            const feedback = document.getElementById('mod3-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Scope Compliance!</strong> Clinical advice and side effect management must be immediately referred to the licensed pharmacist.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Action.</strong> Technicians are strictly prohibited from evaluating side effects or providing clinical counseling.";
+            }
+        }
+
+        // Module 4 Recall Check
+        function checkMod4Recall(choice) {
+            const feedback = document.getElementById('mod4-recall-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Application!</strong> Using LAST (Listen, Apologize, Solve, Thank) de-escalates tension and maintains professional care standards.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect De-escalation.</strong> Arguing or calling security prematurely escalates conflicts. Apply the LAST framework first.";
+            }
+        }
+
+        // Module 5 Math Lab Check
+        function checkMathLab(choice) {
+            const feedback = document.getElementById('math-lab-feedback');
+            feedback.classList.remove('hidden', 'bg-red-900/60', 'bg-emerald-900/60', 'text-red-200', 'text-emerald-200');
+            if (choice === 2) {
+                feedback.classList.add('bg-emerald-900/60', 'text-emerald-200', 'border', 'border-emerald-700');
+                feedback.innerHTML = "<strong>Correct Calculation!</strong> $\\text{Wait Time} = \\frac{24\\text{ Rx}}{0.8\\text{ Rx/min}} = 30\\text{ minutes}$.";
+            } else {
+                feedback.classList.add('bg-red-900/60', 'text-red-200', 'border', 'border-red-700');
+                feedback.innerHTML = "<strong>Incorrect Calculation.</strong> Apply the formula: $\\frac{\\text{Queue Length}}{\\text{Processing Rate}} = \\frac{24}{0.8} = 30$ minutes.";
+            }
+        }
+
+        // Exam Methods
+        function startFinalExam() {
+            document.getElementById('exam-start-box').classList.add('hidden');
+            document.getElementById('exam-container').classList.remove('hidden');
+
+            const list = document.getElementById('quiz-questions-list');
+            list.innerHTML = '';
+
+            examQuestions.forEach((q, idx) => {
+                const qCard = document.createElement('div');
+                qCard.className = 'p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-3';
+                
+                let optionsHtml = '';
+                q.options.forEach((opt, optIdx) => {
+                    optionsHtml += `
+                        <label class="flex items-center space-x-3 p-2.5 bg-white border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition text-xs text-slate-800">
+                            <input type="radio" name="exam_q_${idx}" value="${optIdx}" class="text-pharmacy-600 focus:ring-pharmacy-500">
+                            <span>${opt}</span>
+                        </label>
+                    `;
+                });
+
+                qCard.innerHTML = `
+                    <div class="font-bold text-slate-900 text-xs sm:text-sm">${q.q}</div>
+                    <div class="space-y-2">${optionsHtml}</div>
+                    <div id="rationale_q_${idx}" class="hidden p-3 rounded-lg text-xs mt-2"></div>
+                `;
+                list.appendChild(qCard);
+            });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function submitFinalExam() {
+            let score = 0;
+            examQuestions.forEach((q, idx) => {
+                const selected = document.querySelector(`input[name="exam_q_${idx}"]:checked`);
+                const rationaleDiv = document.getElementById(`rationale_q_${idx}`);
+                rationaleDiv.classList.remove('hidden', 'bg-red-100', 'bg-emerald-100', 'text-red-900', 'text-emerald-900');
+
+                if (selected && parseInt(selected.value) === q.correct) {
+                    score++;
+                    rationaleDiv.classList.add('bg-emerald-100', 'text-emerald-900', 'border', 'border-emerald-200');
+                    rationaleDiv.innerHTML = `<strong>Correct!</strong> ${q.rationale}`;
+                } else {
+                    rationaleDiv.classList.add('bg-red-100', 'text-red-900', 'border', 'border-red-200');
+                    rationaleDiv.innerHTML = `<strong>Incorrect.</strong> ${q.rationale}`;
+                }
+            });
+
+            const percent = Math.round((score / examQuestions.length) * 100);
+            document.getElementById('overallScoreDisplay').innerText = `${percent}%`;
+            
+            const resultsBox = document.getElementById('exam-results-box');
+            resultsBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'bg-red-50', 'border-red-200');
+
+            if (percent >= 80) {
+                resultsBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+                resultsBox.innerHTML = `
+                    <div class="text-3xl"><i class="fa-solid fa-circle-check text-emerald-600"></i></div>
+                    <h3 class="text-xl font-bold">Congratulations! You Passed Day 23 Exam!</h3>
+                    <p class="text-xs">Your Score: <strong>${score} / ${examQuestions.length} (${percent}%)</strong></p>
+                    <p class="text-xs text-emerald-700">You have demonstrated core competency in pharmacy station workflow, customer service standards, OBRA '90 counseling compliance, de-escalation tactics, and queue throughput calculations.</p>
+                `;
+                markModuleComplete('mod6');
+            } else {
+                resultsBox.classList.add('bg-red-50', 'border-red-300', 'text-red-900');
+                resultsBox.innerHTML = `
+                    <div class="text-3xl"><i class="fa-solid fa-triangle-exclamation text-red-600"></i></div>
+                    <h3 class="text-xl font-bold">Passing Score Not Met</h3>
+                    <p class="text-xs">Your Score: <strong>${score} / ${examQuestions.length} (${percent}%)</strong> (Passing threshold is 80%).</p>
+                    <p class="text-xs text-red-700">Please review the rationale notes above and retake the exam when ready.</p>
+                `;
+            }
+            resultsBox.scrollIntoView({ behavior: 'smooth' });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Personal Study Notes Modal Logic
+        function toggleNotesModal() {
+            const modal = document.getElementById('notesModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('modalToast');
+            toast.innerText = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        function saveNotes() {
+            const val = document.getElementById('studentNotesArea').value;
+            localStorage.setItem('day23_study_notes', val);
+            showToast("Notes saved successfully!");
+        }
+
+        function loadSavedNotes() {
+            const saved = localStorage.getItem('day23_study_notes');
+            if (saved) {
+                document.getElementById('studentNotesArea').value = saved;
+            }
+            const savedName = localStorage.getItem('day23_student_name');
+            if (savedName) {
+                document.getElementById('studentNameInput').value = savedName;
+            }
+        }
+
+        function clearNotes() {
+            document.getElementById('studentNotesArea').value = '';
+            localStorage.removeItem('day23_study_notes');
+            showToast("Study notes cleared.");
+        }
+
+        function copyNotesToClipboard() {
+            const notes = document.getElementById('studentNotesArea').value;
+            navigator.clipboard.writeText(notes).then(() => {
+                showToast("Notes copied to clipboard!");
+            }).catch(() => {
+                showToast("Failed to copy notes.");
+            });
+        }
+    </script>
+</body>
+</html>
